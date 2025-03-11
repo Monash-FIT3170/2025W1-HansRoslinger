@@ -23,3 +23,5 @@ Connor Macdougall, cmac0046@student.monash.edu, Personal email: connoramacdougal
 Liam Chui, lchu0032@student.monash.edu, Personal Email: Liamchui88@gmail.com
 
 Bhanu Wijekoon, bwij0005@student.moanash.edu, Personal email: bhanu_wij@hotmail.com
+
+Agamjot SIngh, asin0114@student.monash.edu, personal: contactagam004@gmail.com

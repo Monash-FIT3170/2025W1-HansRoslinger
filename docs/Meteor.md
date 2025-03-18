@@ -1,21 +1,15 @@
-# Documentation
-
-All the information I have gathered from the following documentation
-- [metor docs](https://docs.meteor.com/about/install.html)
+# Meteor.js Documentation
 
 
 
 
-
-The following is all assuming you are running on windows, if you aren't you'll need to follow the docs
-# Steps
-1. npx meteor
-
-
+### Installing Meteor.js
+[metor docs](https://docs.meteor.com/about/install.html)
 
 ### Creating the project
 ```
 meteor create HansRoslinger
+# This creates a default application  called HansRoslinger, in the JavaScript language
 ```
 
 ### Running the Project

@@ -363,4 +363,154 @@ We can see that as we type values into our input fields, it automatically just a
 
 # 4. Writing javascript and interacting with React Components
 
+Currently the Item and Quantity we enter into the input fields is shown also in the textBox. But not let's try and allow users to add multiple items to this list.
+
+For this we'll need 2 things
+- A Button component to toggle some code
+- Some code to add the values to a list
+
+## Button Component
+Again, like our InputField, we're going to define a generic Button Input that we can use
+
+```jsx
+// Input/Button.jsx
+import React from 'react';
+
+// Button component that takes 'label' and 'onClick' as props
+export function Button({ label, onClick }) {
+  return (
+    <button onClick={onClick}>{label}</button>
+  );
+}
+```
+This button component takes 2 inputs
+label: the text you want to display on the button
+onClick: a function which does something when the button is clicked
+
+As well, don't forget to add this new component to our index.jsx
+
+```jsx
+// Input/index.jsx
+export { InputField } from './InputField';
+export { Button} from './Button';
+```
+
+## Adding this Button to our add and having it do something
+Now that we have our button component, let's add it to our App
+```jsx
+// App.jsx
+import { InputField, Button } from './Input'; //update the Input import to include new button
+
+//...
+//...
+<Button
+label="Add to List"
+onClick={addToList}
+/>
+```
+
+You can also see that when the button is clicked, it runs a function called `addToList`. This is a new function we'll define that will take a list, and add the values from the 2 input fields to them
+
+```jsx
+// App.jsx
+const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
+const addToList = () => { //this function updates the shopping list above by appending a new value to it
+setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
+}
+```
+
+finally, we'll need to update the `TextBox` to display what is stored in our shopping list
+
+```jsx
+// App.jsx
+{/* Display the current items and quantity in the shopping list */}
+<TextBox value={shoppingList.join("\n")} /> 
+```
+
+With all that said and done, our final `App.jsx` should look like the following
+
+```jsx
+// App.jsx
+import React, { useState } from 'react';
+import { Hello } from './Hello.jsx';
+import { Info } from './Info.jsx';
+import { InputField, Button } from './Input';
+import { TextBox } from './Output'; // Importing TextBox component to display output
+
+export const App = () => {
+  const [item, setItem] = useState('Apple'); // useState is a very common react function that defines a variable 'item' and a function 'setItem' that is used to modify that item
+  const [quantity, setQuantity] = useState('5');
+
+  const handleItemChange = (e) => setItem(e.target.value); // Here we have defined a function which will update the value of the item variable when we enter anything into its InputField
+  const handleQuantityChange = (e) => setQuantity(e.target.value);
+
+  const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
+  const addToList = () => { //this function updates the shopping list above by appending a new value to it
+    setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
+  }
+
+  return (
+    <div>
+      <h1>Welcome to Meteor!</h1>
+      <Hello />
+      <Info />
+
+      {/* Input for item */}
+      <InputField
+        label="Item"
+        type="text"
+        value={item} // The value of the item is displayed to the text box
+        onChange={handleItemChange} // When you type into the text box, the value is updated
+      />
+
+      {/* Input for quantity */}
+      <InputField
+        label="Quantity"
+        type="number"
+        value={quantity}
+        onChange={handleQuantityChange}
+      />
+
+      <br></br>
+
+      <Button
+        label="Add to List"
+        onClick={addToList}
+      />
+      <br></br>
+      <br></br>
+
+      {/* Display the current items and quantity in the shopping list */}
+      <TextBox value={shoppingList.join("\n")} /> 
+    </div>
+  );
+};
+```
+
+![alt text](Images/localhost-button.png)
+
+We can also see that if we type vlaues into the input fields and press `Add to list`, they will show up in the TextBox below
+
+![alt text](Images/localhost-shoppinglist-text-box.png)
+
+HOW COOL!
+> NOTE: you may find that if you refresh the page, the values stored in the textBox will dissapear, this is because the list is created and only kept for each instance of the website, and gets reset when you refresh the page. If you want to keep persistant data, you'll need a `MongoDB Database`, which is what the next section will cover
+
+As well, incase you are lost, the current file `ui` directory structure should look like this
+
+```
+└───ui
+    │   App.jsx
+    │   Hello.jsx
+    │   Info.jsx
+    │
+    ├───Input
+    │       Button.jsx
+    │       index.jsx
+    │       InputField.jsx
+    │
+    └───Output
+            index.jsx
+            TextBox.jsx
+```
 # 5. Using MongoDB

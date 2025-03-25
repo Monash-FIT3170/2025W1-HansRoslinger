@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Hello } from './Hello.jsx';
 import { Info } from './Info.jsx';
-import { InputField } from './Input';
+import { InputField, Button } from './Input';
 import { TextBox } from './Output'; // Importing TextBox component to display output
 
 export const App = () => {
@@ -10,6 +10,11 @@ export const App = () => {
 
   const handleItemChange = (e) => setItem(e.target.value); // Here we have defined a function which will update the value of the item variable when we enter anything into its InputField
   const handleQuantityChange = (e) => setQuantity(e.target.value);
+
+  const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
+  const addToList = () => { //this function updates the shopping list above by appending a new value to it
+    setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
+  }
 
   return (
     <div>
@@ -34,10 +39,16 @@ export const App = () => {
       />
 
       <br></br>
+
+      <Button
+        label="Add to List"
+        onClick={addToList}
+      />
+      <br></br>
       <br></br>
 
-      {/* Display the current item and quantity using TextBox */}
-      <TextBox value={`Item: ${item}, Quantity: ${quantity}`} /> 
-    </div> // TextBox will display the current values
+      {/* Display the current items and quantity in the shopping list */}
+      <TextBox value={shoppingList.join("\n")} /> 
+    </div>
   );
 };

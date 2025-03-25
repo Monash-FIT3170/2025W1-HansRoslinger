@@ -278,7 +278,8 @@ export const App = () => {
 ```
 
 If you've done it correctly your webpage should look something like this
-![alt text](Images/localhost-inputfields.png.png)
+
+![alt text](Images/localhost-inputfields.png)
 ## TextBox.jsx
 
 Now that we have an InputField component, lets set up a basic TextBox field
@@ -355,7 +356,8 @@ export const App = () => {
 ```
 
 With everything finally in your webpage should look like this!
-![alt text](Images/localhost-inputoutputfields.png.png)
+
+![alt text](Images/localhost-inputoutputfields.png)
 
 We can see that as we type values into our input fields, it automatically just added to our text box below!
 

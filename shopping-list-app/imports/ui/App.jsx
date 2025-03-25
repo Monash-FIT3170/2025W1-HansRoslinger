@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Hello } from './Hello.jsx';
 import { Info } from './Info.jsx';
 import { InputField } from './Input';
-import { TextBox } from './Output';
+import { TextBox } from './Output'; // Importing TextBox component to display output
 
 export const App = () => {
   const [item, setItem] = useState('Apple'); // useState is a very common react function that defines a variable 'item' and a function 'setItem' that is used to modify that item
@@ -32,6 +32,9 @@ export const App = () => {
         value={quantity}
         onChange={handleQuantityChange}
       />
+
+      <br></br>
+      <br></br>
 
       {/* Display the current item and quantity using TextBox */}
       <TextBox value={`Item: ${item}, Quantity: ${quantity}`} /> 

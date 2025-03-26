@@ -3,18 +3,23 @@ import { Hello } from './Hello.jsx';
 import { Info } from './Info.jsx';
 import { InputField, Button } from './Input';
 import { TextBox } from './Output'; // Importing TextBox component to display output
+import { ShoppingListCollection, AddToList } from '../api/shoppinglist.js';
+import { useTracker } from 'meteor/react-meteor-data';
 
 export const App = () => {
   const [item, setItem] = useState('Apple'); // useState is a very common react function that defines a variable 'item' and a function 'setItem' that is used to modify that item
   const [quantity, setQuantity] = useState('5');
+  const [shoppingList, setShoppingList] = useState([]);
 
   const handleItemChange = (e) => setItem(e.target.value); // Here we have defined a function which will update the value of the item variable when we enter anything into its InputField
   const handleQuantityChange = (e) => setQuantity(e.target.value);
 
-  const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
-  const addToList = () => { //this function updates the shopping list above by appending a new value to it
-    setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
-  }
+  // Subscribe to the shopping list
+  useTracker(() => {
+    Meteor.subscribe('shoppingList'); // Subscribe to the shopping list data
+    const items = ShoppingListCollection.find().fetch(); // Fetch the shopping list items
+    setShoppingList(items); // Update the shopping list state
+  }, []);
 
   return (
     <div>
@@ -42,13 +47,13 @@ export const App = () => {
 
       <Button
         label="Add to List"
-        onClick={addToList}
+        onClick={() => AddToList(item, quantity)}
       />
       <br></br>
       <br></br>
 
       {/* Display the current items and quantity in the shopping list */}
-      <TextBox value={shoppingList.join("\n")} /> 
+      <TextBox value={shoppingList.map(entry => `Item: ${entry.item}, Quantity: ${entry.quantity}`).join('\n')} />
     </div>
   );
 };

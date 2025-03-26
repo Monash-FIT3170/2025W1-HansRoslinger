@@ -81,6 +81,7 @@ C:\Git Repos\2025W1-HansRoslinger\shopping-list-app>meteor run
 => Started proxy.
 => Started HMR server.
 => Started MongoDB.
+=> Linted your app. No linting errors.
 I20250325-18:30:30.354(11)? ** You've set up some data subscriptions with Meteor.publish(), but
 I20250325-18:30:30.501(11)? ** you still have autopublish turned on. Because autopublish is still
 I20250325-18:30:30.501(11)? ** on, your Meteor.publish() calls won't have much effect. All data        
@@ -113,20 +114,20 @@ In the case of meteor.js, React UI Components are stored in the `imports/ui` dir
 
 ```
 ├───api
-│       links.js
+│       links.ts
 └───ui
-        App.jsx
-        Hello.jsx
-        Info.jsx
+        App.tsx
+        Hello.tsx
+        Info.tsx
 ```
 
-Each individual part of the UI is written in a `.jsx` react file, and they are all imported and combined together in the `App.jsx` file
+Each individual part of the UI is written in a `.tsx` react file, and they are all imported and combined together in the `App.tsx` file
 
-```jsx
-// App.jsx
+```tsx
+// App.tsx
 import React from 'react';
-import { Hello } from './Hello.jsx'; //Importing the Hello component from Hello.jsx
-import { Info } from './Info.jsx'; //Importing the Info component from Info.jsx
+import { Hello } from './Hello.tsx'; //Importing the Hello component from Hello.tsx
+import { Info } from './Info.tsx'; //Importing the Info component from Info.tsx
 
 export const App = () => (
   <div>
@@ -137,12 +138,12 @@ export const App = () => (
 );
 ```
 
-> EXERCISE: take a look at the `Hello.jsx` and `Info.jsx` files and see how the components are being defined
+> EXERCISE: take a look at the `Hello.tsx` and `Info.tsx` files and see how the components are being defined
 
 ---
 
 <br></br>
-## How is the App.jsx then ran by the client?
+## How is the App.tsx then ran by the client?
 
 in the `client` directory there contains 3 files. This is the top level html file which is ran accessible by the client from the localhost webpage
 - It's html!
@@ -151,7 +152,7 @@ in the `client` directory there contains 3 files. This is the top level html fil
 ├───client
     main.css
     main.html
-    main.jsx
+    main.tsx
 ```
 
 <br></br>
@@ -169,9 +170,9 @@ The `main.html` file creates a div (a block) in html which references an object 
 
 ```
 
-the `main.jsx` imports the `App` as a react components, creates a component with the react-target that is specified, and tells the container to render the react code from the App component.
-```jsx
-// main.jsx
+the `main.tsx` imports the `App` as a react components, creates a component with the react-target that is specified, and tells the container to render the react code from the App component.
+```tsx
+// main.tsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Meteor } from 'meteor/meteor';
@@ -196,42 +197,42 @@ Now that we know the structure of react components in meteor.js, let's try and c
 <br></br>
 > NOTE: the key to react components is to create ones that are as **reusable as possible**. This is the heart of React and what allows you to simplify web application code a lot.
 
-To follow this principle, lets create 2 new directories `Input` and `Output`, and a file in each. `inputField.jsx` and `textBox.jsx`.
+To follow this principle, lets create 2 new directories `Input` and `Output`, and a file in each. `inputField.tsx` and `textBox.tsx`.
 
 Creating directories for groups of components is a good way to keep everythign organised
 
 The directory layout should look like this
 ```
 └───ui
-    │   App.jsx
-    │   Hello.jsx
-    │   Info.jsx
+    │   App.tsx
+    │   Hello.tsx
+    │   Info.tsx
     │
     ├───Input
-    │       index.jsx
-    │       InputField.jsx
+    │       index.tsx
+    │       InputField.tsx
     │
     └───Output
-            index.jsx
-            TextBox.jsx
+            index.tsx
+            TextBox.tsx
 ```
-You can also see we have created 2 `index.jsx` files, I'll talk about them later on
+You can also see we have created 2 `index.tsx` files, I'll talk about them later on
 
-## InputField.jsx
+## InputField.tsx
 In this file we are going to create a reusable component for defining an input field
-```jsx
-// Input/InputField.jsx
+```tsx
+// Input/InputField.tsx
 import React from 'react';
 
-export function InputField({ label, value, onChange }) {
+export const InputField: React.FC<{ label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ label, value, onChange }) => {
   return (
     <div>
       <label>{label}</label>
-      <br></br>
+      <br />
       <input type='text' value={value} onChange={onChange} />
     </div>
   );
-}
+};
 ```
 The react component to create an inputField has 3 inputs: `label`, `value` and `onChange`
 
@@ -242,56 +243,58 @@ The react component to create an inputField has 3 inputs: `label`, `value` and `
 > onChange: This is a function you input which performs some action when text is written
 
 
-## index.jsx and simplifying component imports
-Remember that index.jsx file above? The reason we include that is so that we can simplify the imports of components in directories.
+## index.tsx and simplifying component imports
+Remember that index.tsx file above? The reason we include that is so that we can simplify the imports of components in directories.
 
-**Without index.jsx** if we wanted to import the `InputField.jsx` from `App.jsx` we would have to use the following code
+**Without index.tsx** if we wanted to import the `InputField.tsx` from `App.tsx` we would have to use the following code
 
-```jsx
-// App.jsx
-import { InputField } from './Input/InputField.jsx';
+```tsx
+// App.tsx
+import { InputField } from './Input/InputField.tsx';
 ```
 This looks fine, but as we add more and more files, we would have to have a newline for each file in that one directory!
-```jsx
-// App.jsx
-import { InputField } from './Input/InputField.jsx';
-import { Button } from './Input/Button.jsx';
-import { Calendar } from './Input/Calendar.jsx';
+```tsx
+// App.tsx
+import { InputField } from './Input/InputField';
+import { Button } from './Input/Button';
+import { Calendar } from './Input/Calendar';
 ... This sucks!
 ```
 
 <br></br>
-Instead we can define a `index.jsx` file which exports every component in the directory under a single import
-```jsx
-// Input/index.jsx
-export { InputField } from './InputField.jsx';
-export { Button} from './Button.jsx' // These would be potential future components
-export { Calendar} from './Calendar.jsx' // These would be potential future components
+Instead we can define a `index.tsx` file which exports every component in the directory under a single import
+
+```tsx
+// Input/index.tsx
+export { InputField } from './InputField';
+export { Button} from './Button' // These would be potential future components
+export { Calendar} from './Calendar' // These would be potential future components
 ```
 <br></br>
 This way we can simplify our import to the following, making it easier for everyone!
-```jsx
-// App.jsx
+
+```tsx
+// App.tsx
 import {InputField, Button, Calendar} from './Input';
 ```
 
 wow!
 <br></br>
-From all these learnings, lets add this new InputField to our `App.jsx`
+From all these learnings, lets add this new InputField to our `App.tsx`
 
-```jsx
-// App.jsx
+```tsx
+// App.tsx
 import React, { useState } from 'react';
-import { Hello } from './Hello.jsx';
-import { Info } from './Info.jsx';
+import { Hello } from './Hello';
+import { Info } from './Info';
 import { InputField } from './Input';
 
-export const App = () => {
-  const [item, setItem] = useState('Apple'); //useState is a very common react function that defines a variable 'item' and a function 'setitem' that is used to modify that item
-  const [quantity, setQuantity] = useState('5'); //Here we set the default value of the quantity to "5"
+export const App: React.FC = () => {
+  const [item, setItem] = useState<string>('Apple'); //useState is a very common react function that defines a variable 'item' and a function 'setitem' that is used to modify that item
+  const [quantity, setQuantity] = useState<string>('5'); //Here we set the default value of the quantity to "5"
 
-  const handleItemChange = (e) => setItem(e.target.value); //here we have defined a function which will update the value of the item variable when we enter anything into it's InputField
-  const handleQuantityChange = (e) => setQuantity(e.target.value);
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>) => setItem(e.target.value); //here we have defined a function which will update the value of the item variable when we enter anything into it's InputField
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value);
 
   return (
     <div>
@@ -302,7 +305,6 @@ export const App = () => {
       {/* Input for item */}
       <InputField
         label="Item"
-        type="text"
         value={item} //The value of the item is displayed to the text box
         onChange={handleItemChange} //When you type into the text box, the value is updated
       />
@@ -310,21 +312,23 @@ export const App = () => {
       {/* Input for quantity */}
       <InputField
         label="Quantity"
-        type="number"
         value={quantity}
         onChange={handleQuantityChange}
       />
     </div>
   );
 };
+
 ```
 You can see above that we define React components in our returned div as if they were HTML components, and we define attributes to customise these InputFields.
 
 In order to handle the values that we get from the InputField, we use a common react function called UseState
-```jsx
+
+```tsx
 import React, { useState } from 'react';
 const [<variable>, <function>] = useState(<defaultValue>)
 ```
+
 <br></br>
 Above is the default template for how useState is defined, and it sets out a variable, it's default value, as well as a function which can be used to interact with it.
 
@@ -336,30 +340,32 @@ If you've done it correctly your webpage should look something like this
 ![alt text](Images/localhost-inputfields.png)
 <br></br>
 <br></br>
-## TextBox.jsx
+
+## TextBox.tsx
 
 Now that we have an InputField component, lets set up a basic TextBox field
 
-```jsx
-// Output/TextBox.jsx
+```tsx
+// Output/TextBox.tsx
 import React from 'react';
 
-export function TextBox({ value }) {
+export const TextBox: React.FC<{ value: string }> = ({ value }) => {
   return (
     <div>
       <textarea value={value} readOnly />
     </div>
   );
-}
+};
+
 ```
 The inputs are the following:
 > value: what we would like to display to the text box
 
 `readOnly` makes it so nothing can be entered by the client on the website
 
-Lets also define our `index.jsx` file to make importing easier
-```jsx
-// Output/index.jsx
+Lets also define our `index.tsx` file to make importing easier
+```tsx
+// Output/index.tsx
 export { TextBox } from './TextBox';
 ```
 
@@ -367,12 +373,12 @@ export { TextBox } from './TextBox';
 <br></br>
 
 
-Once this is done, lets add this to our `App.jsx`
-```jsx
-// App.jsx
+Once this is done, lets add this to our `App.tsx`
+```tsx
+// App.tsx
 import React, { useState } from 'react';
-import { Hello } from './Hello.jsx';
-import { Info } from './Info.jsx';
+import { Hello } from './Hello.tsx';
+import { Info } from './Info.tsx';
 import { InputField } from './Input';
 import { TextBox } from './Output'; // Importing TextBox component to display output
 
@@ -439,8 +445,8 @@ For this we'll need 2 things
 ## Button Component
 Again, like our InputField, we're going to define a generic Button Input that we can use inside our `Input` directory
 
-```jsx
-// Input/Button.jsx
+```tsx
+// Input/Button.tsx
 import React from 'react';
 
 // Button component that takes 'label' and 'onClick' as props
@@ -455,10 +461,10 @@ This button component takes 2 inputs
 
 > onClick: a function which does something when the button is clicked
 
-As well, don't forget to add this new component to our index.jsx
+As well, don't forget to add this new component to our index.tsx
 
-```jsx
-// Input/index.jsx
+```tsx
+// Input/index.tsx
 export { InputField } from './InputField';
 export { Button} from './Button';
 ```
@@ -467,8 +473,9 @@ export { Button} from './Button';
 <br></br>
 ## Adding this Button to our app and having it do something
 Now that we have our button component, let's add it to our App
-```jsx
-// App.jsx
+
+```tsx
+// App.tsx
 import { InputField, Button } from './Input'; //update the Input import to include new button
 
 //...
@@ -482,8 +489,8 @@ onClick={addToList}
 You can see above, we've defined a function called `addToList` inside the `onClick`. This is a new function we have to define that will take a list, and add the values from the 2 input fields to it.
 
 Here is an example of logic to do just that
-```jsx
-// App.jsx
+```tsx
+// App.tsx
 const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
 const addToList = () => { //this function updates the shopping list above by appending a new value to it
 setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
@@ -493,8 +500,8 @@ setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity
 <br></br>
 finally, we'll need to update the `TextBox` to display what is stored in our shopping list, instead of just what was in the input fields
 
-```jsx
-// App.jsx
+```tsx
+// App.tsx
 {/* Display the current items and quantity in the shopping list */}
 <TextBox value={shoppingList.join("\n")} /> 
 ```
@@ -502,28 +509,27 @@ finally, we'll need to update the `TextBox` to display what is stored in our sho
 <br></br>
 <br></br>
 
-With all that said and done, our final `App.jsx` should look like the following
+With all that said and done, our final `App.tsx` should look like the following
 
-```jsx
-// App.jsx
+```tsx
+// App.tsx
 import React, { useState } from 'react';
-import { Hello } from './Hello.jsx';
-import { Info } from './Info.jsx';
+import { Hello } from './Hello';
+import { Info } from './Info';
 import { InputField, Button } from './Input';
 import { TextBox } from './Output'; // Importing TextBox component to display output
 
-export const App = () => {
-  const [item, setItem] = useState('Apple'); // useState is a very common react function that defines a variable 'item' and a function 'setItem' that is used to modify that item
-  const [quantity, setQuantity] = useState('5');
+export const App: React.FC = () => {
+  const [item, setItem] = useState<string>('Apple'); //useState is a very common react function that defines a variable 'item' and a function 'setitem' that is used to modify that item
+  const [quantity, setQuantity] = useState<string>('5'); //Here we set the default value of the quantity to "5"
 
-  const handleItemChange = (e) => setItem(e.target.value); // Here we have defined a function which will update the value of the item variable when we enter anything into its InputField
-  const handleQuantityChange = (e) => setQuantity(e.target.value);
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>) => setItem(e.target.value); //here we have defined a function which will update the value of the item variable when we enter anything into it's InputField
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value);
 
-  const [shoppingList, setShoppingList] = useState([]); //we've define a list that can we set the value of
-  const addToList = () => { //this function updates the shopping list above by appending a new value to it
+  const [shoppingList, setShoppingList] = useState<string[]>([]); // We've defined a list that can hold strings
+  const addToList = () => { // This function updates the shopping list above by appending a new value to it
     setShoppingList((prevList) => [...prevList, `Item: ${item}, Quantity: ${quantity}`]);
-  }
-
+  };
   return (
     <div>
       <h1>Welcome to Meteor!</h1>
@@ -533,29 +539,26 @@ export const App = () => {
       {/* Input for item */}
       <InputField
         label="Item"
-        type="text"
-        value={item} // The value of the item is displayed to the text box
-        onChange={handleItemChange} // When you type into the text box, the value is updated
+        value={item} //The value of the item is displayed to the text box
+        onChange={handleItemChange} //When you type into the text box, the value is updated
       />
 
       {/* Input for quantity */}
       <InputField
         label="Quantity"
-        type="number"
         value={quantity}
         onChange={handleQuantityChange}
       />
 
+      <br></br>
       <br></br>
 
       <Button
         label="Add to List"
         onClick={addToList}
       />
-      <br></br>
-      <br></br>
 
-      {/* Display the current items and quantity in the shopping list */}
+      {/* Display the current item and quantity using TextBox */}
       <TextBox value={shoppingList.join("\n")} /> 
     </div>
   );
@@ -576,18 +579,18 @@ As well, incase you are lost, the current file `ui` directory structure should l
 
 ```
 └───ui
-    │   App.jsx
-    │   Hello.jsx
-    │   Info.jsx
+    │   App.tsx
+    │   Hello.tsx
+    │   Info.tsx
     │
     ├───Input
-    │       Button.jsx
-    │       index.jsx
-    │       InputField.jsx
+    │       Button.tsx
+    │       index.tsx
+    │       InputField.tsx
     │
     └───Output
-            index.jsx
-            TextBox.jsx
+            index.tsx
+            TextBox.tsx
 ```
 # 5. Using MongoDB
 
@@ -633,24 +636,24 @@ if you make any modifications to server code you'll need to rerun meteor run (or
 
 ## Setting Up Our Shopping List In MongoDB
 
-### imports/api/shoppinglist.js
+### imports/api/shoppinglist.ts
 in the API directory in our application, we're going to create a new typescript file which will be used to create a ShoppingList Collection in our MongoDB
 
 ```javascript
 import { Mongo } from 'meteor/mongo';
 
 // Define the ShoppingList MongoDB collection
-export const ShoppingListCollection = new Mongo.Collection('shoppingList');
+export const ShoppingListCollection = new Mongo.Collection<{ item: string; quantity: string }>('shoppingList');
 
 // Function to add the current item and quantity to MongoDB
-export const AddToList = (item, quantity) => {
-  const doc = { item, quantity: parseInt(quantity) };
+export const AddToList = (item: string, quantity: string): void => {
+  const doc = { item, quantity: quantity };
   ShoppingListCollection.insert(doc); // Insert the new item into the collection
 };
 ```
 Here we've defined a new ShoppingList Collection for our MongoDB, and we've defined a mutating function which will allow you to add a new item/quantity pair to the DB
 
-### server/main.js
+### server/main.ts
 To ensure the database is persistent across clients, we need to publish the ShoppingList collection on the `server side` inside the `server/main.js` file
 
 ```javascript
@@ -668,23 +671,28 @@ To ensure the database is persistent across clients, we need to publish the Shop
 ```
 At the very bottom similar to how the links collection is defined, we are publishing the ShoppingList collection to our database when the server is spun up for the first time.
 
-### Updating App.jsx
+### Updating App.tsx
 
-With the database section setup, we can now use it in our App.jsx
+With the database section setup, we can now use it in our App.tsx
 
-At the top we have to import 2 new packages
-```jsx
-import { ShoppingListCollection, AddToList } from '../api/shoppinglist.js';
+At the top we have to import 3 new packages
+
+> PLEASE RUN `npm install @types/meteor --save-dev`
+
+```tsx
+import { ShoppingListCollection, AddToList } from '../api/shoppinglist';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 ```
+
+
 Our ShoppingListCollection, AddToList function, and a UseTracker
 
 UseTracker is a React hook that will automatic run specified code when any data is modified, in this case our MongoDB Database. This is is used to update the TextField when we add a new document.
 
-```jsx
-  const [shoppingList, setShoppingList] = useState([]);
-
-  // Subscribe to the shopping list
+```tsx
+  const [shoppingList, setShoppingList] = useState<{ item: string; quantity: string }[]>([]);  // We've defined a list that can hold strings
+  
   useTracker(() => {
     Meteor.subscribe('shoppingList'); // Subscribe to the shopping list data
     const items = ShoppingListCollection.find().fetch(); // Fetch the shopping list items
@@ -695,7 +703,7 @@ The useTracker subscribes to the ShoppingList, and will update the values in our
 
 
 And finally, we update our Button and our TextField
-```jsx
+```tsx
       <Button
         label="Add to List"
         onClick={() => AddToList(item, quantity)}
@@ -712,24 +720,25 @@ We then have to update our textBox to take our local shoppingList array, which s
 
 
 The final solution should look like this
-```jsx
+```tsx
 import React, { useState } from 'react';
-import { Hello } from './Hello.jsx';
-import { Info } from './Info.jsx';
+import { Hello } from './Hello';
+import { Info } from './Info';
 import { InputField, Button } from './Input';
 import { TextBox } from './Output'; // Importing TextBox component to display output
-import { ShoppingListCollection, AddToList } from '../api/shoppinglist.js';
+import { ShoppingListCollection, AddToList } from '../api/shoppinglist';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 
-export const App = () => {
-  const [item, setItem] = useState('Apple'); // useState is a very common react function that defines a variable 'item' and a function 'setItem' that is used to modify that item
-  const [quantity, setQuantity] = useState('5');
-  const [shoppingList, setShoppingList] = useState([]);
+export const App: React.FC = () => {
+  const [item, setItem] = useState<string>('Apple'); //useState is a very common react function that defines a variable 'item' and a function 'setitem' that is used to modify that item
+  const [quantity, setQuantity] = useState<string>('5'); //Here we set the default value of the quantity to "5"
 
-  const handleItemChange = (e) => setItem(e.target.value); // Here we have defined a function which will update the value of the item variable when we enter anything into its InputField
-  const handleQuantityChange = (e) => setQuantity(e.target.value);
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>) => setItem(e.target.value); //here we have defined a function which will update the value of the item variable when we enter anything into it's InputField
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value);
 
-  // Subscribe to the shopping list
+  const [shoppingList, setShoppingList] = useState<{ item: string; quantity: string }[]>([]);  // We've defined a list that can hold strings
+  
   useTracker(() => {
     Meteor.subscribe('shoppingList'); // Subscribe to the shopping list data
     const items = ShoppingListCollection.find().fetch(); // Fetch the shopping list items
@@ -745,19 +754,18 @@ export const App = () => {
       {/* Input for item */}
       <InputField
         label="Item"
-        type="text"
-        value={item} // The value of the item is displayed to the text box
-        onChange={handleItemChange} // When you type into the text box, the value is updated
+        value={item} //The value of the item is displayed to the text box
+        onChange={handleItemChange} //When you type into the text box, the value is updated
       />
 
       {/* Input for quantity */}
       <InputField
         label="Quantity"
-        type="number"
         value={quantity}
         onChange={handleQuantityChange}
       />
 
+      <br></br>
       <br></br>
 
       <Button

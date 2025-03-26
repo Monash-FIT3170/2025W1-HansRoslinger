@@ -3,10 +3,17 @@
 
 # Links to additional information
 ### Meteor.JS
+- [Installing meteor.js](https://v2-docs.meteor.com/install.html)
+- [Introduction to meteor.js](https://guide.meteor.com/)
+- [Creating an app](https://react-tutorial.meteor.com/simple-todos/01-creating-app.html)
 
 ### React
-
+- [React Quick Start](https://react.dev/learn)
+- [Introduction to React in Meteor.js](https://guide.meteor.com/react)
 ### MongoDB
+- [Mongosh installation guide](https://www.mongodb.com/docs/mongodb-shell/install/)
+- [What is MongoDB](https://www.mongodb.com/company/what-is-mongodb)
+- [MongoDB in Meteor](https://guide.meteor.com/collections.html)
 
 # Preface
 This Technology Tutorial Plan will follow the creation of a small application that teaches
@@ -32,7 +39,7 @@ For this tutorial, we’re going to setup a basic shopping list application, it 
 # 1. Installing Meteor.js
 To install meteor.js, you can follow the steps outlined [here](https://docs.meteor.com/about/install).
 
-In general, run the following command
+In general, whether you are using windows or not, you shoudl run the following command
 ```
 npx meteor
 ```
@@ -42,6 +49,7 @@ If this does not work, try running the following command instead
 npm install -g meteor --foreground-script
 ```
 
+If neither work, please consult the link above.
 <br></br>
 <br></br>
 
@@ -109,6 +117,11 @@ I20250325-18:30:30.508(11)?
 *This is what the webpage should look like*
 
 # 3. Using React in meteor.js?
+
+> If you haven't already, install react into your meteor application
+```
+meteor npm install --save react react-dom
+```
 
 In the case of meteor.js, React UI Components are stored in the `imports/ui` directory.
 
@@ -809,4 +822,6 @@ Running the last command lets us remove all the items from our shopping list.
 
 # Conclusion
 
-If you've gotten through this entire tutorial congrats! You've successfully been able to create a small shopping list application that has utilised meteor.js reuseable react components, typescript and MongoDB! 
+If you've gotten through this entire tutorial congrats! You've successfully been able to create a small shopping list application that has utilised meteor.js reuseable react components, typescript and MongoDB!
+
+Pretty cool right?

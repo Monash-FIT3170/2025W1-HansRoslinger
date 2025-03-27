@@ -801,7 +801,7 @@ We can see that when running the app we can successfully add items to the shoppi
 
 <br></br>
 
-![alt text](Images/localhost-finalapp.png.png)
+![alt text](Images/localhost-finalapp.png)
 
 If use the terminal where we ran `meteor mongo`, we can run the following commands to get some info about our collections
 

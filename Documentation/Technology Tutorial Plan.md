@@ -39,7 +39,7 @@ For this tutorial, we’re going to setup a basic shopping list application, it 
 # 1. Installing Meteor.js
 To install meteor.js, you can follow the steps outlined [here](https://docs.meteor.com/about/install).
 
-In general, whether you are using windows or not, you shoudl run the following command
+In general, whether you are using windows or not, you should run the following command
 ```
 npx meteor
 ```

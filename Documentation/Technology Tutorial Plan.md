@@ -461,11 +461,11 @@ Again, like our InputField, we're going to define a generic Button Input that we
 import React from 'react';
 
 // Button component that takes 'label' and 'onClick' as props
-export function Button({ label, onClick }) {
+export const Button: React.FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => {
   return (
     <button onClick={onClick}>{label}</button>
   );
-}
+};
 ```
 This button component takes 2 inputs
 > label: the text you want to display on the button

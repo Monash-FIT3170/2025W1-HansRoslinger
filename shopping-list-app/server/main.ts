@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Link, LinksCollection } from '/imports/api/links';
+import { ShoppingListCollection } from '/imports/api/shoppinglist';
 
 async function insertLink({ title, url }: Pick<Link, 'title' | 'url'>) {
   await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
@@ -34,4 +35,9 @@ Meteor.startup(async () => {
   Meteor.publish("links", function () {
     return LinksCollection.find();
   });
+  
+  Meteor.publish('shoppingList', function publishShoppingList() {
+    return ShoppingListCollection.find();
+  });
+  
 });

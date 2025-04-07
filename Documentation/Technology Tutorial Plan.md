@@ -586,7 +586,7 @@ We can also see that if we type vlaues into the input fields and press `Add to l
 ![alt text](Images/localhost-shoppinglist-text-box.png)
 
 HOW COOL!
-> NOTE: you may find that if you refresh the page, the values stored in the textBox will dissapear, this is because the list is created and only kept for each instance of the website, and gets reset when you refresh the page and the client is recreated. If you want to keep persistant data, you'll need a `MongoDB Database`, which is what the next section will cover.
+> NOTE: you may find that if you refresh the page, the values stored in the textBox will dissapear, this is because the list is created and only kept for each instance of the website, and gets reset when you refresh the page and the client is recreated. If you want to keep persistent data, you'll need a `MongoDB Database`, which is what the next section will cover.
 
 As well, incase you are lost, the current file `ui` directory structure should look like this
 

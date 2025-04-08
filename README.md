@@ -27,6 +27,6 @@ Hand and face detection is probably the only one we need, so it can be modified 
 
 To start it:
 1. `cd .\POCs\nodejs-mediapipe-main\`
-2. `node server.js`
+2. `node server.js` OR `npm run start`
 
 This will start a server at `http://localhost:3000`.

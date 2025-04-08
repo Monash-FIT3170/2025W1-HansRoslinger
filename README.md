@@ -16,3 +16,17 @@
 | Liam Chui          | lchu0032@student.monash.edu       | Liamchui88@gmail.com                  |
 | Bhanu Wijekoon     | bwij0005@student.moanash.edu      | bhanu_wij@hotmail.com                 |
 | Agamjot Singh      | asin0114@student.monash.edu       | contactagam004@gmail.com              |
+
+## Proof of Concepts (POCs)
+POCs are located in the ~/POCs folder.
+
+### nodejs-mediapipe POC
+This POC is a nodejs wrapper for mediapipe web. It has 4 different modes - hand and face detection, pose detection, image segmentation and full hand, face and pose detection.
+
+Hand and face detection is probably the only one we need, so it can be modified to remove the other functionality.
+
+To start it:
+1. `cd .\POCs\nodejs-mediapipe\`
+2. `node server.js`
+
+This will start a server at `http://localhost:3000`.

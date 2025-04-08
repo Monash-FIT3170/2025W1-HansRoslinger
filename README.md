@@ -26,7 +26,7 @@ This POC is a nodejs wrapper for mediapipe web. It has 4 different modes - hand 
 Hand and face detection is probably the only one we need, so it can be modified to remove the other functionality.
 
 To start it:
-1. `cd .\POCs\nodejs-mediapipe\`
+1. `cd .\POCs\nodejs-mediapipe-main\`
 2. `node server.js`
 
 This will start a server at `http://localhost:3000`.

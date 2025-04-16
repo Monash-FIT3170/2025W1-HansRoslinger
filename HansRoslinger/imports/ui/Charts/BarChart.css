@@ -1,10 +1,13 @@
 .d3-chart-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 30%; /* Adjust the height of the chart as needed */
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 1; /* Fully visible */
+  background-color: transparent; /* Ensure the background is fully transparent */
 }
 
 .bar {

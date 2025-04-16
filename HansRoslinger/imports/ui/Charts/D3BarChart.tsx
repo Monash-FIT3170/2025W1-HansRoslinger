@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import './BarChart.css';
+import { DEFAULT_COLOUR, SELECT_COLOUR, WIDTH, HEIGHT } from './constants'; // Import constants
 
 interface D3BarChartProps {
   data: { label: string; value: number }[];
-  width: number;
-  height: number;
 }
 
-export const D3BarChart: React.FC<D3BarChartProps> = ({ data, width, height }) => {
+export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,26 +21,27 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data, width, height }) =
       const svg = d3
         .select(chartRef.current)
         .append('svg')
-        .attr('width', width)
-        .attr('height', height);
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
+        .style('background-color', 'transparent');
 
       // Create scales
       const xScale = d3
         .scaleBand()
         .domain(data.map((d) => d.label))
-        .range([margin.left, width - margin.right])
+        .range([margin.left, WIDTH - margin.right])
         .padding(0.1);
 
       const yScale = d3
         .scaleLinear()
         .domain([0, d3.max(data, (d) => d.value) || 100])
         .nice()
-        .range([height - margin.bottom, margin.top]);
+        .range([HEIGHT - margin.bottom, margin.top]);
 
-      // Add axes
+      // This moves the axes to the bottom left of the chart
       svg
         .append('g')
-        .attr('transform', `translate(0, ${height - margin.bottom})`)
+        .attr('transform', `translate(0, ${HEIGHT - margin.bottom})`)
         .call(d3.axisBottom(xScale));
 
       svg
@@ -59,10 +59,16 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data, width, height }) =
         .attr('x', (d) => xScale(d.label) || 0)
         .attr('y', (d) => yScale(d.value))
         .attr('width', xScale.bandwidth())
-        .attr('height', (d) => height - margin.bottom - yScale(d.value))
-        .attr('fill', (d, i) => ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'][i % 4]); // Vivid colors
+        .attr('height', (d) => HEIGHT - margin.bottom - yScale(d.value))
+        .attr('fill', DEFAULT_COLOUR) // Use default color
+        .on('mouseover', function () {
+          d3.select(this).attr('fill', SELECT_COLOUR); // this is just for showing colours at the moment, will have to be changed for gesture input
+        })
+        .on('mouseout', function () {
+          d3.select(this).attr('fill', DEFAULT_COLOUR);
+        });
     }
-  }, [data, width, height]);
+  }, [data]);
 
   return <div ref={chartRef} className="d3-chart-container"></div>;
 };

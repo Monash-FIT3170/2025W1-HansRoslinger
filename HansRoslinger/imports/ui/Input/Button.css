@@ -1,1 +1,10 @@
-/* Add any button-specific styles here if needed */
+.button-container {
+    position: absolute; /* Position the buttons above other elements */
+    top: 20px; /* Add space from the top */
+    left: 50%; /* Center the buttons horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    z-index: 2; /* Ensure buttons are above the webcam and chart */
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Add spacing between buttons */
+  }

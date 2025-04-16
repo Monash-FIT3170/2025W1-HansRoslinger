@@ -1,38 +1,7 @@
 .app-container {
   position: relative;
   width: 100%;
-  height: 100vh; /* Full viewport height */
-  margin: auto; /* Center the container */
-  overflow: hidden; /* Prevent overflow */
-}
-
-.red-theme * {
-  background-color: red !important;
-  color: white !important;
-}
-
-.chart-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.chart-container canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Stretch to fit the webcam's resolution */
-}
-
-.button-container {
-  position: absolute; /* Position the buttons above other elements */
-  top: 20px; /* Add space from the top */
-  left: 50%; /* Center the buttons horizontally */
-  transform: translateX(-50%); /* Adjust for centering */
-  z-index: 2; /* Ensure buttons are above the webcam and chart */
-  display: flex;
-  justify-content: center;
-  gap: 10px; /* Add spacing between buttons */
+  height: 100vh;
+  margin: auto;
+  overflow: hidden;
 }

@@ -1,0 +1,22 @@
+.webcam-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Place the webcam behind everything */
+  opacity: 1; /* Fully visible */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.webcam-view {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Maintain aspect ratio of the webcam */
+}
+
+.grayscale .webcam-view {
+  filter: grayscale(100%);
+}

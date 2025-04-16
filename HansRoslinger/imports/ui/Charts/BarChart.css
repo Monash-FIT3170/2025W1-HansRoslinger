@@ -1,0 +1,16 @@
+.d3-chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1; /* Fully visible */
+}
+
+.bar {
+  transition: fill 0.3s, height 0.3s;
+}
+
+.bar:hover {
+  fill: #ffa726; /* Highlight color on hover */
+}

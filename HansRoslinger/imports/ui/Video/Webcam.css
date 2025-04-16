@@ -4,8 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1; /* Place the webcam behind everything */
-  opacity: 1; /* Fully visible */
+  z-index: 0; /* Place the webcam behind everything */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,7 +13,7 @@
 .webcam-view {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Maintain aspect ratio of the webcam */
+  object-fit: cover; /* Ensure the webcam covers the entire screen */
 }
 
 .grayscale .webcam-view {

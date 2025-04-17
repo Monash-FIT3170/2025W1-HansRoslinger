@@ -20,7 +20,7 @@ export const App = () => {
     { label: 'Sep', value: 20 },
     { label: 'Oct', value: 50 },
     { label: 'Nov', value: 70 },
-    { label: 'Dec', value: 40 },
+    { label: 'Dec', value: 30 },
   ];
 
   return (

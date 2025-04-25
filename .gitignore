@@ -1,2 +1,8 @@
 HansRoslinger/.meteor
 HansRoslinger/node_modules
+shopping-list-app/
+
+.gitignore
+/node_modules
+package-lock.json
+package.json

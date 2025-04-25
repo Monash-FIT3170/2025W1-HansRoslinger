@@ -1,4 +1,3 @@
-// GestureRecognizerComponent.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 
@@ -6,6 +5,7 @@ const GestureRecognizerComponent = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [gestureResult, setGestureResult] = useState("");
   const gestureRecognizerRef = useRef<GestureRecognizer | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const setup = async () => {
@@ -29,14 +29,32 @@ const GestureRecognizerComponent = () => {
 
       // Start webcam
       if (videoRef.current) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          videoRef.current!.srcObject = stream;
-          videoRef.current!.play();
-        });
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            videoRef.current!.srcObject = stream;
+            videoRef.current!.play();
+          })
+          .catch((err) => {
+            console.error("Error accessing the webcam:", err);
+          });
       }
     };
 
     setup();
+
+    return () => {
+      // Cleanup: Stop the video stream when the component unmounts
+      if (videoRef.current && videoRef.current.srcObject instanceof MediaStream) {
+        const stream = videoRef.current.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -48,7 +66,7 @@ const GestureRecognizerComponent = () => {
       const processFrame = async () => {
         const video = videoRef.current!;
         if (video.readyState === 4) {
-          const result = recognizer.recognizeForVideo(video, performance.now());
+          const result = await recognizer.recognizeForVideo(video, performance.now());
 
           if (
             result.gestures.length > 0 &&
@@ -58,14 +76,19 @@ const GestureRecognizerComponent = () => {
             setGestureResult(gesture);
           }
         }
-
-        requestAnimationFrame(processFrame);
       };
 
-      processFrame();
+      // Check gestures periodically every 500ms
+      intervalRef.current = setInterval(processFrame, 500);
     };
 
     detectGesture();
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 
   return (

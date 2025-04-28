@@ -17,8 +17,7 @@ typescript@5.6.3              # Enable TypeScript syntax in .ts and .tsx modules
 shell-server@0.6.1            # Server-side component of the `meteor shell` command
 hot-module-replacement@0.5.4  # Update client in development without reloading the page
 
-autopublish@1.0.8             # Publish all data to the clients (for prototyping)
-insecure@1.0.8                # Allow all DB writes from clients (for prototyping)
+
 static-html@1.4.0             # Define static page content in .html files
 react-meteor-data       # React higher-order component for reactively tracking Meteor data
 zodern:types            # Pull in type declarations from other Meteor packages

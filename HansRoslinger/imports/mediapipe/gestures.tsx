@@ -66,6 +66,7 @@ const GestureRecognizerComponent = () => {
       const processFrame = async () => {
         const video = videoRef.current!;
         if (video.readyState === 4) {
+          console.log("printing");
           const result = await recognizer.recognizeForVideo(video, performance.now());
           console.log(JSON.stringify(result.gestures[0][0].categoryName))
           let res = "";

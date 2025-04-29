@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 type MediaPipeGesture = {
   name: string;          // "Thumb_Up", "Open_Palm", etc.

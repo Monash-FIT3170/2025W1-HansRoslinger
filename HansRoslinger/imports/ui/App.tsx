@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import './main.css';
 import { Button } from './Input';
-import 'material-design-lite/material.min.css';
-import 'material-design-lite/material.min.js';
 import { WebcamComponent } from './Video/webcam';
 import { D3BarChart } from './Charts/D3BarChart';
+// pull in MDL’s styles and JS
+import 'material-design-lite/material.min.css';
+import 'material-design-lite/material.min.js';
+
 
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -27,23 +29,19 @@ export const App = () => {
 
   return (
     <div className="app-container">
-      <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <header className="mdl-layout__header">
-          <div className="mdl-layout__header-row">
-            <div className="button-container">
-              <Button
-                label="Toggle Grayscale"
-                onClick={() => setGrayscale(!grayscale)}
-              />
-            </div>
-            {/* other header content… */}
+      <div className="demo-layout-transparent mdl-layout mdl-js-layout">
+      <header className="mdl-layout__header mdl-layout__header--transparent">
+        <div className="mdl-layout__header-row">
+          <span className="mdl-layout-title">HansRoslinger</span>
+          <div className="button-container">
+            <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
           </div>
-        </header>
-      </div>
-
+        </div>
+      </header>
       <div className="video-container">
         {showWebcam && <WebcamComponent grayscale={grayscale} />}
         <D3BarChart data={data} />
+      </div>
       </div>
     </div>
   );

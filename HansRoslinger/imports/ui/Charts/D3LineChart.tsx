@@ -8,13 +8,15 @@ import {
   AXIS_FONT_SIZE,
   AXIS_TEXT_SHADOW,
   AXIS_LINE_SHADOW,
+  LINE_STROKE_WIDTH,
+  POINT_RADIUS,
 } from './constants';
 
-interface D3BarChartProps {
+interface D3LineChartProps {
   data: { label: string; value: number }[];
 }
 
-export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
+export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const renderChart = () => {
@@ -29,7 +31,6 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       const width = containerWidth - MARGIN.left - MARGIN.right;
       const height = containerHeight - MARGIN.top - MARGIN.bottom;
 
-      // Create SVG container
       const svg = d3
         .select(chartRef.current)
         .append('svg')
@@ -37,12 +38,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .attr('height', containerHeight)
         .style('background-color', 'transparent');
 
-      // Create scales
       const xScale = d3
-        .scaleBand()
+        .scalePoint()
         .domain(data.map((d) => d.label))
-        .range([MARGIN.left, width + MARGIN.left])
-        .padding(0.1);
+        .range([MARGIN.left, width + MARGIN.left]);
 
       const yScale = d3
         .scaleLinear()
@@ -50,7 +49,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .nice()
         .range([height + MARGIN.top, MARGIN.top]);
 
-      // Add axes
+      // Axes
       svg
         .append('g')
         .attr('transform', `translate(0, ${height + MARGIN.top})`)
@@ -74,17 +73,30 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .attr('stroke', AXIS_COLOR)
         .style('filter', AXIS_LINE_SHADOW);
 
-      // Add bars
+      // Line path
+      const line = d3
+        .line<{ label: string; value: number }>()
+        .x((d) => xScale(d.label)!)
+        .y((d) => yScale(d.value))
+        .curve(d3.curveMonotoneX);
+
       svg
-        .selectAll('.bar')
+        .append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', DEFAULT_COLOUR)
+        .attr('stroke-width', LINE_STROKE_WIDTH)
+        .attr('d', line);
+
+      // Points
+      svg
+        .selectAll('.dot')
         .data(data)
         .enter()
-        .append('rect')
-        .attr('class', 'bar')
-        .attr('x', (d) => xScale(d.label) || 0)
-        .attr('y', (d) => yScale(d.value))
-        .attr('width', xScale.bandwidth())
-        .attr('height', (d) => height + MARGIN.top - yScale(d.value))
+        .append('circle')
+        .attr('cx', (d) => xScale(d.label)!)
+        .attr('cy', (d) => yScale(d.value))
+        .attr('r', POINT_RADIUS)
         .attr('fill', DEFAULT_COLOUR)
         .on('mouseover', function () {
           d3.select(this).attr('fill', SELECT_COLOUR);

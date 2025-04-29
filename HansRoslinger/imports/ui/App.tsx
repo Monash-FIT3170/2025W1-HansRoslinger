@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './main.css';
 import { Button } from './Input';
+import 'material-design-lite/material.min.css';
+import 'material-design-lite/material.min.js';
 import { WebcamComponent } from './Video/webcam';
 import { D3BarChart } from './Charts/D3BarChart';
 
@@ -25,11 +27,24 @@ export const App = () => {
 
   return (
     <div className="app-container">
-      <div className="button-container">
-        <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
+      <div className="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header className="mdl-layout__header">
+          <div className="mdl-layout__header-row">
+            <div className="button-container">
+              <Button
+                label="Toggle Grayscale"
+                onClick={() => setGrayscale(!grayscale)}
+              />
+            </div>
+            {/* other header content… */}
+          </div>
+        </header>
       </div>
-      {showWebcam && <WebcamComponent grayscale={grayscale} />}
-      <D3BarChart data={data} />
+
+      <div className="video-container">
+        {showWebcam && <WebcamComponent grayscale={grayscale} />}
+        <D3BarChart data={data} />
+      </div>
     </div>
   );
 };

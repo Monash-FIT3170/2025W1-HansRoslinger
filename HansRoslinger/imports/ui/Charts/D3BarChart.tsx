@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as d3 from 'd3';
 import './BarChart.css';
 import { DEFAULT_COLOUR, SELECT_COLOUR, WIDTH, HEIGHT } from './constants'; // Import constants
@@ -18,7 +18,6 @@ interface D3BarChartProps {
 export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const updateXDomainRef = useRef<(centerIndex: number) => void>();
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -75,9 +74,6 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
             .attr('width', xScale.bandwidth())
             .attr('height', d => HEIGHT - margin.bottom - yScale(d.value))
             .attr('fill', DEFAULT_COLOUR)
-            .attr('fill', (_, i) =>
-              i === selectedIndex ? SELECT_COLOUR : DEFAULT_COLOUR
-            )
             .on('mouseover', function () {
               d3.select(this).attr('fill', SELECT_COLOUR);
             })
@@ -89,11 +85,6 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
               if (index !== -1 && updateXDomainRef.current) {
                 updateXDomainRef.current(index);
               }
-              const idx = d3.selectAll<SVGRectElement, unknown>('.bar')
-                          .nodes()
-                          .indexOf(this);
-
-              setSelectedIndex(idx === selectedIndex ? null : idx);
             });
 
           bars.exit().remove();
@@ -112,7 +103,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       return () => {
         d3.select(chartRef.current).select('svg').remove();
       };
-      }, [data, selectedIndex]);
+      }, [data]);
   
 
 

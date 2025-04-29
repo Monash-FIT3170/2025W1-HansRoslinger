@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 
-const GestureRecognizerComponent = () => {
+const GestureDetector = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [gestureResult, setGestureResult] = useState("");
   const gestureRecognizerRef = useRef<GestureRecognizer | null>(null);
@@ -107,4 +107,4 @@ const GestureRecognizerComponent = () => {
   );
 };
 
-export default GestureRecognizerComponent;
+export default GestureDetector;

@@ -9,7 +9,7 @@ interface WebcamProps {
 export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
   return (
     <div className={`webcam-container ${grayscale ? 'grayscale' : ''}`}>
-      <Webcam className="webcam-view" />
+      <Webcam className="webcam-view"/>
     </div>
   );
 };

@@ -1,7 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import './LineChart.css';
-import { DEFAULT_COLOUR, WIDTH, HEIGHT, SELECT_COLOUR } from './constants';
+import {
+  DEFAULT_COLOUR,
+  SELECT_COLOUR,
+  MARGIN,
+  AXIS_COLOR,
+  AXIS_FONT_SIZE,
+  AXIS_TEXT_SHADOW,
+  AXIS_LINE_SHADOW,
+  LINE_STROKE_WIDTH,
+  POINT_RADIUS,
+} from './constants';
 
 interface D3LineChartProps {
   data: { label: string; value: number }[];
@@ -10,40 +19,59 @@ interface D3LineChartProps {
 export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const renderChart = () => {
     if (chartRef.current) {
+      // Clear any existing chart
       d3.select(chartRef.current).select('svg').remove();
 
-      const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+      // Get container dimensions
+      const containerWidth = chartRef.current.offsetWidth;
+      const containerHeight = chartRef.current.offsetHeight || 400; // Default height if not set
+
+      const width = containerWidth - MARGIN.left - MARGIN.right;
+      const height = containerHeight - MARGIN.top - MARGIN.bottom;
 
       const svg = d3
         .select(chartRef.current)
         .append('svg')
-        .attr('width', WIDTH)
-        .attr('height', HEIGHT)
+        .attr('width', containerWidth)
+        .attr('height', containerHeight)
         .style('background-color', 'transparent');
 
       const xScale = d3
         .scalePoint()
         .domain(data.map((d) => d.label))
-        .range([margin.left, WIDTH - margin.right]);
+        .range([MARGIN.left, width + MARGIN.left]);
 
       const yScale = d3
         .scaleLinear()
         .domain([0, d3.max(data, (d) => d.value) || 100])
         .nice()
-        .range([HEIGHT - margin.bottom, margin.top]);
+        .range([height + MARGIN.top, MARGIN.top]);
 
       // Axes
       svg
         .append('g')
-        .attr('transform', `translate(0, ${HEIGHT - margin.bottom})`)
-        .call(d3.axisBottom(xScale));
+        .attr('transform', `translate(0, ${height + MARGIN.top})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll('text')
+        .attr('fill', AXIS_COLOR)
+        .style('font-size', AXIS_FONT_SIZE)
+        .style('text-shadow', AXIS_TEXT_SHADOW);
 
       svg
         .append('g')
-        .attr('transform', `translate(${margin.left}, 0)`)
-        .call(d3.axisLeft(yScale));
+        .attr('transform', `translate(${MARGIN.left}, 0)`)
+        .call(d3.axisLeft(yScale))
+        .selectAll('text')
+        .attr('fill', AXIS_COLOR)
+        .style('font-size', AXIS_FONT_SIZE)
+        .style('text-shadow', AXIS_TEXT_SHADOW);
+
+      // Add thicker shadow to axis lines
+      svg.selectAll('path, line')
+        .attr('stroke', AXIS_COLOR)
+        .style('filter', AXIS_LINE_SHADOW);
 
       // Line path
       const line = d3
@@ -57,7 +85,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
         .datum(data)
         .attr('fill', 'none')
         .attr('stroke', DEFAULT_COLOUR)
-        .attr('stroke-width', 2)
+        .attr('stroke-width', LINE_STROKE_WIDTH)
         .attr('d', line);
 
       // Points
@@ -68,7 +96,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
         .append('circle')
         .attr('cx', (d) => xScale(d.label)!)
         .attr('cy', (d) => yScale(d.value))
-        .attr('r', 4)
+        .attr('r', POINT_RADIUS)
         .attr('fill', DEFAULT_COLOUR)
         .on('mouseover', function () {
           d3.select(this).attr('fill', SELECT_COLOUR);
@@ -77,7 +105,18 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
           d3.select(this).attr('fill', DEFAULT_COLOUR);
         });
     }
+  };
+
+  useEffect(() => {
+    // Initial render
+    renderChart();
+
+    // Re-render on window resize
+    const handleResize = () => renderChart();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
   }, [data]);
 
-  return <div ref={chartRef} className="d3-chart-container"></div>;
+  return <div ref={chartRef} className="d3-chart-container w-full h-96"></div>;
 };

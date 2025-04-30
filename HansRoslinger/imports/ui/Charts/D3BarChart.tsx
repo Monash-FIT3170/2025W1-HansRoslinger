@@ -3,11 +3,14 @@ import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
+  WIDTH,
+  HEIGHT,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,
   AXIS_TEXT_SHADOW,
   AXIS_LINE_SHADOW,
+  BAR_OPACITY,
 } from './constants';
 
 interface D3BarChartProps {
@@ -22,38 +25,31 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       // Clear any existing chart
       d3.select(chartRef.current).select('svg').remove();
 
-      // Get container dimensions
-      const containerWidth = chartRef.current.offsetWidth;
-      const containerHeight = chartRef.current.offsetHeight || 400; // Default height if not set
-
-      const width = containerWidth - MARGIN.left - MARGIN.right;
-      const height = containerHeight - MARGIN.top - MARGIN.bottom;
-
       // Create SVG container
       const svg = d3
         .select(chartRef.current)
         .append('svg')
-        .attr('width', containerWidth)
-        .attr('height', containerHeight)
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
         .style('background-color', 'transparent');
 
       // Create scales
       const xScale = d3
         .scaleBand()
         .domain(data.map((d) => d.label))
-        .range([MARGIN.left, width + MARGIN.left])
+        .range([MARGIN.left, WIDTH - MARGIN.right])
         .padding(0.1);
 
       const yScale = d3
         .scaleLinear()
         .domain([0, d3.max(data, (d) => d.value) || 100])
         .nice()
-        .range([height + MARGIN.top, MARGIN.top]);
+        .range([HEIGHT - MARGIN.bottom, MARGIN.top]);
 
       // Add axes
       svg
         .append('g')
-        .attr('transform', `translate(0, ${height + MARGIN.top})`)
+        .attr('transform', `translate(0, ${HEIGHT - MARGIN.bottom})`)
         .call(d3.axisBottom(xScale))
         .selectAll('text')
         .attr('fill', AXIS_COLOR)
@@ -84,13 +80,14 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .attr('x', (d) => xScale(d.label) || 0)
         .attr('y', (d) => yScale(d.value))
         .attr('width', xScale.bandwidth())
-        .attr('height', (d) => height + MARGIN.top - yScale(d.value))
+        .attr('height', (d) => HEIGHT - MARGIN.bottom - yScale(d.value))
         .attr('fill', DEFAULT_COLOUR)
+        .style('opacity', BAR_OPACITY) // Apply opacity
         .on('mouseover', function () {
-          d3.select(this).attr('fill', SELECT_COLOUR);
+          d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1); // Full opacity on hover
         })
         .on('mouseout', function () {
-          d3.select(this).attr('fill', DEFAULT_COLOUR);
+          d3.select(this).attr('fill', DEFAULT_COLOUR).style('opacity', BAR_OPACITY); // Reset opacity
         });
     }
   };
@@ -106,5 +103,9 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [data]);
 
-  return <div ref={chartRef} className="d3-chart-container w-full h-96"></div>;
+  return (
+    <div className="flex justify-center items-center w-full h-auto">
+      <div ref={chartRef} className="d3-chart-container"></div>
+    </div>
+  );
 };

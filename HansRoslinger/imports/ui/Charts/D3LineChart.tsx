@@ -3,6 +3,8 @@ import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
+  WIDTH,
+  HEIGHT,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,
@@ -24,35 +26,29 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
       // Clear any existing chart
       d3.select(chartRef.current).select('svg').remove();
 
-      // Get container dimensions
-      const containerWidth = chartRef.current.offsetWidth;
-      const containerHeight = chartRef.current.offsetHeight || 400; // Default height if not set
-
-      const width = containerWidth - MARGIN.left - MARGIN.right;
-      const height = containerHeight - MARGIN.top - MARGIN.bottom;
-
+      // Create SVG container
       const svg = d3
         .select(chartRef.current)
         .append('svg')
-        .attr('width', containerWidth)
-        .attr('height', containerHeight)
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
         .style('background-color', 'transparent');
 
       const xScale = d3
         .scalePoint()
         .domain(data.map((d) => d.label))
-        .range([MARGIN.left, width + MARGIN.left]);
+        .range([MARGIN.left, WIDTH - MARGIN.right]);
 
       const yScale = d3
         .scaleLinear()
         .domain([0, d3.max(data, (d) => d.value) || 100])
         .nice()
-        .range([height + MARGIN.top, MARGIN.top]);
+        .range([HEIGHT - MARGIN.bottom, MARGIN.top]);
 
-      // Axes
+      // Add axes
       svg
         .append('g')
-        .attr('transform', `translate(0, ${height + MARGIN.top})`)
+        .attr('transform', `translate(0, ${HEIGHT - MARGIN.bottom})`)
         .call(d3.axisBottom(xScale))
         .selectAll('text')
         .attr('fill', AXIS_COLOR)
@@ -118,5 +114,9 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [data]);
 
-  return <div ref={chartRef} className="d3-chart-container w-full h-96"></div>;
+  return (
+    <div className="flex justify-center items-center w-full h-auto">
+      <div ref={chartRef} className="d3-chart-container"></div>
+    </div>
+  );
 };

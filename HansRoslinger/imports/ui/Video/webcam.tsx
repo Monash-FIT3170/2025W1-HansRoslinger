@@ -10,7 +10,10 @@ export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
     <div
       className={`webcam-container fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`}
     >
-      <Webcam className="w-full h-full object-cover" />
+      <Webcam
+        className="w-full h-full object-cover"
+        style={{ transform: 'scaleX(-1)' }} // Flip vertically
+      />
     </div>
   );
 };

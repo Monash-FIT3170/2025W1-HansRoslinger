@@ -25,11 +25,20 @@ export const App = () => {
 
   return (
     <div className="app-container">
-      <div className="button-container">
-        <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
+      <div className="demo-layout-transparent mdl-layout mdl-js-layout">
+       <header className="mdl-layout__header mdl-layout__header--transparent">
+         <div className="mdl-layout__header-row">
+           <span className="mdl-layout-title">HansRoslinger</span>
+           <div className="button-container">
+             <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
+           </div>
+         </div>
+       </header>
+       <div className="video-container">
+         {showWebcam && <WebcamComponent grayscale={grayscale} />}
+         <D3BarChart data={data} />
+       </div>
+        </div>
       </div>
-      {showWebcam && <WebcamComponent grayscale={grayscale} />}
-      <D3BarChart data={data} />
-    </div>
   );
 };

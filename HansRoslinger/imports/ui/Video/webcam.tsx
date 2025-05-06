@@ -1,6 +1,5 @@
-import React from 'react'; // Import React
+import React from 'react';
 import Webcam from 'react-webcam';
-import './Webcam.css';
 
 interface WebcamProps {
   grayscale: boolean;
@@ -8,8 +7,13 @@ interface WebcamProps {
 
 export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
   return (
-    <div className={`webcam-container ${grayscale ? 'grayscale' : ''}`}>
-      <Webcam className="webcam-view" />
+    <div
+      className={`webcam-container fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`}
+    >
+      <Webcam
+        className="w-full h-full object-cover"
+        style={{ transform: 'scaleX(-1)' }} // Flip vertically
+      />
     </div>
   );
 };

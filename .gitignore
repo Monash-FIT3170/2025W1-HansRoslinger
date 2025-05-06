@@ -2,3 +2,6 @@ HansRoslinger/.meteor
 HansRoslinger/node_modules
 shopping-list-app/node_modules
 shopping-list-app/.meteor
+
+spike/shopping-list-app/node_modules
+spike/shopping-list-app/.meteor

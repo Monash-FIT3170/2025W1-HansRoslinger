@@ -25,17 +25,18 @@ export const App = () => {
   ];
 
   return (
-  <div className="app-container">
-      <div className="button-container">
-        <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
-      </div>
-      {showWebcam && <WebcamComponent grayscale={grayscale} />}
-      <D3BarChart data={data} />
-      <div className="p-8">
-      <h1 className="text-xl font-bold mb-4">Gesture Recognition Demo</h1>
-      <GestureDetector />
-      </div>
+  <div>
+    <div className="app-container">
+        <div className="button-container">
+          <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
+        </div>
+        {showWebcam && <WebcamComponent grayscale={grayscale} />}
+        <D3BarChart data={data} />
+    </div>
+    <div className="p-8">
+    <h1 className="text-xl font-bold mb-4">Gesture Recognition Demo</h1>
+    <GestureDetector />
+    </div>
   </div>
-    
 );
 };

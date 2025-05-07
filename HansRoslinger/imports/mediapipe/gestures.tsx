@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-
-// class Gesture {
-//   timestamp: current time
-//   handedness: left or right
-//   gesture_ID: gesture_enum
-//   land_marks: list of x,y,z points
-//   certainty: 0 to 1
-// }
+import { GestureType, Handedness, Gesture } from "../gesture/gesture";
 
 const GestureDetector = () => {
   const videoRef = useRef<HTMLVideoElement>(null);

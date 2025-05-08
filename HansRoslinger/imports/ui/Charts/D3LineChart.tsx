@@ -16,7 +16,10 @@ import {
 
 interface D3LineChartProps {
   data: { label: string; value: number }[];
+  width?: number;
+  height?: number;
 }
+
 
 export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);

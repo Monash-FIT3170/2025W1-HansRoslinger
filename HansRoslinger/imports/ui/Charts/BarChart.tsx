@@ -13,12 +13,17 @@ import {
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
 
-const BarChart: React.FC = () => {
+interface BarChartProps {
+  width?: number | string;
+  height?: number | string;
+}
+
+const BarChart: React.FC<BarChartProps> = ({ width = '100%', height = 120 }) => {
   const data = generateBarChartData();
 
   return (
-    <div style={{ width: '100%', height: '500px' }}>
-      <Bar data={data} options={options} />
+    <div style={{ width, height, margin: '0 auto' }}>
+      <Bar data={data} options={{ ...options, maintainAspectRatio: false }} />
     </div>
   );
 };

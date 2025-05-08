@@ -15,7 +15,10 @@ import {
 
 interface D3BarChartProps {
   data: { label: string; value: number }[];
+  width?: number;
+  height?: number;
 }
+
 
 export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);

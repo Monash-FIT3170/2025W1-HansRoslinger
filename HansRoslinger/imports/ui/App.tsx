@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from './Input'; // Custom button
+import { Button } from './Input'; // Custom Button (if still used)
 import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
@@ -10,8 +10,7 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import MuiButton from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import Stack from '@mui/material/Stack';
 
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -36,40 +35,52 @@ export const App = () => {
   return (
     <div className="app-container flex flex-col items-center min-h-screen bg-transparent">
       <Box sx={{ flexGrow: 1, width: '100%' }}>
-        <AppBar position="static">
+        <AppBar
+          position="static"
+          sx={{
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            color: '#fff',
+            boxShadow: 'none',
+          }}
+        >
           <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               HansRoslinger
             </Typography>
 
-            {/* Use children for MuiButton text */}
-            <MuiButton 
-              onClick={() => setGrayscale(!grayscale)} 
-              color="secondary"
-              variant="contained"
-              sx={{ mx: 1, bgcolor: '#6A5ACD', '&:hover': { bgcolor: '#483D8B' } }}
-            >
-              Toggle Grayscale
-            </MuiButton>
+            <Stack direction="row" spacing={2}>
+              <MuiButton
+                onClick={() => setGrayscale(!grayscale)}
+                variant="outlined"
+                sx={{
+                  border: '1px solid #fff',
+                  color: '#fff',
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                Toggle Grayscale
+              </MuiButton>
 
-            <MuiButton 
-              onClick={() => setShowLineChart(!showLineChart)} 
-              color="primary"
-              variant="contained"
-              sx={{ mx: 1, bgcolor: '#20B2AA', '&:hover': { bgcolor: '#008B8B' } }}
-            >
-              {`Switch to ${showLineChart ? 'BarChart' : 'LineChart'}`}
-            </MuiButton>
+              <MuiButton
+                onClick={() => setShowLineChart(!showLineChart)}
+                variant="outlined"
+                sx={{
+                  border: '1px solid #fff',
+                  color: '#fff',
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                {`Switch to ${showLineChart ? 'BarChart' : 'LineChart'}`}
+              </MuiButton>
+            </Stack>
           </Toolbar>
         </AppBar>
       </Box>
@@ -78,8 +89,12 @@ export const App = () => {
         {showWebcam && <WebcamComponent grayscale={grayscale} />}
       </div>
 
-      <div className="w-full flex justify-center mb-4">
-        {showLineChart ? <D3LineChart data={data} /> : <D3BarChart data={data} />}
+      <div className="w-full max-w-3xl h-32 flex justify-center items-center mb-4">
+        {showLineChart ? (
+          <D3LineChart data={data} width={600} height={150} />
+        ) : (
+          <D3BarChart data={data} width={600} height={150} />
+        )}
       </div>
     </div>
   );

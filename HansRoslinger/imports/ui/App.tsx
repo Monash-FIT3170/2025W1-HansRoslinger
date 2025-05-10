@@ -4,10 +4,11 @@ import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
 import { Header } from './Header';
 
-export const App = () => {
+export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [showWebcam, setShowWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(true);
+  const [showHeader, setShowHeader] = useState(true);
 
   const data = [
     { label: 'Jan', value: 50 },
@@ -24,6 +25,21 @@ export const App = () => {
     { label: 'Dec', value: 30 },
   ];
 
+  // switch between expanded & collapsed toolbar styles
+  const toolbarClasses = showHeader
+    ? [
+        'absolute top-4 right-4 bottom-4 w-16',
+        'bg-gray-900 rounded-2xl shadow-lg',
+        'flex flex-col items-center justify-end py-4 space-y-2',
+        'z-50',
+      ].join(' ')
+    : [
+        'absolute top-4 right-4 w-14 h-14',
+        'bg-gray-900 rounded-xl shadow-lg',
+        'flex items-center justify-center',
+        'z-50',
+      ].join(' ');
+
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
@@ -34,25 +50,34 @@ export const App = () => {
           />
         </div>
       )}
+
+      {/* Bottom-left transparent charts */}
       <div className="absolute bottom-4 left-4 w-96 h-56 bg-transparent pointer-events-none">
         {showLineChart ? (
           <D3LineChart data={data} width={384} height={224} />
         ) : (
-          <D3BarChart  data={data} width={384} height={224} />
+          <D3BarChart data={data} width={384} height={224} />
         )}
       </div>
 
+      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
+      <div className={toolbarClasses}>
+        <button
+          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
+          onClick={() => setShowHeader((h) => !h)}
+        >
+          {showHeader ? 'Hide' : 'Show'}
+        </button>
 
-      {/* Rounded, inset right-hand toolbar */}
-      <div className="absolute top-4 right-5 bottom-4 w-16 bg-gray-900 rounded-2xl shadow-lg flex flex-col items-center justify-end py-4 space-y-4 z-50">
-        <Header
-          grayscale={grayscale}
-          onToggleGrayscale={() => setGrayscale(g => !g)}
-          showLineChart={showLineChart}
-          onToggleChart={() => setShowLineChart(c => !c)}
-        />
+        {showHeader && (
+          <Header
+            grayscale={grayscale}
+            onToggleGrayscale={() => setGrayscale((g) => !g)}
+            showLineChart={showLineChart}
+            onToggleChart={() => setShowLineChart((c) => !c)}
+          />
+        )}
       </div>
-
     </div>
   );
 };

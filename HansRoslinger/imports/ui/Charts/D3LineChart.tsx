@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
-  WIDTH,
-  HEIGHT,
+  WIDTH as DEFAULT_WIDTH,
+  HEIGHT as DEFAULT_HEIGHT,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,
@@ -20,106 +20,103 @@ interface D3LineChartProps {
   height?: number;
 }
 
-
-export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
+export const D3LineChart: React.FC<D3LineChartProps> = ({
+  data,
+  width,
+  height,
+}) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const w = width ?? DEFAULT_WIDTH;
+  const h = height ?? DEFAULT_HEIGHT;
 
   const renderChart = () => {
-    if (chartRef.current) {
-      // Clear any existing chart
-      d3.select(chartRef.current).select('svg').remove();
+    if (!chartRef.current) return;
 
-      // Create SVG container
-      const svg = d3
-        .select(chartRef.current)
-        .append('svg')
-        .attr('width', WIDTH)
-        .attr('height', HEIGHT)
-        .style('background-color', 'transparent');
+    // clear
+    d3.select(chartRef.current).selectAll('*').remove();
 
-      const xScale = d3
-        .scalePoint()
-        .domain(data.map((d) => d.label))
-        .range([MARGIN.left, WIDTH - MARGIN.right]);
+    // responsive svg
+    const svg = d3
+      .select(chartRef.current)
+      .append('svg')
+      .attr('viewBox', `0 0 ${w} ${h}`)
+      .attr('preserveAspectRatio', 'none')
+      .style('width', '100%')
+      .style('height', '100%')
+      .style('background-color', 'transparent');
 
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(data, (d) => d.value) || 100])
-        .nice()
-        .range([HEIGHT - MARGIN.bottom, MARGIN.top]);
+    // scales
+    const xScale = d3
+      .scalePoint()
+      .domain(data.map((d) => d.label))
+      .range([MARGIN.left, w - MARGIN.right]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.value) || 100])
+      .nice()
+      .range([h - MARGIN.bottom, MARGIN.top]);
 
-      // Add axes
-      svg
-        .append('g')
-        .attr('transform', `translate(0, ${HEIGHT - MARGIN.bottom})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll('text')
-        .attr('fill', AXIS_COLOR)
-        .style('font-size', AXIS_FONT_SIZE)
-        .style('text-shadow', AXIS_TEXT_SHADOW);
+    // axes
+    svg
+      .append('g')
+      .attr('transform', `translate(0, ${h - MARGIN.bottom})`)
+      .call(d3.axisBottom(xScale))
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', AXIS_FONT_SIZE)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
 
-      svg
-        .append('g')
-        .attr('transform', `translate(${MARGIN.left}, 0)`)
-        .call(d3.axisLeft(yScale))
-        .selectAll('text')
-        .attr('fill', AXIS_COLOR)
-        .style('font-size', AXIS_FONT_SIZE)
-        .style('text-shadow', AXIS_TEXT_SHADOW);
+    svg
+      .append('g')
+      .attr('transform', `translate(${MARGIN.left}, 0)`)
+      .call(d3.axisLeft(yScale))
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', AXIS_FONT_SIZE)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
 
-      // Add thicker shadow to axis lines
-      svg.selectAll('path, line')
-        .attr('stroke', AXIS_COLOR)
-        .style('filter', AXIS_LINE_SHADOW);
+    // axis lines shadow
+    svg.selectAll('path, line')
+      .attr('stroke', AXIS_COLOR)
+      .style('filter', AXIS_LINE_SHADOW);
 
-      // Line path
-      const line = d3
-        .line<{ label: string; value: number }>()
-        .x((d) => xScale(d.label)!)
-        .y((d) => yScale(d.value))
-        .curve(d3.curveMonotoneX);
+    // line
+    const line = d3
+      .line<{ label: string; value: number }>()
+      .x((d) => xScale(d.label)!)
+      .y((d) => yScale(d.value))
+      .curve(d3.curveMonotoneX);
 
-      svg
-        .append('path')
-        .datum(data)
-        .attr('fill', 'none')
-        .attr('stroke', DEFAULT_COLOUR)
-        .attr('stroke-width', LINE_STROKE_WIDTH)
-        .attr('d', line);
+    svg
+      .append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('stroke', DEFAULT_COLOUR)
+      .attr('stroke-width', LINE_STROKE_WIDTH)
+      .attr('d', line);
 
-      // Points
-      svg
-        .selectAll('.dot')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', (d) => xScale(d.label)!)
-        .attr('cy', (d) => yScale(d.value))
-        .attr('r', POINT_RADIUS)
-        .attr('fill', DEFAULT_COLOUR)
-        .on('mouseover', function () {
-          d3.select(this).attr('fill', SELECT_COLOUR);
-        })
-        .on('mouseout', function () {
-          d3.select(this).attr('fill', DEFAULT_COLOUR);
-        });
-    }
+    // points
+    svg
+      .selectAll('.dot')
+      .data(data)
+      .join('circle')
+      .attr('cx', (d) => xScale(d.label)!)
+      .attr('cy', (d) => yScale(d.value))
+      .attr('r', POINT_RADIUS)
+      .attr('fill', DEFAULT_COLOUR)
+      .on('mouseover', function () {
+        d3.select(this).attr('fill', SELECT_COLOUR);
+      })
+      .on('mouseout', function () {
+        d3.select(this).attr('fill', DEFAULT_COLOUR);
+      });
   };
 
   useEffect(() => {
-    // Initial render
     renderChart();
+    window.addEventListener('resize', renderChart);
+    return () => window.removeEventListener('resize', renderChart);
+  }, [data, width, height]);
 
-    // Re-render on window resize
-    const handleResize = () => renderChart();
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, [data]);
-
-  return (
-    <div className="flex justify-center items-center w-full h-auto">
-      <div ref={chartRef} className="d3-chart-container"></div>
-    </div>
-  );
+  return <div ref={chartRef} className="w-full h-full" />;
 };

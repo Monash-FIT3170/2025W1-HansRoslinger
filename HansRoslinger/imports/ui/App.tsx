@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Header } from './Header';
 import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
+import { Header } from './Header';
 
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -25,47 +25,34 @@ export const App = () => {
   ];
 
   return (
-    <div className="relative w-screen h-screen">
-      {/* Full‐screen video */}
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Fullscreen video */}
       {showWebcam && (
         <div className="absolute inset-0">
-          {/* Make sure your WebcamComponent accepts className or style props */}
           <WebcamComponent
             grayscale={grayscale}
           />
         </div>
       )}
-
-      {/* Bottom‐left transparent chart panel */}
-      <div className="absolute bottom-4 left-4 w-80 h-40 bg-transparent">
+      <div className="absolute bottom-4 left-4 w-96 h-56 bg-transparent pointer-events-none">
         {showLineChart ? (
-          <D3LineChart data={data} width={600} height={150} />
+          <D3LineChart data={data} width={384} height={224} />
         ) : (
-          <D3BarChart data={data} width={600} height={150} />
+          <D3BarChart  data={data} width={384} height={224} />
         )}
       </div>
 
-      {/* Right‐hand toolbar (unstyled colors) */}
-      <div className="absolute top-0 right-0 bottom-0 w-16 flex flex-col items-center py-4 space-y-4">
+
+      {/* Rounded, inset right-hand toolbar */}
+      <div className="absolute top-4 right-5 bottom-4 w-16 bg-gray-900 rounded-2xl shadow-lg flex flex-col items-center justify-end py-4 space-y-4 z-50">
         <Header
           grayscale={grayscale}
-          onToggleGrayscale={() => setGrayscale((g) => !g)}
+          onToggleGrayscale={() => setGrayscale(g => !g)}
           showLineChart={showLineChart}
-          onToggleChart={() => setShowLineChart((c) => !c)}
+          onToggleChart={() => setShowLineChart(c => !c)}
         />
-        <button
-          onClick={() => setShowWebcam((w) => !w)}
-          className="p-2 rounded"
-        >
-          Toggle Cam
-        </button>
-        <button
-          onClick={() => setShowLineChart((c) => !c)}
-          className="p-2 rounded"
-        >
-          Toggle Chart
-        </button>
       </div>
+
     </div>
   );
 };

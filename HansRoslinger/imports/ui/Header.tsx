@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
     {/* Grayscale toggle */}
     <button
       onClick={onToggleGrayscale}
-      className="w-10 h-10 rounded-lg bg-gray-500 hover:bg-gray-600 text-sm font-medium"
+      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium"
     >
       GS
     </button>

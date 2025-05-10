@@ -29,7 +29,7 @@ export const App: React.FC = () => {
   const toolbarClasses = showHeader
     ? [
         'absolute top-4 right-4 bottom-4 w-16',
-        'bg-gray-900 rounded-2xl shadow-lg',
+        'bg-gray-800 rounded-2xl shadow-lg',
         'flex flex-col items-center justify-end py-4 space-y-2',
         'z-50',
       ].join(' ')

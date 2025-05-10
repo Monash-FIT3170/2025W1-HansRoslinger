@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
-import { Button } from './Input'; // Custom Button (if still used)
+import { Header } from './Header';
 import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
-
-// Material UI
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import MuiButton from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
 
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -33,68 +25,46 @@ export const App = () => {
   ];
 
   return (
-    <div className="app-container flex flex-col items-center min-h-screen bg-transparent">
-      <Box sx={{ flexGrow: 1, width: '100%' }}>
-        <AppBar
-          position="static"
-          sx={{
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            color: '#fff',
-            boxShadow: 'none',
-          }}
-        >
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              HansRoslinger
-            </Typography>
+    <div className="relative w-screen h-screen">
+      {/* Full‐screen video */}
+      {showWebcam && (
+        <div className="absolute inset-0">
+          {/* Make sure your WebcamComponent accepts className or style props */}
+          <WebcamComponent
+            grayscale={grayscale}
+          />
+        </div>
+      )}
 
-            <Stack direction="row" spacing={2}>
-              <MuiButton
-                onClick={() => setGrayscale(!grayscale)}
-                variant="outlined"
-                sx={{
-                  border: '1px solid #fff',
-                  color: '#fff',
-                  backgroundColor: 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
-              >
-                Toggle Grayscale
-              </MuiButton>
-
-              <MuiButton
-                onClick={() => setShowLineChart(!showLineChart)}
-                variant="outlined"
-                sx={{
-                  border: '1px solid #fff',
-                  color: '#fff',
-                  backgroundColor: 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
-              >
-                {`Switch to ${showLineChart ? 'BarChart' : 'LineChart'}`}
-              </MuiButton>
-            </Stack>
-          </Toolbar>
-        </AppBar>
-      </Box>
-
-      <div className="flex-grow flex items-center justify-center w-full mt-4">
-        {showWebcam && <WebcamComponent grayscale={grayscale} />}
-      </div>
-
-      <div className="w-full max-w-3xl h-32 flex justify-center items-center mb-4">
+      {/* Bottom‐left transparent chart panel */}
+      <div className="absolute bottom-4 left-4 w-80 h-40 bg-transparent">
         {showLineChart ? (
           <D3LineChart data={data} width={600} height={150} />
         ) : (
           <D3BarChart data={data} width={600} height={150} />
         )}
+      </div>
+
+      {/* Right‐hand toolbar (unstyled colors) */}
+      <div className="absolute top-0 right-0 bottom-0 w-16 flex flex-col items-center py-4 space-y-4">
+        <Header
+          grayscale={grayscale}
+          onToggleGrayscale={() => setGrayscale((g) => !g)}
+          showLineChart={showLineChart}
+          onToggleChart={() => setShowLineChart((c) => !c)}
+        />
+        <button
+          onClick={() => setShowWebcam((w) => !w)}
+          className="p-2 rounded"
+        >
+          Toggle Cam
+        </button>
+        <button
+          onClick={() => setShowLineChart((c) => !c)}
+          className="p-2 rounded"
+        >
+          Toggle Chart
+        </button>
       </div>
     </div>
   );

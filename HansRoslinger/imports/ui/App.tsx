@@ -34,7 +34,7 @@ export const App: React.FC = () => {
         'z-50',
       ].join(' ')
     : [
-        'absolute top-4 right-4 w-14 h-14',
+        'absolute bottom-4 right-4 w-16 h-16',
         'bg-gray-900 rounded-xl shadow-lg',
         'flex items-center justify-center',
         'z-50',

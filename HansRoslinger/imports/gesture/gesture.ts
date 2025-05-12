@@ -15,7 +15,7 @@ enum Handedness {
 }
 
 type Gesture = {
-  gesture_ID: GestureType,
+  gestureID: GestureType,
   timestamp: Date,
   handedness: Handedness,
   confidence: number;    // 0-1

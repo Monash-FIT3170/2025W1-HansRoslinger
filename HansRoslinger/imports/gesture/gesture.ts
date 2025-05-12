@@ -1,9 +1,12 @@
 enum GestureType {
-  THUMB_UP,
-  THUMB_DOWN,
-  POINTING_UP,
-  OPEN_PALM,
-  VICTORY, // This is the peace sign
+  CLOSED_FIST = "Closed_Fist",
+  I_LOVE_YOU = "ILoveYou",
+  UNIDENTIFIED = "None",
+  OPEN_PALM = "Open_Palm",
+  POINTING_UP = "Pointing_Up",    // This is with the thumb, and index and pinky fingers outstretched
+  THUMB_DOWN = "Thumb_Down",
+  THUMB_UP = "Thumb_Up",
+  VICTORY = "Victory",            // This is the peace sign
 }
 
 enum Handedness {

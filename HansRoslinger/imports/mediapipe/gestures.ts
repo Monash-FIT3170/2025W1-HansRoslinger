@@ -94,7 +94,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
               handedness: detectedGesture.handedness[index][0].categoryName as Handedness,
               timestamp: new Date(),
               confidence: detectedGesture.gestures[index][0].score,
-              landmarks: [],
+              landmarks: detectedGesture.landmarks[index],
             };
             setCurrentGesture(gesture);
           }

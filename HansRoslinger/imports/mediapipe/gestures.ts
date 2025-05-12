@@ -15,13 +15,13 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
   // Gesture Constants
   const NUM_HANDS_DETECTABLE = 2                    // Maximum number of hands that will be detected in a single recognition
   const MIN_HAND_DETECTION_CONFIDENCE = 0.6         // e.g., 0.6 means at least 60% confidence required                    
-  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 300   // in ms
+  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 500   // in ms
   const SETUP_MAX_RETRIES = 5;                      // how many times to reattempt setting up mediapipe imports
   const SETUP_RETRY_DELAY = 1000;                   // in ms
   const VIDEO_HAS_ENOUGH_DATA = 4;                  // HTMLMediaElement.readyState, 4 = HAVE_ENOUGH_DATA which means media can be played long enough for gesture detection
 
   // React specific variables
-  const [currentGesture, setCurrentGesture] = useState<Gesture | null>(null);
+  const [currentGestures, setCurrentGestures] = useState<Gesture[]>(Array(NUM_HANDS_DETECTABLE));
   const [gestureRecognizer, setGestureRecognizer] = useState<GestureRecognizer|null>();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -86,17 +86,19 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
         }
         const video = videoRef.current.video;
         if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
-          const detectedGesture = await gestureRecognizer.recognizeForVideo(video, performance.now());
-          let gesture: Gesture;
-          for (let index = 0; index < detectedGesture.gestures.length; index++) {
-            gesture = {
-              gestureID: detectedGesture.gestures[index][0].categoryName as GestureType,
-              handedness: detectedGesture.handedness[index][0].categoryName as Handedness,
+          const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
+          let gestures: Gesture[] = Array(detectedGestures.gestures.length);
+          for (let index = 0; index < detectedGestures.gestures.length; index++) {
+            gestures[index] = {
+              gestureID: detectedGestures.gestures[index][0].categoryName as GestureType,
+              handedness: detectedGestures.handedness[index][0].categoryName as Handedness,
               timestamp: new Date(),
-              confidence: detectedGesture.gestures[index][0].score,
-              landmarks: detectedGesture.landmarks[index],
+              confidence: detectedGestures.gestures[index][0].score,
+              landmarks: detectedGestures.landmarks[index],
             };
-            setCurrentGesture(gesture);
+          }
+          if (!(gestures.length == 0 && currentGestures.length == 0)) {
+            setCurrentGestures(gestures);
           }
         };
       };
@@ -112,11 +114,13 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
 
   // Handle newly detected gesture
   useEffect(() => {
-    if (currentGesture) {
-      // Code to be called when new gestures are detected goes here
-      console.log(currentGesture);
+    for (let index = 0; index < currentGestures.length; index++) {
+      if (currentGestures[index]) {
+        // Code to be called when new gestures are detected goes here
+        console.log(currentGestures[index]);
+      }
     }
-  }, [currentGesture]);
+  }, [currentGestures]);
 };
 
 

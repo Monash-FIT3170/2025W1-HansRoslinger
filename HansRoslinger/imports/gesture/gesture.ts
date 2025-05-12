@@ -10,8 +10,8 @@ enum GestureType {
 }
 
 enum Handedness {
-  LEFT,
-  RIGHT
+  LEFT = "Left",
+  RIGHT = "Right",
 }
 
 type Gesture = {

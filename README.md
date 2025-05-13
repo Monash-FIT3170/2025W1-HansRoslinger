@@ -17,16 +17,10 @@
 | Bhanu Wijekoon     | bwij0005@student.moanash.edu      | bhanu_wij@hotmail.com                 |
 | Agamjot Singh      | asin0114@student.monash.edu       | contactagam004@gmail.com              |
 
-## Proof of Concepts (POCs)
-POCs are located in the ~/POCs folder.
-
-### nodejs-mediapipe POC
-This POC is a nodejs wrapper for mediapipe web. It has 4 different modes - hand and face detection, pose detection, image segmentation and full hand, face and pose detection.
-
-Hand and face detection is probably the only one we need, so it can be modified to remove the other functionality.
-
-To start it:
-1. `cd .\POCs\nodejs-mediapipe-main\`
-2. `node server.js` OR `npm run start`
+## How to run HansRoslinger
+1. Ensure you are in the right directory:
+`cd .\HansRoslinger` (assuming you are at the root directory of the repository)
+2. Start the code:
+`meteor`
 
 This will start a server at `http://localhost:3000`.

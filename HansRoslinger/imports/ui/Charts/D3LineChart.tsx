@@ -116,7 +116,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
 
   return (
     <div className="flex justify-center items-center w-full h-auto">
-      <div ref={chartRef} className="d3-chart-container"></div>
+      <div ref={chartRef} className="absolute bottom-0 left-0 w-full h-3/10 flex justify-center items-center bg-transparent"></div>
     </div>
   );
 };

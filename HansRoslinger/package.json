@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.7",
-    "@tailwindcss/postcss": "^4.1.4",
+    "@tailwindcss/postcss": "^4.1.6",
     "chart.js": "^4.4.9",
     "d3": "^7.9.0",
     "meteor-node-stubs": "^1.2.5",
@@ -20,7 +20,7 @@
     "react-dom": "^18.2.0",
     "react-webcam": "^7.2.0",
     "recharts": "^2.15.2",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.6"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",

@@ -617,7 +617,8 @@ In order to use MongoDB effectively you'll need to do the following
 #### Download MongoDB Shell
 MongoDB Shell is a terminal app that lets you interact with the database easily, and is used by meteor.
 
-Download it from here https://www.mongodb.com/try/download/compass
+Download it from here https://www.mongodb.com/try/download/shell
+- Make sure you download `MongoDB Shell`
 - For Windows users, make sure to select `MSI` as the package
 
 ### Running MongoDB alongside your meteor application

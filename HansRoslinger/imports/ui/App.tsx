@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { Button } from './Input';
 import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
 import { Header } from './Header';
 
-export const App: React.FC = () => {
+import { WebcamComponent } from './Video/webcam';
+
+export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [showWebcam, setShowWebcam] = useState(true);
-  const [showLineChart, setShowLineChart] = useState(true);
-  const [showHeader, setShowHeader] = useState(true);
 
   const data = [
     { label: 'Jan', value: 50 },
@@ -25,58 +26,27 @@ export const App: React.FC = () => {
     { label: 'Dec', value: 30 },
   ];
 
-  // switch between expanded & collapsed toolbar styles
-  const toolbarClasses = showHeader
-    ? [
-        'absolute top-4 right-4 bottom-4 w-16',
-        'bg-gray-800 rounded-2xl shadow-lg',
-        'flex flex-col items-center justify-end py-4 space-y-2',
-        'z-50',
-      ].join(' ')
-    : [
-        'absolute bottom-4 right-4 w-16 h-16',
-        'bg-gray-900 rounded-xl shadow-lg',
-        'flex items-center justify-center',
-        'z-50',
-      ].join(' ');
+  const [showLineChart, setShowLineChart] = useState(true);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      {/* Fullscreen video */}
-      {showWebcam && (
-        <div className="absolute inset-0">
-          <WebcamComponent
-            grayscale={grayscale}
-          />
-        </div>
-      )}
+    <div className="app-container flex flex-col items-center min-h-screen bg-transparent">
+      {showWebcam && <WebcamComponent grayscale={grayscale} />}
 
-      {/* Bottom-left transparent charts */}
-      <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent pointer-events-none">
-        {showLineChart ? (
-          <D3LineChart data={data} />
-        ) : (
-          <D3BarChart data={data} />
-        )}
+      <div className="w-full bg-white py-2 px-4 fixed top-0 flex justify-center shadow-md">
+        <Button
+          label="Toggle Grayscale"
+          onClick={() => setGrayscale(!grayscale)}
+          className="mx-auto"
+        />
+        <Button
+          label={`Switch to ${showLineChart ? 'BarChart' : 'LineChart'}`}
+          onClick={() => setShowLineChart(!showLineChart)}
+          className="mx-auto ml-4"
+        />
       </div>
-
-      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
-      <div className={toolbarClasses}>
-        <button
-          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
-          onClick={() => setShowHeader((h) => !h)}
-        >
-          {showHeader ? 'Hide' : 'Show'}
-        </button>
-
-        {showHeader && (
-          <Header
-            grayscale={grayscale}
-            onToggleGrayscale={() => setGrayscale((g) => !g)}
-            showLineChart={showLineChart}
-            onToggleChart={() => setShowLineChart((c) => !c)}
-          />
-        )}
+      
+      <div className="absolute bottom-0 w-full flex justify-center mb-4">
+        {showLineChart ? <D3LineChart data={data} /> : <D3BarChart data={data} />}
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ interface WebcamProps {
 export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
   return (
     <div
-      className={`webcam-container fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`}
+      className={`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`}
     >
       <Webcam
         className="w-full h-full object-cover"

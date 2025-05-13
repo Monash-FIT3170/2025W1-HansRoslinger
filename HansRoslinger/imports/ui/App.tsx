@@ -3,7 +3,7 @@ import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
 import { Header } from './Header';
-import { ImageSegmentation } from './Video/ImageSegmentation/ImageSegmentation';
+import { ImageSegmentation } from './Video/ImageSegmentation/index';
 
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -42,6 +42,7 @@ export const App: React.FC = () => {
       ].join(' ');
 
   return (
+    <>
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
       {showWebcam && (
@@ -79,8 +80,10 @@ export const App: React.FC = () => {
           {showHeader ? 'Hide' : 'Show'}
         </button>
       </div>
+    </div>
+    <div>
       <ImageSegmentation />
     </div>
-
+    </>
   );
 };

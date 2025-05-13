@@ -1,6 +1,5 @@
 import React, { useRef } from 'react'; // Import React
 import Webcam from 'react-webcam';
-import './Webcam.css';
 import GestureDetector from '/imports/mediapipe/gestures';
 
 interface WebcamProps {
@@ -19,6 +18,7 @@ export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
       <Webcam
         className="w-full h-full object-cover"
         style={{ transform: 'scaleX(-1)' }} // Flip vertically
+        ref = {webcamRef}
       />
     </div>
   );

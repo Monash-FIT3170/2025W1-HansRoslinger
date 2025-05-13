@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import {Gesture, GestureType, Handedness} from "/gesture";
 
 type MediaPipeGesture = {
   name: string;          // "Thumb_Up", "Open_Palm", etc.
@@ -6,12 +7,7 @@ type MediaPipeGesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
-// Define your gesture functions
-const gestureActions = {
-  Thumb_Up: () => console.log("Thumbs up triggered!"),
-  Open_Palm: () => console.log("Open palm triggered!"),
-  Pointing_Up: () => console.log("Pointing up triggered!"),
-};
+
 
 const GestureHandler = () => {
   const activeGestures = useRef<Map<string, { startTime: number }>>(new Map());

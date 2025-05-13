@@ -1,50 +1,37 @@
-import { useRef } from 'react';
-import {Gesture, GestureType, Handedness} from "/gesture";
 
-type MediaPipeGesture = {
-  name: string;          // "Thumb_Up", "Open_Palm", etc.
-  confidence: number;    // 0-1
-  landmarks: { x: number; y: number; z?: number }[];
-};
-
-
+import {Gesture, Handedness, defaultMapping} from "imports/gesture/gesture";
 
 const GestureHandler = () => {
-  const activeGestures = useRef<Map<string, { startTime: number }>>(new Map());
+  const activeGestures: Record<Handedness, Gesture|null> = {
+    [Handedness.LEFT]: null,
+    [Handedness.RIGHT]: null
+  }
 
   // Process MediaPipe output
-  const processGestures = (gestures: MediaPipeGesture[]) => {
-    const now = Date.now();
+  const handleGesture = (gesture: Gesture) => {
+    const now: number = Date.now();
 
-    gestures.forEach((gesture) => {
-      const { name, confidence } = gesture;
+    const currentGesture: Gesture|null = activeGestures[gesture.handedness];
 
-      // Skip if low confidence
-      if (confidence < 0.6) {
-        activeGestures.current.delete(name);
-        return;
+    // Skip if low confidence
+    if (gesture.confidence < 0.6) {
+      activeGestures[gesture.handedness] = null;
+      return;
+    }
+
+    if (!currentGesture || currentGesture.gestureID!==gesture.gestureID) {
+      // Store Gesture
+      activeGestures[gesture.handedness] = gesture;
+    } else {
+      // Trigger Gesture
+      const elapsed: number = now - currentGesture.timestamp.getTime();
+      if (elapsed >= 100) { // 500ms duration
+        defaultMapping[gesture.gestureID](currentGesture, gesture);
       }
+    }
 
-      // Duration check
-      if (!activeGestures.current.has(name)) {
-        activeGestures.current.set(name, { startTime: now }); // Start timer
-      } else {
-        const elapsed = now - activeGestures.current.get(name)!.startTime;
-        if (elapsed >= 500) { // 500ms duration
-          triggerGestureAction(name); // Call the corresponding function
-          activeGestures.current.delete(name); // Reset
-        }
-      }
-    });
-  };
+  }
 
-  // Call the appropriate function for each gesture
-  const triggerGestureAction = (gestureName: string) => {
-    const action = gestureActions[gestureName as keyof typeof gestureActions];
-    if (action) action(); // Execute if defined
-  };
-
-  return null; // Or forwardRef if needed
 };
 
 export default GestureHandler;

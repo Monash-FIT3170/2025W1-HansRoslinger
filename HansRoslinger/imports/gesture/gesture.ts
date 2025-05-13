@@ -33,6 +33,7 @@ type Gesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
+// Default mapping, would replace console.log with function to be called.
 const defaultMapping: Record<GestureType, (initialGesture: Gesture, lastestGesture: Gesture) => void> = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,

@@ -3,8 +3,6 @@ import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
-  WIDTH as DEFAULT_WIDTH,
-  HEIGHT as DEFAULT_HEIGHT,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,
@@ -20,46 +18,43 @@ interface D3LineChartProps {
   height?: number;
 }
 
-export const D3LineChart: React.FC<D3LineChartProps> = ({
-  data,
-  width,
-  height,
-}) => {
+export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const w = width ?? DEFAULT_WIDTH;
-  const h = height ?? DEFAULT_HEIGHT;
 
   const renderChart = () => {
     if (!chartRef.current) return;
 
-    // clear
+    // get div size
+    const { width: width, height: height} = chartRef.current.getBoundingClientRect();
+    if (width === 0 || height === 0) return;
     d3.select(chartRef.current).selectAll('*').remove();
 
     // responsive svg
     const svg = d3
       .select(chartRef.current)
       .append('svg')
-      .attr('viewBox', `0 0 ${w} ${h}`)
+      .attr('viewBox', `0 0 ${width} ${height}`)
       .attr('preserveAspectRatio', 'none')
       .style('width', '100%')
       .style('height', '100%')
       .style('background-color', 'transparent');
 
-    // scales
+      // scales
     const xScale = d3
       .scalePoint()
       .domain(data.map((d) => d.label))
-      .range([MARGIN.left, w - MARGIN.right]);
+      .range([width * 0.05, width * 0.95])
+
     const yScale = d3
       .scaleLinear()
       .domain([0, d3.max(data, (d) => d.value) || 100])
       .nice()
-      .range([h - MARGIN.bottom, MARGIN.top]);
+      .range([height - MARGIN.bottom, MARGIN.top]);
 
-    // axes
+      // axes
     svg
       .append('g')
-      .attr('transform', `translate(0, ${h - MARGIN.bottom})`)
+      .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
       .selectAll('text')
       .attr('fill', AXIS_COLOR)
@@ -70,11 +65,12 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
       .append('g')
       .attr('transform', `translate(${MARGIN.left}, 0)`)
       .call(d3.axisLeft(yScale))
+      .attr('transform', `translate(${width * 0.05}, 0)`)
       .selectAll('text')
       .attr('fill', AXIS_COLOR)
       .style('font-size', AXIS_FONT_SIZE)
       .style('text-shadow', AXIS_TEXT_SHADOW);
-
+      
     // axis lines shadow
     svg.selectAll('path, line')
       .attr('stroke', AXIS_COLOR)
@@ -116,7 +112,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
     renderChart();
     window.addEventListener('resize', renderChart);
     return () => window.removeEventListener('resize', renderChart);
-  }, [data, width, height]);
+  }, [data]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

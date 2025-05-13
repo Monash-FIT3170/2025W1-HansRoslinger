@@ -52,11 +52,11 @@ export const App: React.FC = () => {
       )}
 
       {/* Bottom-left transparent charts */}
-      <div className="absolute bottom-4 left-4 w-112 h-64 bg-transparent pointer-events-none">
+      <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent pointer-events-none">
         {showLineChart ? (
-          <D3LineChart data={data} width={448} height={256} />
+          <D3LineChart data={data} />
         ) : (
-          <D3BarChart data={data} width={448} height={256} />
+          <D3BarChart data={data} />
         )}
       </div>
 

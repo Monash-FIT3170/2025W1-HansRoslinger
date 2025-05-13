@@ -62,12 +62,6 @@ export const App: React.FC = () => {
 
       {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
       <div className={toolbarClasses}>
-        <button
-          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
-          onClick={() => setShowHeader((h) => !h)}
-        >
-          {showHeader ? 'Hide' : 'Show'}
-        </button>
 
         {showHeader && (
           <Header
@@ -77,6 +71,12 @@ export const App: React.FC = () => {
             onToggleChart={() => setShowLineChart((c) => !c)}
           />
         )}
+        <button
+          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
+          onClick={() => setShowHeader((h) => !h)}
+        >
+          {showHeader ? 'Hide' : 'Show'}
+        </button>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ type Gesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
-const defaultMapping: Record<GestureType, () => void> = {
+const defaultMapping: Record<GestureType, (initialGesture: Gesture, lastestGesture: Gesture) => void> = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,
   [GestureType.POINTING_UP]: console.log,
@@ -46,4 +46,4 @@ const defaultMapping: Record<GestureType, () => void> = {
 
 defaultMapping[GestureType.THUMB_DOWN]
 
-export {Gesture, GestureType, Handedness};
+export {Gesture, GestureType, Handedness, defaultMapping};

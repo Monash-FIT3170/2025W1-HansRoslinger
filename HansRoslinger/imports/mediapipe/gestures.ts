@@ -90,8 +90,8 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
           let gestures: Gesture[] = Array(detectedGestures.gestures.length);
           for (let index = 0; index < detectedGestures.gestures.length; index++) {
             gestures[index] = {
-              gestureID: detectedGestures.gestures[index][0].categoryName as GestureType,
-              handedness: detectedGestures.handedness[index][0].categoryName as Handedness,
+              gestureID: detectedGestures.gestures[index][0].categoryName as unknown as GestureType,
+              handedness: detectedGestures.handedness[index][0].categoryName as unknown as Handedness,
               timestamp: new Date(),
               confidence: detectedGestures.gestures[index][0].score,
               landmarks: detectedGestures.landmarks[index],

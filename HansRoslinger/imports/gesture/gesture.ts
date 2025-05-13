@@ -3,7 +3,7 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP,    // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP,        // This is with the thumb, and index and pinky fingers outstretched
   THUMB_DOWN,
   THUMB_UP,
   VICTORY,            // This is the peace sign
@@ -34,7 +34,7 @@ type Gesture = {
 };
 
 // Default mapping, would replace console.log with function to be called.
-const defaultMapping: Record<GestureType, (initialGesture: Gesture, lastestGesture: Gesture) => void> = {
+const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGesture: Gesture) => void> = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,
   [GestureType.POINTING_UP]: console.log,

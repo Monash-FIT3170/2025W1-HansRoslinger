@@ -2,6 +2,8 @@
 import {Gesture, Handedness, defaultMapping} from "imports/gesture/gesture";
 
 const GestureHandler = () => {
+  const GESTURE_TIME_TO_ACTIVATE = 500      // in ms
+
   const activeGestures: Record<Handedness, Gesture|null> = {
     [Handedness.LEFT]: null,
     [Handedness.RIGHT]: null
@@ -13,19 +15,13 @@ const GestureHandler = () => {
 
     const currentGesture: Gesture|null = activeGestures[gesture.handedness];
 
-    // Skip if low confidence
-    if (gesture.confidence < 0.6) {
-      activeGestures[gesture.handedness] = null;
-      return;
-    }
-
     if (!currentGesture || currentGesture.gestureID!==gesture.gestureID) {
       // Store Gesture
       activeGestures[gesture.handedness] = gesture;
     } else {
       // Trigger Gesture
       const elapsed: number = now - currentGesture.timestamp.getTime();
-      if (elapsed >= 100) { // 500ms duration
+      if (elapsed >= GESTURE_TIME_TO_ACTIVATE) {
         defaultMapping[gesture.gestureID](currentGesture, gesture);
       }
     }

@@ -3,7 +3,6 @@ import './main.css';
 import { Button } from './Input';
 import { WebcamComponent } from './Video/webcam';
 import { D3BarChart } from './Charts/D3BarChart';
-import GestureDetector from "../mediapipe/gestures";
 
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -35,7 +34,6 @@ export const App = () => {
     </div>
     <div className="p-8">
     <h1 className="text-xl font-bold mb-4">Gesture Recognition Demo</h1>
-    <GestureDetector />
     </div>
   </div>
 );

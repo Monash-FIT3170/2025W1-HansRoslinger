@@ -10,14 +10,15 @@ import {
   AXIS_FONT_SIZE,
   AXIS_TEXT_SHADOW,
   AXIS_LINE_SHADOW,
-  BAR_OPACITY,
+  LINE_STROKE_WIDTH,
+  POINT_RADIUS,
 } from './constants';
 
-interface D3BarChartProps {
+interface D3LineChartProps {
   data: { label: string; value: number }[];
 }
 
-export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
+export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const renderChart = () => {
@@ -33,12 +34,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .attr('height', HEIGHT)
         .style('background-color', 'transparent');
 
-      // Create scales
       const xScale = d3
-        .scaleBand()
+        .scalePoint()
         .domain(data.map((d) => d.label))
-        .range([MARGIN.left, WIDTH - MARGIN.right])
-        .padding(0.1);
+        .range([MARGIN.left, WIDTH - MARGIN.right]);
 
       const yScale = d3
         .scaleLinear()
@@ -70,24 +69,36 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
         .attr('stroke', AXIS_COLOR)
         .style('filter', AXIS_LINE_SHADOW);
 
-      // Add bars
+      // Line path
+      const line = d3
+        .line<{ label: string; value: number }>()
+        .x((d) => xScale(d.label)!)
+        .y((d) => yScale(d.value))
+        .curve(d3.curveMonotoneX);
+
       svg
-        .selectAll('.bar')
+        .append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', DEFAULT_COLOUR)
+        .attr('stroke-width', LINE_STROKE_WIDTH)
+        .attr('d', line);
+
+      // Points
+      svg
+        .selectAll('.dot')
         .data(data)
         .enter()
-        .append('rect')
-        .attr('class', 'bar')
-        .attr('x', (d) => xScale(d.label) || 0)
-        .attr('y', (d) => yScale(d.value))
-        .attr('width', xScale.bandwidth())
-        .attr('height', (d) => HEIGHT - MARGIN.bottom - yScale(d.value))
+        .append('circle')
+        .attr('cx', (d) => xScale(d.label)!)
+        .attr('cy', (d) => yScale(d.value))
+        .attr('r', POINT_RADIUS)
         .attr('fill', DEFAULT_COLOUR)
-        .style('opacity', BAR_OPACITY) // Apply opacity
         .on('mouseover', function () {
-          d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1); // Full opacity on hover
+          d3.select(this).attr('fill', SELECT_COLOUR);
         })
         .on('mouseout', function () {
-          d3.select(this).attr('fill', DEFAULT_COLOUR).style('opacity', BAR_OPACITY); // Reset opacity
+          d3.select(this).attr('fill', DEFAULT_COLOUR);
         });
     }
   };

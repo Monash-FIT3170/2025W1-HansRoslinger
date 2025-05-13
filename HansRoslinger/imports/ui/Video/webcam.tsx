@@ -13,8 +13,13 @@ export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
   GestureDetector(webcamRef);
 
   return (
-    <div className={`webcam-container ${grayscale ? 'grayscale' : ''}`}>
-      <Webcam ref={webcamRef} className="webcam-view"/>
+    <div
+      className={`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`}
+    >
+      <Webcam
+        className="w-full h-full object-cover"
+        style={{ transform: 'scaleX(-1)' }} // Flip vertically
+      />
     </div>
   );
 };

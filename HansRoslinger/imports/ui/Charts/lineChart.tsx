@@ -15,12 +15,17 @@ import {
 // Register required components for line chart
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Title);
 
-const LineChart: React.FC = () => {
+interface LineChartProps {
+  width?: number | string;
+  height?: number | string;
+}
+
+const LineChart: React.FC<LineChartProps> = ({ width = '600px', height = '90px' }) => {
   const data = generateLineChartData();
 
   return (
-    <div style={{ width: '100%', height: '500px' }}>
-      <Line data={data} options={options} />
+    <div style={{ width, height, margin: '0 auto' }}>
+      <Line data={data} options={{ ...options, maintainAspectRatio: false }} />
     </div>
   );
 };

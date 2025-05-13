@@ -162,7 +162,7 @@ export const ImageSegmentation = () => {
         <span className="mdc-button__label">ENABLE WEBCAM</span>
       </button>
       <video id="webcam" autoPlay style={{ display: 'none' }}></video>
-      <canvas id="canvas" width="1280px" height="720px"></canvas>
+      <canvas id="canvas" className="w-full h-full object-cover"></canvas>
     </div>
   );
 };

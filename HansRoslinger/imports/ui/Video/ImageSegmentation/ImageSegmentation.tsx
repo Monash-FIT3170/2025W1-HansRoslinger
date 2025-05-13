@@ -4,7 +4,11 @@ import { ImageSegmenter, FilesetResolver } from "@mediapipe/tasks-vision";
 import './imageSegmentation.css';
 // import './imageSegmentationScript'; // Assuming this TypeScript file contains imperative logic
 
-export const ImageSegmentation = () => {
+interface ImageSegmentationProps {
+  grayscale: boolean
+}
+
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = (grayscale) => {
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
     const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
@@ -162,7 +166,7 @@ export const ImageSegmentation = () => {
         <span className="mdc-button__label">ENABLE WEBCAM</span>
       </button>
       <video id="webcam" autoPlay style={{ display: 'none' }}></video>
-      <canvas id="canvas" className="w-full h-full object-cover"></canvas>
+      <canvas id="canvas" className={`w-full h-full object-cover ${grayscale ? '' : 'grayscale'}`}></canvas>
     </div>
   );
 };

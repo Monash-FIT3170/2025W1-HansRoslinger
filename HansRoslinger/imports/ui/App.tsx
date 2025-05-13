@@ -7,6 +7,7 @@ import { ImageSegmentation } from './Video/ImageSegmentation/index';
 
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
+  const [backgroundRemoval, setBackgroundRemoval] = useState(false);
   const [showWebcam, setShowWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
@@ -42,16 +43,18 @@ export const App: React.FC = () => {
       ].join(' ');
 
   return (
-    <>
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
       {showWebcam && (
-        <div className="absolute inset-0">
-          <WebcamComponent
-            grayscale={grayscale}
-          />
-        </div>
-      )}
+      <div className="absolute inset-0">
+        {!backgroundRemoval ? (
+          <WebcamComponent grayscale={grayscale} />
+        ) : (
+          // Replace this with your background removal content
+          <ImageSegmentation grayscale={grayscale}/>
+        )}
+      </div>
+    )}
 
       {/* Bottom-left transparent charts */}
       <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent pointer-events-none">
@@ -67,7 +70,7 @@ export const App: React.FC = () => {
 
         {showHeader && (
           <Header
-            grayscale={grayscale}
+            onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
             onToggleGrayscale={() => setGrayscale((g) => !g)}
             showLineChart={showLineChart}
             onToggleChart={() => setShowLineChart((c) => !c)}
@@ -81,9 +84,5 @@ export const App: React.FC = () => {
         </button>
       </div>
     </div>
-    <div>
-      <ImageSegmentation />
-    </div>
-    </>
   );
 };

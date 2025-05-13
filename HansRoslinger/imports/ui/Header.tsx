@@ -1,23 +1,30 @@
 import React from 'react';
 
 interface HeaderProps {
-  grayscale: boolean;
+  onToggleBackgroundRemoval: () => void;
   onToggleGrayscale: () => void;
   showLineChart: boolean;
   onToggleChart: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  grayscale,
+  onToggleBackgroundRemoval,
   onToggleGrayscale,
   showLineChart,
   onToggleChart,
 }) => (
   <>
+    {/* Background removal toggle */}
+    <button
+      onClick={onToggleBackgroundRemoval}
+      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+    >
+      BR
+    </button>
     {/* Grayscale toggle */}
     <button
       onClick={onToggleGrayscale}
-      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium"
+      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
     >
       GS
     </button>

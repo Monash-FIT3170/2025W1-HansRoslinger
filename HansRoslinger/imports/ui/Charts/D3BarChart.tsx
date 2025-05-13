@@ -21,91 +21,84 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const renderChart = () => {
-    if (chartRef.current) {
-      // Clear any existing chart
-      d3.select(chartRef.current).select('svg').remove();
+    if (!chartRef.current) return;
 
-      // Create SVG container
-      const svg = d3
-        .select(chartRef.current)
-        .append('svg')
-        .attr('width', WIDTH)
-        .attr('height', HEIGHT)
-        .style('background-color', 'transparent');
+    const { width: width, height: height } = chartRef.current.getBoundingClientRect();
+    if (width === 0 || height === 0) return;
 
-      // Create scales
-      const xScale = d3
-        .scaleBand()
-        .domain(data.map((d) => d.label))
-        .range([MARGIN.left, WIDTH - MARGIN.right])
-        .padding(0.1);
+    d3.select(chartRef.current).selectAll('*').remove();
 
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(data, (d) => d.value) || 100])
-        .nice()
-        .range([HEIGHT - MARGIN.bottom, MARGIN.top]);
+        // responsive SVG
+    const svg = d3
+      .select(chartRef.current)
+      .append('svg')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'none')
+      .style('width', '100%')
+      .style('height', '100%')
+      .style('background-color', 'transparent');
 
-      // Add axes
-      svg
-        .append('g')
-        .attr('transform', `translate(0, ${HEIGHT - MARGIN.bottom})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll('text')
-        .attr('fill', AXIS_COLOR)
-        .style('font-size', AXIS_FONT_SIZE)
-        .style('text-shadow', AXIS_TEXT_SHADOW);
+          // scales
+    const xScale = d3
+      .scaleBand()
+      .domain(data.map((d) => d.label))
+      .range([width * 0.05, width * 0.95])
+      .padding(0.1);
 
-      svg
-        .append('g')
-        .attr('transform', `translate(${MARGIN.left}, 0)`)
-        .call(d3.axisLeft(yScale))
-        .selectAll('text')
-        .attr('fill', AXIS_COLOR)
-        .style('font-size', AXIS_FONT_SIZE)
-        .style('text-shadow', AXIS_TEXT_SHADOW);
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.value) || 100])
+      .nice()
+      .range([height - MARGIN.bottom, MARGIN.top]);
 
-      // Add thicker shadow to axis lines
-      svg.selectAll('path, line')
-        .attr('stroke', AXIS_COLOR)
-        .style('filter', AXIS_LINE_SHADOW);
+    svg
+      .append('g')
+      .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
+      .call(d3.axisBottom(xScale))
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', AXIS_FONT_SIZE)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
 
-      // Add bars
-      svg
-        .selectAll('.bar')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('class', 'bar')
-        .attr('x', (d) => xScale(d.label) || 0)
-        .attr('y', (d) => yScale(d.value))
-        .attr('width', xScale.bandwidth())
-        .attr('height', (d) => HEIGHT - MARGIN.bottom - yScale(d.value))
-        .attr('fill', DEFAULT_COLOUR)
-        .style('opacity', BAR_OPACITY) // Apply opacity
-        .on('mouseover', function () {
-          d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1); // Full opacity on hover
-        })
-        .on('mouseout', function () {
-          d3.select(this).attr('fill', DEFAULT_COLOUR).style('opacity', BAR_OPACITY); // Reset opacity
-        });
-    }
+    svg
+      .append('g')
+      .attr('transform', `translate(${MARGIN.left}, 0)`)
+      .call(d3.axisLeft(yScale))
+      .attr('transform', `translate(${width * 0.05}, 0)`)
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', AXIS_FONT_SIZE)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
+
+    svg.selectAll('path, line')
+      .attr('stroke', AXIS_COLOR)
+      .style('filter', AXIS_LINE_SHADOW);
+
+      // bars
+    svg
+      .selectAll('.bar')
+      .data(data)
+      .join('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => xScale(d.label) || 0)
+      .attr('y', (d) => yScale(d.value))
+      .attr('width', xScale.bandwidth())
+      .attr('height', (d) => height - MARGIN.bottom - yScale(d.value))
+      .attr('fill', DEFAULT_COLOUR)
+      .style('opacity', BAR_OPACITY)
+      .on('mouseover', function () {
+        d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1);
+      })
+      .on('mouseout', function () {
+        d3.select(this).attr('fill', DEFAULT_COLOUR).style('opacity', BAR_OPACITY);
+      });
   };
 
   useEffect(() => {
-    // Initial render
     renderChart();
-
-    // Re-render on window resize
-    const handleResize = () => renderChart();
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', renderChart);
+    return () => window.removeEventListener('resize', renderChart);
   }, [data]);
 
-  return (
-    <div className="flex justify-center items-center w-full h-auto">
-      <div ref={chartRef} className="absolute bottom-0 left-0 w-full h-3/10 flex justify-center items-center bg-transparent"></div>
-    </div>
-  );
+  return <div ref={chartRef} className="w-full h-full" />;
 };

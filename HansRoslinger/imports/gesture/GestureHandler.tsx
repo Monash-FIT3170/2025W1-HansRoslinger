@@ -1,6 +1,12 @@
 import { Gesture, Handedness, handleGestureToFunc } from "./gesture";
 import { useRef } from "react";
 
+let isZoomEnabled = false;
+
+window.addEventListener("chart:togglezoom", (_: Event) => {
+  isZoomEnabled = !isZoomEnabled;
+});
+
 export const GestureHandler = () => {
   const GESTURE_TIME_TO_ACTIVATE = 500; // in ms
 
@@ -17,7 +23,7 @@ export const GestureHandler = () => {
       activeGestures.current[gesture.handedness] = gesture;
     } else {
       const elapsed = now - currentGesture.timestamp.getTime();
-      if (elapsed >= GESTURE_TIME_TO_ACTIVATE) {
+      if (elapsed >= GESTURE_TIME_TO_ACTIVATE || isZoomEnabled) {
         handleGestureToFunc(gesture.gestureID, currentGesture, gesture);
         // we update the time so we don't have duplicate activations
         currentGesture.timestamp = new Date();

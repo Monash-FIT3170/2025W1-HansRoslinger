@@ -1,6 +1,8 @@
 import { processPointUpGesture } from "./PointUp";
 import { processOpenPalmGesture } from "./OpenPalm";
 import { processClosedFistGesture } from "./ClosedFist";
+import { processVictorySignGesture, processZoom } from "./VictorySign";
+
 enum GestureType {
   CLOSED_FIST,
   I_LOVE_YOU,
@@ -36,30 +38,58 @@ type Gesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
-  const defaultMapping = {
-    [GestureType.THUMB_UP]: console.log,
-    [GestureType.THUMB_DOWN]: console.log,
-    [GestureType.POINTING_UP]: processPointUpGesture,
-    [GestureType.CLOSED_FIST]: processClosedFistGesture,
-    [GestureType.I_LOVE_YOU]: console.log,
-    [GestureType.UNIDENTIFIED]: console.log,
-    [GestureType.OPEN_PALM]: processOpenPalmGesture,
-    [GestureType.VICTORY]: console.log,
-  };
+// Define a boolean to track the zoom state
+let isZoomEnabled = false;
+let zoomStartPosition: { x: number; y: number } | null = null;
 
-export {Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc};
+// Watch for the "chart:zoom" event and toggle the boolean
+window.addEventListener("chart:togglezoom", (event: Event) => {
+  const customEvent = event as CustomEvent<{ x: number; y: number }>;
+  isZoomEnabled = !isZoomEnabled;
+  if (isZoomEnabled && customEvent.detail) {
+    const { x, y } = customEvent.detail;
+    zoomStartPosition = { x: x, y: y };
+    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+  } else {
+    zoomStartPosition = null;
+    console.log(`Zoom disabled.`);
+  }
+});
+
+const defaultMapping = {
+  [GestureType.THUMB_UP]: console.log,
+  [GestureType.THUMB_DOWN]: console.log,
+  [GestureType.POINTING_UP]: processPointUpGesture,
+  [GestureType.CLOSED_FIST]: processClosedFistGesture,
+  [GestureType.I_LOVE_YOU]: console.log,
+  [GestureType.UNIDENTIFIED]: console.log,
+  [GestureType.OPEN_PALM]: processOpenPalmGesture,
+  [GestureType.VICTORY]: processVictorySignGesture,
+};
 
 // Default mapping, would replace console.log with function to be called.
 const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
   const label = labelMapping[INPUT];
-  const handler = defaultMapping[label];
-  if (handler) {
-    handler(initialGesture, latestGesture);
+  if (isZoomEnabled) {
+    // if gesture is closed fist, we want to end zoom
+    if (label === GestureType.CLOSED_FIST) {
+      processVictorySignGesture(initialGesture, latestGesture);
+    }
+    else {
+      processZoom(zoomStartPosition!, latestGesture);
+    }
   } else {
-    console.warn(`No handler found for gesture: ${INPUT}`);
+    const handler = defaultMapping[label];
+    if (handler) {
+      handler(initialGesture, latestGesture);
+    } else {
+      console.warn(`No handler found for gesture: ${INPUT}`);
+    }
   }
+  
 };
 
+export { Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
 
 export const gestureToScreenPosition = (
   x: number,

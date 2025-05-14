@@ -19,6 +19,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selectedBars, setSelectedBars] = useState<Set<string>>(new Set());
   const [filteredData, setFilteredData] = useState(data);
+  const [zoomScale, setZoomScale] = useState(1);
 
   const handleHighlight = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -44,12 +45,19 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const handleClear = () => {
     setSelectedBars(new Set());
     setFilteredData(data);
+    setZoomScale(1); // Reset zoom scale to 1
   };
 
   const handleFilter = () => {
     if (selectedBars.size > 0) {
       setFilteredData(data.filter(d => selectedBars.has(d.label)));
     }
+  };
+
+  const handleZoom = (event: Event) => {
+    const customEvent = event as CustomEvent<number>;
+    const scale = Math.max(0.5, Math.min(1.5, customEvent.detail));
+    setZoomScale(scale);
   };
 
   const renderChart = () => {
@@ -122,6 +130,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
           .attr('fill', selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR)
           .style('opacity', BAR_OPACITY);
       });
+
+    svg.attr('transform', `scale(${zoomScale})`); // Apply the zoom scale
   };
 
   useEffect(() => {
@@ -130,13 +140,16 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     window.addEventListener('chart:highlight', handleHighlight as EventListener);
     window.addEventListener('chart:clear', handleClear as EventListener);
     window.addEventListener('chart:filter', handleFilter as EventListener);
+    window.addEventListener('chart:zoom', handleZoom as EventListener);
+
     return () => {
       window.removeEventListener('resize', renderChart);
       window.removeEventListener('chart:clear', handleClear as EventListener);
       window.removeEventListener('chart:highlight', handleHighlight as EventListener);
       window.removeEventListener('chart:filter', handleFilter as EventListener);
+      window.removeEventListener('chart:zoom', handleZoom as EventListener);
     };
-  }, [data, filteredData, selectedBars]);
+  }, [data, filteredData, selectedBars, zoomScale]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

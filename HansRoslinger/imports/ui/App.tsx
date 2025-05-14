@@ -11,6 +11,8 @@ export const App: React.FC = () => {
   const [showWebcam, _] = useState(true);
   const [showLineChart, setShowLineChart] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const [zoomStartPosition, setZoomStartPosition] = useState<{ x: number; y: number } | null>(null);
 
   const data = [
     { label: 'Jan', value: 50 },
@@ -27,7 +29,24 @@ export const App: React.FC = () => {
     { label: 'Dec', value: 30 },
   ];
 
-  // switch between expanded & collapsed toolbar styles
+  useEffect(() => {
+    const handleToggleZoom = (event: Event) => {
+      const customEvent = event as CustomEvent<{ x: number; y: number }>;
+      setIsZoomEnabled((prev) => {
+        const next = !prev;
+        if (next && customEvent.detail) {
+          setZoomStartPosition({ x: customEvent.detail.x, y: customEvent.detail.y });
+        } else {
+          setZoomStartPosition(null);
+        }
+        return next;
+      });
+    };
+
+    window.addEventListener('chart:togglezoom', handleToggleZoom);
+    return () => window.removeEventListener('chart:togglezoom', handleToggleZoom);
+  }, []);
+
   const toolbarClasses = showHeader
     ? [
         'absolute top-4 right-4 bottom-4 w-16',
@@ -43,46 +62,56 @@ export const App: React.FC = () => {
       ].join(' ');
 
   return (
-      <div className="relative w-screen h-screen overflow-hidden">
-        {/* Fullscreen video */}
-        {showWebcam && (
-      <div className="absolute inset-0">
-        {!backgroundRemoval ? (
-          <WebcamComponent grayscale={grayscale} />
-        ) : (
-          // Replace this with your background removal content
-          <ImageSegmentation grayscale={grayscale}/>
-        )}
-      </div>
-    )}
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Fullscreen video */}
+      {showWebcam && (
+        <div className="absolute inset-0">
+          {!backgroundRemoval ? (
+            <WebcamComponent grayscale={grayscale} />
+          ) : (
+            <ImageSegmentation grayscale={grayscale} />
+          )}
+        </div>
+      )}
 
-        {/* Bottom-left transparent charts */}
-        <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent">
-          {showLineChart ? (
+      {/* Red dot for zoom start position */}
+      {isZoomEnabled && zoomStartPosition && (
+        <div
+          className="absolute w-4 h-4 bg-red-600 rounded-full pointer-events-none z-50"
+          style={{
+            left: `${zoomStartPosition.x}px`,
+            top: `${zoomStartPosition.y}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      )}
+
+      {/* Bottom-left transparent charts */}
+      <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent">
+        {showLineChart ? (
           <D3LineChart data={data} />
         ) : (
           <D3BarChart data={data} />
         )}
-        </div>
-
-        {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
-        <div className={toolbarClasses}>
-
-          {showHeader && (
-            <Header
-              onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
-              onToggleGrayscale={() => setGrayscale((g) => !g)}
-              showLineChart={showLineChart}
-              onToggleChart={() => setShowLineChart((c) => !c)}
-            />
-          )}
-          <button
-            className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
-            onClick={() => setShowHeader((h) => !h)}
-          >
-            {showHeader ? 'Hide' : 'Show'}
-          </button>
-        </div>
       </div>
+
+      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
+      <div className={toolbarClasses}>
+        {showHeader && (
+          <Header
+            onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
+            onToggleGrayscale={() => setGrayscale((g) => !g)}
+            showLineChart={showLineChart}
+            onToggleChart={() => setShowLineChart((c) => !c)}
+          />
+        )}
+        <button
+          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
+          onClick={() => setShowHeader((h) => !h)}
+        >
+          {showHeader ? 'Hide' : 'Show'}
+        </button>
+      </div>
+    </div>
   );
 };

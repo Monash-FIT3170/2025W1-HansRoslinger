@@ -160,9 +160,9 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = (grayscale) =
   }, []);
 
   return (
-    <div>
+    <div className="`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`">
       <video id="webcam" autoPlay style={{ display: 'none' }}></video>
-      <canvas id="canvas" className="`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`" style={{transform: 'scaleX(-1)'}}></canvas>
+      <canvas id="canvas" className="w-full h-full object-cover" style={{transform: 'scaleX(-1)'}}></canvas>
     </div>
   );
 };

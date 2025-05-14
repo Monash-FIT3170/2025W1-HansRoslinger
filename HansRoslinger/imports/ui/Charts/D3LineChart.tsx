@@ -3,8 +3,6 @@ import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
-  WIDTH,
-  HEIGHT,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,

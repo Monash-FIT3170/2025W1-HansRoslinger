@@ -8,3 +8,8 @@
     justify-content: center;
     gap: 10px; /* Add spacing between buttons */
   }
+
+  .reset-button {
+    position: fixed;
+    top: 80%;
+  }

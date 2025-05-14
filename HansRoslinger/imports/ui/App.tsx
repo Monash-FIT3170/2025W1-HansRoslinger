@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
@@ -43,9 +43,9 @@ export const App: React.FC = () => {
       ].join(' ');
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      {/* Fullscreen video */}
-      {showWebcam && (
+      <div className="relative w-screen h-screen overflow-hidden">
+        {/* Fullscreen video */}
+        {showWebcam && (
       <div className="absolute inset-0">
         {!backgroundRemoval ? (
           <WebcamComponent grayscale={grayscale} />
@@ -56,33 +56,33 @@ export const App: React.FC = () => {
       </div>
     )}
 
-      {/* Bottom-left transparent charts */}
-      <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent pointer-events-none">
-        {showLineChart ? (
+        {/* Bottom-left transparent charts */}
+        <div className="absolute bottom-[1%] left-0 w-full h-1/2 bg-transparent">
+          {showLineChart ? (
           <D3LineChart data={data} />
         ) : (
           <D3BarChart data={data} />
         )}
-      </div>
+        </div>
 
-      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
-      <div className={toolbarClasses}>
+        {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
+        <div className={toolbarClasses}>
 
-        {showHeader && (
-          <Header
-            onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
-            onToggleGrayscale={() => setGrayscale((g) => !g)}
-            showLineChart={showLineChart}
-            onToggleChart={() => setShowLineChart((c) => !c)}
-          />
-        )}
-        <button
-          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
-          onClick={() => setShowHeader((h) => !h)}
-        >
-          {showHeader ? 'Hide' : 'Show'}
-        </button>
+          {showHeader && (
+            <Header
+              onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
+              onToggleGrayscale={() => setGrayscale((g) => !g)}
+              showLineChart={showLineChart}
+              onToggleChart={() => setShowLineChart((c) => !c)}
+            />
+          )}
+          <button
+            className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
+            onClick={() => setShowHeader((h) => !h)}
+          >
+            {showHeader ? 'Hide' : 'Show'}
+          </button>
+        </div>
       </div>
-    </div>
   );
 };

@@ -1,33 +1,32 @@
+import { Gesture, Handedness, handleGestureToFunc } from "./gesture";
+import { useRef } from "react";
 
-import {Gesture, Handedness, defaultMapping} from "imports/gesture/gesture";
+export const GestureHandler = () => {
+  const GESTURE_TIME_TO_ACTIVATE = 250; // in ms
 
-const GestureHandler = () => {
-  const GESTURE_TIME_TO_ACTIVATE = 500      // in ms
-
-  const activeGestures: Record<Handedness, Gesture|null> = {
+  const activeGestures = useRef<Record<Handedness, Gesture | null>>({
     [Handedness.LEFT]: null,
-    [Handedness.RIGHT]: null
-  }
+    [Handedness.RIGHT]: null,
+  });
 
-  // Process MediaPipe output
-  const handleGesture = (gesture: Gesture) => {
+  const HandleGesture = (gesture: Gesture) => {
     const now: number = Date.now();
+    const currentGesture = activeGestures.current[gesture.handedness];
 
-    const currentGesture: Gesture|null = activeGestures[gesture.handedness];
-
-    if (!currentGesture || currentGesture.gestureID!==gesture.gestureID) {
-      // Store Gesture
-      activeGestures[gesture.handedness] = gesture;
+    if (!currentGesture || currentGesture.gestureID !== gesture.gestureID) {
+      activeGestures.current[gesture.handedness] = gesture;
     } else {
-      // Trigger Gesture
-      const elapsed: number = now - currentGesture.timestamp.getTime();
+      const elapsed = now - currentGesture.timestamp.getTime();
       if (elapsed >= GESTURE_TIME_TO_ACTIVATE) {
-        defaultMapping[gesture.gestureID](currentGesture, gesture);
+        handleGestureToFunc(gesture.gestureID, currentGesture, gesture);
+        // we update the time so we don't have duplicate activations
+        currentGesture.timestamp = new Date();
+
       }
     }
+  };
 
-  }
-
+  return { HandleGesture };
 };
 
 export default GestureHandler;

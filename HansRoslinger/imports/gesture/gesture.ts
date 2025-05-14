@@ -1,3 +1,5 @@
+import { processPointUpGesture } from "./PointUp";
+import { processOpenPalmGesture } from "./OpenPalm";
 enum GestureType {
   CLOSED_FIST,
   I_LOVE_YOU,
@@ -9,15 +11,15 @@ enum GestureType {
   VICTORY,            // This is the peace sign
 }
 
-const labelMapping: Record<GestureType, string> = {
-  [GestureType.THUMB_UP]: "Thumb Up",
-  [GestureType.THUMB_DOWN]: "Thumb Down",
-  [GestureType.POINTING_UP]: "Point Up",
-  [GestureType.CLOSED_FIST]: "Closed Fist",
-  [GestureType.I_LOVE_YOU]: "I Love You",
-  [GestureType.UNIDENTIFIED]: "Unidentified",
-  [GestureType.OPEN_PALM]: "Open Palm",
-  [GestureType.VICTORY]: "Victory",
+export const labelMapping: Record<string, GestureType> = {
+  "Thumb_Up": GestureType.THUMB_UP,
+  "Thumb_Down": GestureType.THUMB_DOWN,
+  "Pointing_Up": GestureType.POINTING_UP,
+  "Closed_Fist": GestureType.CLOSED_FIST,
+  "I_Love_You": GestureType.I_LOVE_YOU,
+  "Unidentified": GestureType.UNIDENTIFIED,
+  "Open_Palm": GestureType.OPEN_PALM,
+  "Victory": GestureType.VICTORY,
 };
 
 enum Handedness {
@@ -33,18 +35,51 @@ type Gesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
+  const defaultMapping = {
+    [GestureType.THUMB_UP]: console.log,
+    [GestureType.THUMB_DOWN]: console.log,
+    [GestureType.POINTING_UP]: processPointUpGesture,
+    [GestureType.CLOSED_FIST]: console.log,
+    [GestureType.I_LOVE_YOU]: console.log,
+    [GestureType.UNIDENTIFIED]: console.log,
+    [GestureType.OPEN_PALM]: processOpenPalmGesture,
+    [GestureType.VICTORY]: console.log,
+  };
+
+export {Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc};
+
 // Default mapping, would replace console.log with function to be called.
-const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGesture: Gesture) => void> = {
-  [GestureType.THUMB_UP]: console.log,
-  [GestureType.THUMB_DOWN]: console.log,
-  [GestureType.POINTING_UP]: console.log,
-  [GestureType.CLOSED_FIST]: console.log,
-  [GestureType.I_LOVE_YOU]: console.log,
-  [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: console.log,
-  [GestureType.VICTORY]: console.log,
+const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
+  const label = labelMapping[INPUT];
+  const handler = defaultMapping[label];
+  if (handler) {
+    handler(initialGesture, latestGesture);
+  } else {
+    console.warn(`No handler found for gesture: ${INPUT}`);
+  }
 };
 
-defaultMapping[GestureType.THUMB_DOWN]
 
-export {Gesture, GestureType, Handedness, defaultMapping};
+export const gestureToScreenPosition = (
+  x: number,
+  y: number,
+  z?: number
+): { screenX: number; screenY: number } => {
+  // Get the screen dimensions
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // Flip the x coordinate (mirrored horizontally)
+  const flippedX = 1 - x;
+
+  // Convert normalized x and y to absolute screen positions
+  const screenX = Math.round(flippedX * screenWidth);
+  const screenY = Math.round(y * screenHeight);
+
+  // Optionally, you can use z for depth-related calculations if needed
+  if (z !== undefined) {
+    console.log(`Depth (z): ${z}`);
+  }
+
+  return { screenX, screenY };
+};

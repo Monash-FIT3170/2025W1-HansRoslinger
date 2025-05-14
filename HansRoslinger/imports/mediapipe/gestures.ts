@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from 'react-webcam';
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, Handedness, Gesture } from "../gesture/gesture";
+import { GestureType, Handedness, Gesture,  } from "../gesture/gesture";
+import { GestureHandler } from "../gesture/GestureHandler";
 
 
 /*
@@ -24,6 +25,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>(Array(NUM_HANDS_DETECTABLE));
   const [gestureRecognizer, setGestureRecognizer] = useState<GestureRecognizer|null>();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { HandleGesture } = GestureHandler();
 
 
   // Helper function
@@ -118,6 +120,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
       if (currentGestures[index]) {
         // Code to be called when new gestures are detected goes here
         console.log(currentGestures[index]);
+        HandleGesture(currentGestures[index]);
       }
     }
   }, [currentGestures]);

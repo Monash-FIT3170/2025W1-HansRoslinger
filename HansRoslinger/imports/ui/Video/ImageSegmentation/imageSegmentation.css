@@ -19,13 +19,13 @@ html {
   padding: 0;
 }
 
-body {
+/* body {
   font-family: roboto;
   margin: 2em;
   color: #3d3d3d;
   --mdc-theme-primary: #007f8b;
   --mdc-theme-on-primary: #f1f3f4;
-}
+} */
 
 h1 {
   color: #007f8b;

@@ -14,7 +14,13 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleChart,
 }) => (
   <>
-    {/* Background removal toggle */}
+    {/* Background removal enable */}
+    <button
+      id="background-removal-enable"
+      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+    >
+      EBR
+    </button>
     <button
       onClick={onToggleBackgroundRemoval}
       className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"

@@ -132,10 +132,10 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = (grayscale) =
 
       if (webcamRunning === true) {
         webcamRunning = false;
-        enableWebcamButton.innerText = "ENABLE SEGMENTATION";
+        enableWebcamButton.innerText = "EBR";
       } else {
         webcamRunning = true;
-        enableWebcamButton.innerText = "DISABLE SEGMENTATION";
+        enableWebcamButton.innerText = "DBR";
       }
 
       // getUsermedia parameters.
@@ -148,10 +148,10 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = (grayscale) =
       video.addEventListener("loadeddata", predictWebcam);
     }
 
-    // If webcam supported, add event listener to button.
+    // If webcam supported, add event listener to button.s
     if (hasGetUserMedia()) {
       enableWebcamButton = document.getElementById(
-        "webcamButton"
+        "background-removal-enable"
       ) as HTMLButtonElement;
       enableWebcamButton.addEventListener("click", enableCam);
     } else {
@@ -160,13 +160,9 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = (grayscale) =
   }, []);
 
   return (
-    <div className="webcam">
-      <button id="webcamButton" className="mdc-button mdc-button--raised">
-        <span className="mdc-button__ripple"></span>
-        <span className="mdc-button__label">ENABLE WEBCAM</span>
-      </button>
+    <div>
       <video id="webcam" autoPlay style={{ display: 'none' }}></video>
-      <canvas id="canvas" className={`w-full h-full object-cover ${grayscale ? '' : 'grayscale'}`}></canvas>
+      <canvas id="canvas" className="`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`" style={{transform: 'scaleX(-1)'}}></canvas>
     </div>
   );
 };

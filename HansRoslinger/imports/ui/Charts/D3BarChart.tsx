@@ -18,6 +18,7 @@ interface D3BarChartProps {
 export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selectedBars, setSelectedBars] = useState<Set<string>>(new Set());
+  const [filteredData, setFilteredData] = useState(data);
 
   const handleHighlight = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -33,11 +34,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
         setSelectedBars((prev) => {
           const next = new Set(prev);
-          if (next.has(d.label)) {
-            next.delete(d.label);
-          } else {
-            next.add(d.label);
-          }
+          next.has(d.label) ? next.delete(d.label) : next.add(d.label);
           return next;
         });
       }
@@ -46,6 +43,13 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
   const handleClear = () => {
     setSelectedBars(new Set());
+    setFilteredData(data);
+  };
+
+  const handleFilter = () => {
+    if (selectedBars.size > 0) {
+      setFilteredData(data.filter(d => selectedBars.has(d.label)));
+    }
   };
 
   const renderChart = () => {
@@ -67,13 +71,13 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
     const xScale = d3
       .scaleBand()
-      .domain(data.map((d) => d.label))
+      .domain(filteredData.map((d) => d.label))
       .range([MARGIN.left, width - MARGIN.right])
       .padding(0.1);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.value) || 100])
+      .domain([0, d3.max(filteredData, (d) => d.value) || 100])
       .nice()
       .range([height - MARGIN.bottom, MARGIN.top]);
 
@@ -101,7 +105,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
     svg
       .selectAll('.bar')
-      .data(data)
+      .data(filteredData)
       .join('rect')
       .attr('class', 'bar')
       .attr('x', (d) => xScale(d.label) || 0)
@@ -125,11 +129,14 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     window.addEventListener('resize', renderChart);
     window.addEventListener('chart:highlight', handleHighlight as EventListener);
     window.addEventListener('chart:clear', handleClear as EventListener);
+    window.addEventListener('chart:filter', handleFilter as EventListener);
     return () => {
       window.removeEventListener('resize', renderChart);
       window.removeEventListener('chart:clear', handleClear as EventListener);
+      window.removeEventListener('chart:highlight', handleHighlight as EventListener);
+      window.removeEventListener('chart:filter', handleFilter as EventListener);
     };
-  }, [data, selectedBars]);
+  }, [data, filteredData, selectedBars]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

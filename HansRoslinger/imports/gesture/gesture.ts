@@ -1,5 +1,6 @@
 import { processPointUpGesture } from "./PointUp";
 import { processOpenPalmGesture } from "./OpenPalm";
+import { processClosedFistGesture } from "./ClosedFist";
 enum GestureType {
   CLOSED_FIST,
   I_LOVE_YOU,
@@ -39,7 +40,7 @@ type Gesture = {
     [GestureType.THUMB_UP]: console.log,
     [GestureType.THUMB_DOWN]: console.log,
     [GestureType.POINTING_UP]: processPointUpGesture,
-    [GestureType.CLOSED_FIST]: console.log,
+    [GestureType.CLOSED_FIST]: processClosedFistGesture,
     [GestureType.I_LOVE_YOU]: console.log,
     [GestureType.UNIDENTIFIED]: console.log,
     [GestureType.OPEN_PALM]: processOpenPalmGesture,

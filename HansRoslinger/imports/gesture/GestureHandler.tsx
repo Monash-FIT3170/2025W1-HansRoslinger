@@ -2,7 +2,7 @@ import { Gesture, Handedness, handleGestureToFunc } from "./gesture";
 import { useRef } from "react";
 
 export const GestureHandler = () => {
-  const GESTURE_TIME_TO_ACTIVATE = 250; // in ms
+  const GESTURE_TIME_TO_ACTIVATE = 500; // in ms
 
   const activeGestures = useRef<Record<Handedness, Gesture | null>>({
     [Handedness.LEFT]: null,

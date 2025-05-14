@@ -7,6 +7,7 @@ import { D3BarChart } from './Charts/D3BarChart';
 export const App = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [showWebcam, setShowWebcam] = useState(true); // Webcam is always visible
+  const [resetCounter, setResetCounter] = useState(0)
 
   const data = [
     { label: 'Jan', value: 50 },
@@ -29,7 +30,10 @@ export const App = () => {
         <Button label="Toggle Grayscale" onClick={() => setGrayscale(!grayscale)} />
       </div>
       {showWebcam && <WebcamComponent grayscale={grayscale} />}
-      <D3BarChart data={data} />
+      <D3BarChart key={resetCounter} data={data} />
+      <div className='reset-button'>
+        <Button label="Reset" onClick={() => setResetCounter(prev => prev + 1)} />
+      </div>
     </div>
   );
 };

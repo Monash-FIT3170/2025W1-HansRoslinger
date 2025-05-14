@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
@@ -13,22 +13,34 @@ import {
   BAR_OPACITY,
 } from './constants';
 
+interface Datum {
+  label: string;
+  value: number;
+}
+
 interface D3BarChartProps {
-  data: { label: string; value: number }[];
+  data: Datum[];
 }
 
 export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [viewData, setViewData] = useState<Datum[]>(data);
+
+  useEffect(() => {
+    setViewData(data);
+    setSelectedLabel(null);
+  }, [data]);
 
   const renderChart = () => {
     if (!chartRef.current) return;
 
-    const { width: width, height: height } = chartRef.current.getBoundingClientRect();
+    const { width, height } = chartRef.current.getBoundingClientRect();
     if (width === 0 || height === 0) return;
 
     d3.select(chartRef.current).selectAll('*').remove();
 
-        // responsive SVG
+    // Responsive SVG
     const svg = d3
       .select(chartRef.current)
       .append('svg')
@@ -38,19 +50,20 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       .style('height', '100%')
       .style('background-color', 'transparent');
 
-          // scales
+    // Scales
     const xScale = d3
       .scaleBand()
-      .domain(data.map((d) => d.label))
+      .domain(viewData.map((d) => d.label))
       .range([width * 0.05, width * 0.95])
       .padding(0.1);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.value) || 100])
+      .domain([0, d3.max(viewData, (d) => d.value) || 100])
       .nice()
       .range([height - MARGIN.bottom, MARGIN.top]);
 
+    // Axes
     svg
       .append('g')
       .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
@@ -74,23 +87,35 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       .attr('stroke', AXIS_COLOR)
       .style('filter', AXIS_LINE_SHADOW);
 
-      // bars
+    // bars
     svg
       .selectAll('.bar')
-      .data(data)
+      .data(viewData)
       .join('rect')
       .attr('class', 'bar')
-      .attr('x', (d) => xScale(d.label) || 0)
+      .attr('x', (d) => xScale(d.label)!)
       .attr('y', (d) => yScale(d.value))
       .attr('width', xScale.bandwidth())
       .attr('height', (d) => height - MARGIN.bottom - yScale(d.value))
-      .attr('fill', DEFAULT_COLOUR)
-      .style('opacity', BAR_OPACITY)
+      .attr('fill', (d) => (d.label === selectedLabel ? SELECT_COLOUR : DEFAULT_COLOUR))
+      .style('cursor', 'pointer')
+      /* Hover */
       .on('mouseover', function () {
-        d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1);
+        d3.select(this).attr('fill', SELECT_COLOUR);
       })
-      .on('mouseout', function () {
-        d3.select(this).attr('fill', DEFAULT_COLOUR).style('opacity', BAR_OPACITY);
+      .on('mouseout', function (event, d) {
+        d3.select(this).attr('fill', d.label === selectedLabel ? SELECT_COLOUR : DEFAULT_COLOUR);
+      })
+      /* Click */
+      .on('click', (event, d) => {
+        // Toggle highlight
+        setSelectedLabel((prev) => (prev === d.label ? null : d.label));
+
+        // Zoom to ±2 around the clicked bar
+        const centre = data.findIndex((r) => r.label === d.label);
+        const start = Math.max(centre - 2, 0);
+        const end = Math.min(centre + 3, data.length);
+        setViewData(data.slice(start, end));
       });
   };
 
@@ -98,7 +123,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     renderChart();
     window.addEventListener('resize', renderChart);
     return () => window.removeEventListener('resize', renderChart);
-  }, [data]);
+  }, [viewData, selectedLabel]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

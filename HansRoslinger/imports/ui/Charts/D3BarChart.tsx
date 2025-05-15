@@ -43,9 +43,14 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
   };
 
   const handleClear = () => {
-    setSelectedBars(new Set());
-    setFilteredData(data);
-    setZoomScale(1); // Reset zoom scale to 1
+    const isFiltered = filteredData.length !== data.length;
+
+    if (isFiltered) {
+      setFilteredData(data);
+      setZoomScale(1);
+    } else if (selectedBars.size > 0) {
+      setSelectedBars(new Set());
+    }
   };
 
   const handleFilter = () => {
@@ -146,14 +151,6 @@ const handleZoom = (event: Event) => {
       .attr('height', (d) => height - MARGIN.bottom - yScale(d.value))
       .attr('fill', (d) => (selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR))
       .style('opacity', BAR_OPACITY)
-      .on('mouseover', function () {
-        d3.select(this).attr('fill', SELECT_COLOUR).style('opacity', 1);
-      })
-      .on('mouseout', function (event, d) {
-        d3.select(this)
-          .attr('fill', selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR)
-          .style('opacity', BAR_OPACITY);
-      });
 
     svg.attr('transform', `scale(${zoomScale})`); // Apply the zoom scale
   };

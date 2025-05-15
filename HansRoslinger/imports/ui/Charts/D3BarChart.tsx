@@ -115,7 +115,8 @@ const handleZoom = (event: Event) => {
       .attr('preserveAspectRatio', 'none')
       .style('width', '100%')
       .style('height', '100%')
-      .style('background-color', 'transparent');
+      .style('background-color', 'transparent')
+      .style('overflow', 'visible'); // <-- Add this line
 
     const xScale = d3
       .scaleBand()
@@ -172,9 +173,23 @@ const handleZoom = (event: Event) => {
       .attr('y', d => yScale(d.value) - 5)
       .attr('text-anchor', 'middle')
       .attr('fill', AXIS_COLOR)
-      .style('font-size', '20px')
-      .style('text-shadow', AXIS_TEXT_SHADOW)
-      .html(d => `<tspan font-weight="bold">${d.label}</tspan> ${d.value}`);
+      .each(function(d) {
+      // this is making the text on the selected bars be the size of the bar
+      const text = `${d.label} ${d.value}`;
+      const barWidth = xScale.bandwidth();
+      // minimum size so that it can be visible when fully zoomed out
+      const fontSize = Math.max(20, barWidth * 0.8 / text.length * 1.8);
+      d3.select(this)
+        .style('font-size', `${fontSize}px`)
+        .style('text-shadow', AXIS_TEXT_SHADOW)
+        .html(null)
+        .append('tspan')
+        .attr('font-weight', 'bold')
+        .text(d.label + ' ')
+        .append('tspan')
+        .attr('font-weight', null)
+        .text(d.value);
+      });
 
     svg.attr('transform', `scale(${zoomScale})`);
   };

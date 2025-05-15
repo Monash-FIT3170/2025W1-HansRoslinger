@@ -59,35 +59,46 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     }
   };
 
-  const handleZoom = (event: Event) => {
-    const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
-    const { scaleX, scaleY } = customEvent.detail;
-    const clampedScaleX = Math.max(0.5, Math.min(1.5, scaleX));
-    const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
+const handleZoom = (event: Event) => {
+  const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
+  const { scaleX, scaleY } = customEvent.detail;
+  const clampedScaleX = Math.max(0.5, Math.min(1.5, scaleX));
+  const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
-    setZoomScale(clampedScaleX);
+  setZoomScale(clampedScaleX);
 
-    if (clampedScaleY < 1) {
-      const total = data.length;
-      const visible = Math.floor(total * clampedScaleY);
-      let start = 0;
+  if (clampedScaleY < 1) {
+    const total = data.length;
+    let visible = Math.floor(total * clampedScaleY);
+    let start = 0;
 
-      const selected = Array.from(selectedBars);
-      if (selected.length > 0) {
-        const indices = selected
-          .map(label => data.findIndex(d => d.label === label))
-          .filter(i => i !== -1);
-        const avgIndex = Math.floor(indices.reduce((a, b) => a + b, 0) / indices.length);
-        start = Math.max(0, Math.min(total - visible, avgIndex - Math.floor(visible / 2)));
-      } else {
-        start = Math.floor((total - visible) / 2);
-      }
+    const selected = Array.from(selectedBars);
+    if (selected.length > 0) {
+      // Find min and max indices of selected bars
+      const indices = selected
+        .map(label => data.findIndex(d => d.label === label))
+        .filter(i => i !== -1)
+        .sort((a, b) => a - b);
 
-      setFilteredData(data.slice(start, start + visible));
+      const minIndex = indices[0];
+      const maxIndex = indices[indices.length - 1];
+
+      visible = Math.max(visible, maxIndex - minIndex + 1);
+
+      start = Math.max(0, Math.min(total - visible, Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2)));
+
+      if (start > minIndex) start = minIndex;
+      if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
+      start = Math.max(0, Math.min(total - visible, start));
     } else {
-      setFilteredData(data);
+      start = Math.floor((total - visible) / 2);
     }
-  };
+
+    setFilteredData(data.slice(start, start + visible));
+  } else {
+    setFilteredData(data);
+  }
+};
 
   const renderChart = () => {
     if (!chartRef.current) return;

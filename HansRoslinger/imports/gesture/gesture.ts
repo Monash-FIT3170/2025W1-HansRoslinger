@@ -1,3 +1,8 @@
+import { processPointUpGesture } from "./PointUp";
+import { processOpenPalmGesture } from "./OpenPalm";
+import { processClosedFistGesture } from "./ClosedFist";
+import { processVictorySignGesture, processZoom } from "./VictorySign";
+
 enum GestureType {
   CLOSED_FIST,
   I_LOVE_YOU,
@@ -9,15 +14,15 @@ enum GestureType {
   VICTORY,            // This is the peace sign
 }
 
-const labelMapping: Record<GestureType, string> = {
-  [GestureType.THUMB_UP]: "Thumb Up",
-  [GestureType.THUMB_DOWN]: "Thumb Down",
-  [GestureType.POINTING_UP]: "Point Up",
-  [GestureType.CLOSED_FIST]: "Closed Fist",
-  [GestureType.I_LOVE_YOU]: "I Love You",
-  [GestureType.UNIDENTIFIED]: "Unidentified",
-  [GestureType.OPEN_PALM]: "Open Palm",
-  [GestureType.VICTORY]: "Victory",
+export const labelMapping: Record<string, GestureType> = {
+  "Thumb_Up": GestureType.THUMB_UP,
+  "Thumb_Down": GestureType.THUMB_DOWN,
+  "Pointing_Up": GestureType.POINTING_UP,
+  "Closed_Fist": GestureType.CLOSED_FIST,
+  "I_Love_You": GestureType.I_LOVE_YOU,
+  "Unidentified": GestureType.UNIDENTIFIED,
+  "Open_Palm": GestureType.OPEN_PALM,
+  "Victory": GestureType.VICTORY,
 };
 
 enum Handedness {
@@ -33,18 +38,79 @@ type Gesture = {
   landmarks: { x: number; y: number; z?: number }[];
 };
 
-// Default mapping, would replace console.log with function to be called.
-const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGesture: Gesture) => void> = {
+// Define a boolean to track the zoom state
+let isZoomEnabled = false;
+let zoomStartPosition: { x: number; y: number } | null = null;
+
+// Watch for the "chart:zoom" event and toggle the boolean
+window.addEventListener("chart:togglezoom", (event: Event) => {
+  const customEvent = event as CustomEvent<{ x: number; y: number }>;
+  isZoomEnabled = !isZoomEnabled;
+  if (isZoomEnabled && customEvent.detail) {
+    const { x, y } = customEvent.detail;
+    zoomStartPosition = { x: x, y: y };
+    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+  } else {
+    zoomStartPosition = null;
+    console.log(`Zoom disabled.`);
+  }
+});
+
+const defaultMapping = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,
-  [GestureType.POINTING_UP]: console.log,
-  [GestureType.CLOSED_FIST]: console.log,
+  [GestureType.POINTING_UP]: processPointUpGesture,
+  [GestureType.CLOSED_FIST]: processClosedFistGesture,
   [GestureType.I_LOVE_YOU]: console.log,
   [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: console.log,
-  [GestureType.VICTORY]: console.log,
+  [GestureType.OPEN_PALM]: processOpenPalmGesture,
+  [GestureType.VICTORY]: processVictorySignGesture,
 };
 
-defaultMapping[GestureType.THUMB_DOWN]
+// Default mapping, would replace console.log with function to be called.
+const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
+  const label = labelMapping[INPUT];
+  if (isZoomEnabled) {
+    // if gesture is closed fist, we want to end zoom
+    if (label === GestureType.CLOSED_FIST) {
+      processVictorySignGesture(initialGesture, latestGesture);
+    }
+    else {
+      processZoom(zoomStartPosition!, latestGesture);
+    }
+  } else {
+    const handler = defaultMapping[label];
+    if (handler) {
+      handler(initialGesture, latestGesture);
+    } else {
+      console.warn(`No handler found for gesture: ${INPUT}`);
+    }
+  }
+  
+};
 
-export {Gesture, GestureType, Handedness, defaultMapping};
+export { Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
+
+export const gestureToScreenPosition = (
+  x: number,
+  y: number,
+  z?: number
+): { screenX: number; screenY: number } => {
+  // Get the screen dimensions
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // Flip the x coordinate (mirrored horizontally)
+  const flippedX = 1 - x;
+
+  // Convert normalized x and y to absolute screen positions
+  const screenX = Math.round(flippedX * screenWidth);
+  const screenY = Math.round(y * screenHeight);
+
+  // Optionally, you can use z for depth-related calculations if needed
+  if (z !== undefined) {
+    console.log(`Depth (z): ${z}`);
+  }
+
+  return { screenX, screenY };
+};

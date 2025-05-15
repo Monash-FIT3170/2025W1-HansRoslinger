@@ -9,7 +9,7 @@ export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
   const [showWebcam, _] = useState(true);
-  const [showLineChart, setShowLineChart] = useState(true);
+  const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomStartPosition, setZoomStartPosition] = useState<{ x: number; y: number } | null>(null);

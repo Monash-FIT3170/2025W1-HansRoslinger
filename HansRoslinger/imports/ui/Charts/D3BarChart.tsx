@@ -175,7 +175,7 @@ const handleZoom = (event: Event) => {
       .attr('fill', AXIS_COLOR)
       .each(function(d) {
       // this is making the text on the selected bars be the size of the bar
-      const text = `${d.label} ${d.value}`;
+      const text = `${d.label} - ${d.value}`;
       const barWidth = xScale.bandwidth();
       // minimum size so that it can be visible when fully zoomed out
       const fontSize = Math.max(20, barWidth * 0.8 / text.length * 1.8);

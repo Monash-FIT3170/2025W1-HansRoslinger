@@ -29,10 +29,21 @@ export const processZoom = (
   );
 
   const dx = currentPosition.screenX - zoomStartPosition.x;
-  const maxDistance = Math.min(window.innerWidth, window.innerHeight) * 0.3;
-  const normalized = Math.min(Math.abs(dx) / maxDistance, 1);
-  const delta = dx >= 0 ? normalized * 0.5 : -normalized * 0.5;
+  const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+  const normalizedX = Math.min(Math.abs(dx) / maxDistanceX, 1);
+  const deltaX = dx >= 0 ? normalizedX * 0.5 : -normalizedX * 0.5;
 
-  const scale = Math.min(Math.max(1 + delta, 0.5), 1.5);
-  window.dispatchEvent(new CustomEvent<number>('chart:zoom', { detail: scale }));
+  const dy = currentPosition.screenY - zoomStartPosition.y;
+  const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+  const normalizedY = Math.min(Math.abs(Math.min(dy, 0)) / maxDistanceY, 1) * 2;
+
+  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
+  const scaleY = 1 - normalizedY * 0.9;
+
+  console.log('Zoom scaleX:', scaleX, 'scaleY:', scaleY);
+  window.dispatchEvent(
+    new CustomEvent<{ scaleX: number; scaleY: number }>('chart:zoom', {
+      detail: { scaleX, scaleY },
+    })
+  );
 };

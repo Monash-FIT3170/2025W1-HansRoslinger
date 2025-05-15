@@ -24,8 +24,8 @@ export const processZoom = (
   gestures: Gesture,
 ): void => {
   const currentPosition = gestureToScreenPosition(
-    gestures.landmarks[0].x,
-    gestures.landmarks[0].y
+    gestures.landmarks[9].x,
+    gestures.landmarks[9].y
   );
 
   const dx = currentPosition.screenX - zoomStartPosition.x;
@@ -35,11 +35,12 @@ export const processZoom = (
 
   const dy = currentPosition.screenY - zoomStartPosition.y;
   const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
-  const normalizedY = Math.min(Math.abs(Math.min(dy, 0)) / maxDistanceY, 1) * 2;
+  const normalizedY = Math.min(Math.abs(Math.min(dy, 0)) / maxDistanceY, 1);
 
   const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
   const scaleY = 1 - normalizedY * 0.9;
 
+  console.log('dx:', dx, 'dy:', dy);
   console.log('Zoom scaleX:', scaleX, 'scaleY:', scaleY);
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>('chart:zoom', {

@@ -15,15 +15,15 @@ export const App: React.FC = () => {
   const [zoomStartPosition, setZoomStartPosition] = useState<{ x: number; y: number } | null>(null);
 
   const data = [
-    { label: 'Jan 1', value: 45 },
-    { label: 'Jan 2', value: 52 },
-    { label: 'Jan 3', value: 48 },
-    { label: 'Jan 4', value: 51 },
+    // { label: 'Jan 1', value: 45 },
+    // { label: 'Jan 2', value: 52 },
+    // { label: 'Jan 3', value: 48 },
+    // { label: 'Jan 4', value: 51 },
 
-    { label: 'Feb 1', value: 55 },
-    { label: 'Feb 2', value: 60 },
-    { label: 'Feb 3', value: 58 },
-    { label: 'Feb 4', value: 62 },
+    // { label: 'Feb 1', value: 55 },
+    // { label: 'Feb 2', value: 60 },
+    // { label: 'Feb 3', value: 58 },
+    // { label: 'Feb 4', value: 62 },
 
     { label: 'Mar 1', value: 65 },
     { label: 'Mar 2', value: 68 },
@@ -65,15 +65,15 @@ export const App: React.FC = () => {
     { label: 'Oct 3', value: 72 },
     { label: 'Oct 4', value: 74 },
 
-    { label: 'Nov 1', value: 60 },
-    { label: 'Nov 2', value: 65 },
-    { label: 'Nov 3', value: 62 },
-    { label: 'Nov 4', value: 68 },
+    // { label: 'Nov 1', value: 60 },
+    // { label: 'Nov 2', value: 65 },
+    // { label: 'Nov 3', value: 62 },
+    // { label: 'Nov 4', value: 68 },
 
-    { label: 'Dec 1', value: 55 },
-    { label: 'Dec 2', value: 58 },
-    { label: 'Dec 3', value: 60 },
-    { label: 'Dec 4', value: 63 },
+    // { label: 'Dec 1', value: 55 },
+    // { label: 'Dec 2', value: 58 },
+    // { label: 'Dec 3', value: 60 },
+    // { label: 'Dec 4', value: 63 },
   ];
 
   useEffect(() => {
@@ -112,28 +112,31 @@ export const App: React.FC = () => {
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
       {showWebcam && (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
           {!backgroundRemoval ? (
             <WebcamComponent grayscale={grayscale} />
           ) : (
             <ImageSegmentation grayscale={grayscale} />
           )}
         </div>
-      )}
+            )}
 
         {isZoomEnabled && zoomStartPosition && (
           <div
             className="absolute w-4 h-4 bg-cyan-400 rounded-full pointer-events-none z-50"
             style={{
-          left: `${zoomStartPosition.x}px`,
-          top: `${zoomStartPosition.y}px`,
-          transform: 'translate(-50%, -50%)',
+              left: `${zoomStartPosition.x}px`,
+              top: `${zoomStartPosition.y}px`,
+              transform: 'translate(-50%, -50%)',
             }}
           />
         )}
 
         {/* Bottom-left transparent charts */}
-        <div className="absolute left-0 w-full h-1/2 bg-transparent" style={{ bottom: '10%' }}>
+        <div
+          className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+          style={{ bottom: '10%', width: '95%', height: '50%' }}
+        >
           {showLineChart ? (
             <D3LineChart data={data} />
           ) : (

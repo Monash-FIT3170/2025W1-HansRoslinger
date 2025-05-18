@@ -7,8 +7,11 @@ on:
 jobs:
   eslint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HansRoslinger
     steps:
       - uses: actions/checkout@v1
       - uses: stefanoeb/eslint-action@1.0.2
         with:
-          files: HansRoslinger/
+          files: .

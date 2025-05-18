@@ -8,7 +8,7 @@ import { ImageSegmentation } from "./Video/ImageSegmentation/index";
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [showWebcam, _] = useState(true);
+  const [showWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
 

@@ -48,6 +48,5 @@ const defaultMapping: Record<
   [GestureType.VICTORY]: console.log,
 };
 
-defaultMapping[GestureType.THUMB_DOWN];
 
 export { Gesture, GestureType, Handedness, defaultMapping };

@@ -18,23 +18,23 @@ import { ImageSegmenter, FilesetResolver } from "@mediapipe/tasks-vision";
 const video = document.getElementById("webcam") as HTMLVideoElement;
 const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
 const canvasCtx = canvasElement.getContext("2d");
-const webcamPredictions = document.getElementById("webcamPredictions");
+// const webcamPredictions = document.getElementById("webcamPredictions");
 const demosSection: HTMLElement = document.getElementById("demos");
 let enableWebcamButton: HTMLButtonElement;
-let webcamRunning: Boolean = false;
-const videoHeight: string = "360px";
-const videoWidth: string = "480px";
+let webcamRunning: boolean = false;
+// const videoHeight: string = "360px";
+// const videoWidth: string = "480px";
 let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
-const resultWidthHeigth = 256;
+// const resultWidthHeigth = 256;
 
 let imageSegmenter: ImageSegmenter;
-let labels: Array<string>;
+// let labels: Array<string>;
 
 // Create a transparent background (only keep person)
-const legendColors = [
-  [0, 0, 0, 0], // Background - fully transparent
-  [255, 255, 255, 255], // Person - keep original colors
-];
+// const legendColors = [
+//   [0, 0, 0, 0], // Background - fully transparent
+//   [255, 255, 255, 255], // Person - keep original colors
+// ];
 
 const createImageSegmenter = async () => {
   const audio = await FilesetResolver.forVisionTasks(
@@ -132,14 +132,14 @@ async function predictWebcam() {
       runningMode: runningMode,
     });
   }
-  let startTimeMs = performance.now();
+  const startTimeMs = performance.now();
 
   // Start segmenting the stream.
   imageSegmenter.segmentForVideo(video, startTimeMs, callbackForVideo);
 }
 
 // Enable the live webcam view and start imageSegmentation.
-async function enableCam(event) {
+async function enableCam() {
   if (imageSegmenter === undefined) {
     return;
   }

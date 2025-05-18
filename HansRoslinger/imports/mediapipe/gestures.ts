@@ -94,7 +94,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
             video,
             performance.now(),
           );
-          let gestures: Gesture[] = Array(detectedGestures.gestures.length);
+          const gestures: Gesture[] = Array(detectedGestures.gestures.length);
           for (
             let index = 0;
             index < detectedGestures.gestures.length;

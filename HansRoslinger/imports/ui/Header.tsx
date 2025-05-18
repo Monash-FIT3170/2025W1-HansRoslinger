@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface HeaderProps {
   onToggleBackgroundRemoval: () => void;
@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
       onClick={onToggleChart}
       className="w-10 h-10 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-sm font-medium"
     >
-      {showLineChart ? 'Bar' : 'Line'}
+      {showLineChart ? "Bar" : "Line"}
     </button>
   </>
 );

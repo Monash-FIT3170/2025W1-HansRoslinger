@@ -16,7 +16,6 @@ export const generateBarChartData = () => {
     ],
   };
 };
-
 export const options = {
   responsive: true,
   plugins: {

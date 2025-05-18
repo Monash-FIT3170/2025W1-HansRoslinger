@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  SRC_DIR: HansRoslinger
+tasks:
+  default:
+    cmds:
+      - task --list-all
+  ci:
+    dir: '{{.SRC_DIR}}'
+    cmds:
+      - npx eslint "**/*.{js,jsx,ts,tsx}"

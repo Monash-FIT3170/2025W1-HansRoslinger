@@ -1,9 +1,4 @@
-import { Gesture } from './gesture';
-
-export const processClosedFistGesture = (
-  _1: Gesture,
-  _2: Gesture,
-): void => {
+export const processClosedFistGesture = (): void => {
 
   const gestureEvent = new CustomEvent('chart:filter', {
   });

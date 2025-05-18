@@ -35,7 +35,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
         setSelectedBars((prev) => {
           const next = new Set(prev);
-          next.has(d.label) ? next.delete(d.label) : next.add(d.label);
+          if (next.has(d.label)) {
+            next.delete(d.label);
+          } else {
+            next.add(d.label);
+          }
           return next;
         });
       }

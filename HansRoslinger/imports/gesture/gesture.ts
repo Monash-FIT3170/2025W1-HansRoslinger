@@ -3,10 +3,10 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP,        // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
   THUMB_DOWN,
   THUMB_UP,
-  VICTORY,            // This is the peace sign
+  VICTORY, // This is the peace sign
 }
 
 const labelMapping: Record<GestureType, string> = {
@@ -26,15 +26,18 @@ enum Handedness {
 }
 
 type Gesture = {
-  gestureID: GestureType,
-  timestamp: Date,
-  handedness: Handedness,
-  confidence: number;    // 0-1
+  gestureID: GestureType;
+  timestamp: Date;
+  handedness: Handedness;
+  confidence: number; // 0-1
   landmarks: { x: number; y: number; z?: number }[];
 };
 
 // Default mapping, would replace console.log with function to be called.
-const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGesture: Gesture) => void> = {
+const defaultMapping: Record<
+  GestureType,
+  (initialGesture: Gesture, latestGesture: Gesture) => void
+> = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,
   [GestureType.POINTING_UP]: console.log,
@@ -45,6 +48,6 @@ const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGestur
   [GestureType.VICTORY]: console.log,
 };
 
-defaultMapping[GestureType.THUMB_DOWN]
+defaultMapping[GestureType.THUMB_DOWN];
 
-export {Gesture, GestureType, Handedness, defaultMapping};
+export { Gesture, GestureType, Handedness, defaultMapping };

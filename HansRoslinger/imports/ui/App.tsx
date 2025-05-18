@@ -75,7 +75,7 @@ export const App: React.FC = () => {
     // { label: 'Dec 3', value: 60 },
     // { label: 'Dec 4', value: 63 },
   ];
-
+  // code which handles playing a dot at the start position of the zoom
   useEffect(() => {
     const handleToggleZoom = (event: Event) => {
       const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -92,6 +92,16 @@ export const App: React.FC = () => {
 
     window.addEventListener('chart:togglezoom', handleToggleZoom);
     return () => window.removeEventListener('chart:togglezoom', handleToggleZoom);
+  }, []);
+
+  // code which switches the chart type when thumbs up is done
+useEffect(() => {
+    const handleSwitchChart = (event: Event) => {
+      setShowLineChart((prev) => !prev);
+    };
+
+    window.addEventListener('chart:switch', handleSwitchChart);
+    return () => window.removeEventListener('chart:switch', handleSwitchChart);
   }, []);
 
   const toolbarClasses = showHeader

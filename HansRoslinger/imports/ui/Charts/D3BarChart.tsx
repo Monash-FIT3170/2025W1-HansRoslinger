@@ -121,7 +121,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       .style('width', '100%')
       .style('height', '100%')
       .style('background-color', 'transparent')
-      .style('overflow', 'visible'); // <-- Add this line
+      .style('overflow', 'visible');
 
     const xScale = d3
       .scaleBand()

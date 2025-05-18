@@ -48,5 +48,4 @@ const defaultMapping: Record<
   [GestureType.VICTORY]: console.log,
 };
 
-
 export { Gesture, GestureType, Handedness, defaultMapping };

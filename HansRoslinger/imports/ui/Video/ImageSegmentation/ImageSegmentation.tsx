@@ -8,8 +8,7 @@ interface ImageSegmentationProps {
   grayscale: boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = (
-) => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = () => {
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
     const canvasElement = document.getElementById(

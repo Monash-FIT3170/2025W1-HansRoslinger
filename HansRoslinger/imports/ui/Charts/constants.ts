@@ -17,3 +17,9 @@ export const AXIS_LINE_SHADOW = 'drop-shadow(2px 2px 2px black)';
 export const LINE_STROKE_WIDTH = 6;
 export const POINT_RADIUS      = 8;
 export const BAR_OPACITY       = 0.8;
+
+// constants for the dataset title
+export const TITLE_FONT_SIZE = '2.5rem';
+export const TITLE_FONT_FAMILY = 'sans-serif';
+export const TITLE_TEXT_SHADOW = '2px 2px 2px black';
+export const TITLE_COLOR = 'white';

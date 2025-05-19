@@ -3,6 +3,7 @@ import { processOpenPalmGesture } from "./OpenPalm";
 import { processClosedFistGesture } from "./ClosedFist";
 import { processVictorySignGesture, processZoom } from "./VictorySign";
 import { processThumbsUp} from "./ThumbsUp";
+import { processThumbsDown} from "./ThumbsDown"
 
 enum GestureType {
   CLOSED_FIST,
@@ -59,7 +60,7 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 
 const defaultMapping = {
   [GestureType.THUMB_UP]: processThumbsUp,
-  [GestureType.THUMB_DOWN]: console.log,
+  [GestureType.THUMB_DOWN]: processThumbsDown,
   [GestureType.POINTING_UP]: processPointUpGesture,
   [GestureType.CLOSED_FIST]: processClosedFistGesture,
   [GestureType.I_LOVE_YOU]: console.log,

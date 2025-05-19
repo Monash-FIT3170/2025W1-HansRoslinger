@@ -56,15 +56,57 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
   }
 });
 
+// Map to track the ON/OFF status of each gesture
+const gestureStatusMap: Map<GestureType, boolean> = new Map();
+
+// Initialize all gestures to OFF
+Object.values(GestureType)
+  .filter((v) => typeof v === "number") // Only enum values, not keys
+  .forEach((gesture) => gestureStatusMap.set(gesture as GestureType, false));
+
+/**
+ * Sets the status of a gesture.
+ * @param gesture - The gesture to update.
+ * @param status - The new status: true = ON, false = OFF.
+ */
+const setGestureStatus = (gesture: GestureType, status: boolean): void => {
+  gestureStatusMap.set(gesture, status);
+  console.log(`Gesture ${GestureType[gesture]} is now ${status ? "ON" : "OFF"}`);
+};
+
+/**
+ * Toggles the current status of a gesture.
+ * @param gesture - The gesture to toggle.
+ */
+const toggleGestureStatus = (gesture: GestureType): void => {
+  const currentStatus = gestureStatusMap.get(gesture) ?? false;
+  gestureStatusMap.set(gesture, !currentStatus);
+  console.log(`Gesture ${GestureType[gesture]} toggled to ${!currentStatus ? "ON" : "OFF"}`);
+};
+
+/**
+ * Gets the current status of a gesture.
+ * @param gesture - The gesture to check.
+ * @returns boolean indicating ON/OFF status.
+ */
+const isGestureOn = (gesture: GestureType): boolean => {
+  return gestureStatusMap.get(gesture) ?? false;
+};
+
+export {setGestureStatus, toggleGestureStatus, isGestureOn };
+
+
+
+
 const defaultMapping = {
   [GestureType.THUMB_UP]: console.log,
   [GestureType.THUMB_DOWN]: console.log,
-  [GestureType.POINTING_UP]: processPointUpGesture,
-  [GestureType.CLOSED_FIST]: processClosedFistGesture,
+  [GestureType.POINTING_UP]: isGestureOn(GestureType.POINTING_UP) ? processPointUpGesture : console.log,
+  [GestureType.CLOSED_FIST]: isGestureOn(GestureType.CLOSED_FIST) ? processClosedFistGesture : console.log,
   [GestureType.I_LOVE_YOU]: console.log,
   [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: processOpenPalmGesture,
-  [GestureType.VICTORY]: processVictorySignGesture,
+  [GestureType.OPEN_PALM]: isGestureOn(GestureType.OPEN_PALM) ? processOpenPalmGesture : console.log,
+  [GestureType.VICTORY]: isGestureOn(GestureType.VICTORY) ? processVictorySignGesture : console.log,
 };
 
 // Default mapping, would replace console.log with function to be called.

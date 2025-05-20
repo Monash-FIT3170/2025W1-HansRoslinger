@@ -47,4 +47,4 @@ const defaultMapping: Record<GestureType, (initialGesture: Gesture, latestGestur
 
 defaultMapping[GestureType.THUMB_DOWN]
 
-export {Gesture, GestureType, Handedness, defaultMapping};
+export {Gesture, GestureType, Handedness, defaultMapping, labelMapping};

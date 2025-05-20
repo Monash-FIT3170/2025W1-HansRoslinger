@@ -9,22 +9,26 @@ import {
   AXIS_TEXT_SHADOW,
   AXIS_LINE_SHADOW,
   BAR_OPACITY,
-} from "./constants";
+} from './constants';
+import { Dataset } from '../Input/Data';
 
 interface D3BarChartProps {
-  data: { label: string; value: number }[];
+  dataset: Dataset;
 }
 
-export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
+export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
+  const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
-  const [selectedBars, setSelectedBars] = useState<Set<string>>(new Set());
+  const [highlightedBars, setHighlightedBars] = useState<Set<string>>(new Set());
   const [filteredData, setFilteredData] = useState(data);
   const [zoomScale, setZoomScale] = useState(1);
 
+  // this handles highlighting a particular bar when the gesture is hovering over it
   const handleHighlight = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     const { x, y } = customEvent.detail;
 
+    // don't do anything if the chart is not currently shown to the user
     if (!chartRef.current) return;
 
     const svg = d3.select(chartRef.current).select("svg");
@@ -33,15 +37,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       { label: string; value: number }
     >("rect.bar");
 
+    // this is the complicated logic that checks the position of the pointer finter and checks whether it is over any particular bar chart
     bars.each(function (d) {
       const bbox = this.getBoundingClientRect();
-      if (
-        x >= bbox.left &&
-        x <= bbox.right &&
-        y >= bbox.top &&
-        y <= bbox.bottom
-      ) {
-        setSelectedBars((prev) => {
+      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+        setHighlightedBars((prev) => {
           const next = new Set(prev);
           if (next.has(d.label)) {
             next.delete(d.label);
@@ -54,23 +54,27 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     });
   };
 
+  // this handles clearing filters which are applied to the bar chart
   const handleClear = () => {
+    // it should always clear the filters applied first
     const isFiltered = filteredData.length !== data.length;
 
     if (isFiltered) {
       setFilteredData(data);
       setZoomScale(1);
-    } else if (selectedBars.size > 0) {
-      setSelectedBars(new Set());
+    // otherwise it will clear the highlighted bars next
+    } else if (highlightedBars.size > 0) {
+      setHighlightedBars(new Set());
     }
   };
 
   const handleFilter = () => {
-    if (selectedBars.size > 0) {
-      setFilteredData(data.filter((d) => selectedBars.has(d.label)));
+    if (highlightedBars.size > 0) {
+      setFilteredData(data.filter(d => highlightedBars.has(d.label)));
     }
   };
 
+  
   const handleZoom = (event: Event) => {
     const customEvent = event as CustomEvent<{
       scaleX: number;
@@ -78,43 +82,42 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     }>;
     const { scaleX, scaleY } = customEvent.detail;
 
-    // make it so you can't make the allowed scale larger than the screen
+    // this is making sure that the user can't zoom in so much that part of the graph is not visible (going out of the screen)
     const chartWidth = chartRef.current?.getBoundingClientRect().width || 1;
     const windowWidth = window.innerWidth;
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
-    const clampedScaleX = Math.max(
-      0.5,
-      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
-    );
+
+    // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
+    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
+    // the user can at most show 10% of the graph of 100% of the graph
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
     setZoomScale(clampedScaleX);
 
+
+    // this logic is making sure that when you zoom in, it will focus around the centre of all the bars you have highlighted
     if (clampedScaleY < 1) {
       const total = data.length;
       let visible = Math.floor(total * clampedScaleY);
       let start = 0;
 
-      const selected = Array.from(selectedBars);
+      const selected = Array.from(highlightedBars);
       if (selected.length > 0) {
+        // get the index positions of all the highlighted bars
         const indices = selected
           .map((label) => data.findIndex((d) => d.label === label))
           .filter((i) => i !== -1)
           .sort((a, b) => a - b);
+        
 
         const minIndex = indices[0];
         const maxIndex = indices[indices.length - 1];
-
+        
+        // the max zoom should still ensure all of the highlighted bars are visible
         visible = Math.max(visible, maxIndex - minIndex + 1);
-
-        start = Math.max(
-          0,
-          Math.min(
-            total - visible,
-            Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2),
-          ),
-        );
+        
+        start = Math.max(0, Math.min(total - visible, Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2)));
 
         if (start > minIndex) start = minIndex;
         if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
@@ -139,13 +142,13 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
     const svg = d3
       .select(chartRef.current)
-      .append("svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("preserveAspectRatio", "none")
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("background-color", "transparent")
-      .style("overflow", "visible"); // <-- Add this line
+      .append('svg')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'none')
+      .style('width', '100%')
+      .style('height', '100%')
+      .style('background-color', 'transparent')
+      .style('overflow', 'visible');
 
     const xScale = d3
       .scaleBand()
@@ -185,41 +188,37 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     svg
       .selectAll(".bar")
       .data(filteredData)
-      .join("rect")
-      .attr("class", "bar")
-      .attr("x", (d) => xScale(d.label) || 0)
-      .attr("y", (d) => yScale(d.value))
-      .attr("width", xScale.bandwidth())
-      .attr("height", (d) => height - MARGIN.bottom - yScale(d.value))
-      .attr("fill", (d) =>
-        selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
-      )
-      .style("opacity", BAR_OPACITY);
+      .join('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => xScale(d.label) || 0)
+      .attr('y', (d) => yScale(d.value))
+      .attr('width', xScale.bandwidth())
+      .attr('height', (d) => height - MARGIN.bottom - yScale(d.value))
+      .attr('fill', (d) => (highlightedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR))
+      .style('opacity', BAR_OPACITY);
 
     svg
-      .selectAll(".label")
-      .data(filteredData.filter((d) => selectedBars.has(d.label)))
-      .join("text")
-      .attr("class", "label")
-      .attr("x", (d) => (xScale(d.label) || 0) + xScale.bandwidth() / 2)
-      .attr("y", (d) => yScale(d.value) - 5)
-      .attr("text-anchor", "middle")
-      .attr("fill", AXIS_COLOR)
-      .each(function (d) {
-        // this is making the text on the selected bars be the size of the bar
+      .selectAll('.label')
+      .data(filteredData.filter(d => highlightedBars.has(d.label)))
+      .join('text')
+      .attr('class', 'label')
+      .attr('x', d => (xScale(d.label) || 0) + xScale.bandwidth() / 2)
+      .attr('y', d => yScale(d.value) - 5)
+      .attr('text-anchor', 'middle')
+      .attr('fill', AXIS_COLOR)
+      .each(function(d) {
         const text = `${d.label} - ${d.value}`;
         const barWidth = xScale.bandwidth();
-        // minimum size so that it can be visible when fully zoomed out
-        const fontSize = Math.max(20, ((barWidth * 0.8) / text.length) * 1.8);
+        const fontSize = Math.max(20, barWidth * 0.8 / text.length * 1.8);
         d3.select(this)
-          .style("font-size", `${fontSize}px`)
-          .style("text-shadow", AXIS_TEXT_SHADOW)
+          .style('font-size', `${fontSize}px`)
+          .style('text-shadow', AXIS_TEXT_SHADOW)
           .html(null)
-          .append("tspan")
-          .attr("font-weight", "bold")
-          .text(d.label + " ")
-          .append("tspan")
-          .attr("font-weight", null)
+          .append('tspan')
+          .attr('font-weight', 'bold')
+          .text(d.label + ' ')
+          .append('tspan')
+          .attr('font-weight', null)
           .text(d.value);
       });
 
@@ -247,7 +246,14 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       window.removeEventListener("chart:filter", handleFilter as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
-  }, [data, filteredData, selectedBars, zoomScale]);
+  }, [data, filteredData, highlightedBars, zoomScale]);
+
+  // The filters should be reset when the dataset changes
+  useEffect(() => {
+    setFilteredData(data);
+    setHighlightedBars(new Set());
+    setZoomScale(1);
+  }, [dataset]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

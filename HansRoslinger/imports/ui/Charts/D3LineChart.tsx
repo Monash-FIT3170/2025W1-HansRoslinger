@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import React, { useEffect, useRef, useState } from 'react';
+import * as d3 from 'd3';
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
@@ -10,73 +10,196 @@ import {
   AXIS_LINE_SHADOW,
   LINE_STROKE_WIDTH,
   POINT_RADIUS,
-} from "./constants";
+} from './constants';
+import { Dataset } from '../Input/Data';
 
 interface D3LineChartProps {
-  data: { label: string; value: number }[];
+  dataset: Dataset;
 }
 
-export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
+export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
+  const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
+  const [filteredData, setFilteredData] = useState(data);
+  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(new Set());
+  const [zoomScale, setZoomScale] = useState(1);
 
-  const renderChart = () => {
+  
+  // this handles highlighting a particular point when the gesture is hovering over it
+  const handleHighlight = (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    const { x, y } = customEvent.detail;
     if (!chartRef.current) return;
 
-    // get div size
-    const { width: width, height: height } =
-      chartRef.current.getBoundingClientRect();
+    const svg = d3.select(chartRef.current).select('svg');
+    const circles = svg.selectAll<SVGCircleElement, { label: string; value: number }>('circle');
+
+    // Get the position of all dots
+    const positions = [] as { cx: number; cy: number; d: { label: string; value: number }; node: SVGCircleElement }[];
+    
+
+    circles.each(function (d) {
+      const bbox = this.getBoundingClientRect();
+      positions.push({
+        cx: bbox.left + bbox.width / 2,
+        cy: bbox.top + bbox.height / 2,
+        d,
+        node: this,
+      });
+    });
+
+    // it will only highlight one dot at a time, so this finds the closest dot to the gestures position
+    let minDist = Infinity;
+    let closest = null as typeof positions[0] | null;
+    for (const pos of positions) {
+      const dist = Math.hypot(pos.cx - x, pos.cy - y); //sqrt((pos.cs - x)^2 + (pos.cy - y)^2)
+      if (dist < minDist) {
+        minDist = dist;
+        closest = pos;
+      }
+    }
+
+    // this selects the closest dot as long as it's closer than 40 pixels away
+    // which gives some leeway for selecting
+    if (closest && minDist <= 40) {
+      setHighlightedDots(prev => {
+        const next = new Set(prev);
+        if (next.has(closest!.d.label)) {
+          next.delete(closest!.d.label);
+        } else {
+          next.add(closest!.d.label);
+        }
+        return next;
+      });
+    }
+  };
+
+  // this handles clearing filters which are applied to the line chart
+  const handleClear = () => {
+    // it should always clear the filters applied first
+    const isFiltered = filteredData.length !== data.length;
+
+    if (isFiltered) {
+      setFilteredData(data);
+      setZoomScale(1);
+    // otherwise it will clear the highlighted dots next
+    } else if (highlightedDots.size > 0) {
+      setHighlightedDots(new Set());
+    }
+  };
+
+  const handleFilter = () => {
+    if (highlightedDots.size > 0) {
+      setFilteredData(data.filter(d => highlightedDots.has(d.label)));
+    }
+  };
+
+
+
+  const handleZoom = (event: Event) => {
+    const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
+    const { scaleX, scaleY } = customEvent.detail;
+
+    // this is making sure that the user can't zoom in so much that part of the graph is not visible (going out of the screen)
+    const chartWidth = chartRef.current?.getBoundingClientRect().width || 1;
+    const windowWidth = window.innerWidth;
+    const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
+
+    // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
+    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
+    // the user can at most show 10% of the graph of 100% of the graph
+    const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
+
+    setZoomScale(clampedScaleX);
+
+    // this logic is making sure that when you zoom in, it will focus around the centre of all the bars you have highlighted
+    if (clampedScaleY < 1) {
+      const total = data.length;
+      let visible = Math.floor(total * clampedScaleY);
+      let start = 0;
+
+      const selected = Array.from(highlightedDots);
+      if (selected.length > 0) {
+        // get the index positions of all the highlighted bars
+        const indices = selected
+          .map(label => data.findIndex(d => d.label === label))
+          .filter(i => i !== -1)
+          .sort((a, b) => a - b);
+
+        const minIndex = indices[0];
+        const maxIndex = indices[indices.length - 1];
+        const avgIndex = Math.round(indices.reduce((a, b) => a + b, 0) / indices.length);
+
+        visible = Math.max(visible, maxIndex - minIndex + 1);
+        start = Math.max(0, Math.min(total - visible, avgIndex - Math.floor(visible / 2)));
+
+        if (start > minIndex) start = minIndex;
+        if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
+        start = Math.max(0, Math.min(total - visible, start));
+      } else {
+        start = Math.floor((total - visible) / 2);
+      }
+
+      setFilteredData(data.slice(start, start + visible));
+    } else {
+      setFilteredData(data);
+    }
+  };
+  const renderChart = (customData = filteredData) => {
+    if (!chartRef.current) return;
+
+    const { width, height } = chartRef.current.getBoundingClientRect();
     if (width === 0 || height === 0) return;
     d3.select(chartRef.current).selectAll("*").remove();
 
-    // responsive svg
     const svg = d3
       .select(chartRef.current)
-      .append("svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("preserveAspectRatio", "none")
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("background-color", "transparent");
+      .append('svg')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'none')
+      .style('width', '100%')
+      .style('height', '100%')
+      .style('background-color', 'transparent')
+      .style('overflow', 'visible');
 
-    // scales
     const xScale = d3
       .scalePoint()
-      .domain(data.map((d) => d.label))
+      .domain(customData.map((d) => d.label))
       .range([width * 0.05, width * 0.95]);
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.value) || 100])
+      .domain([0, d3.max(customData, (d) => d.value) || 100])
       .nice()
       .range([height - MARGIN.bottom, MARGIN.top]);
 
-    // axes
+    const originalCount = data.length;
+    const currentCount = customData.length;
+    const fontScale = originalCount > 0 ? originalCount / currentCount : 1;
+    const axisFontSize = `${AXIS_FONT_SIZE}`;
+
     svg
       .append("g")
       .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
-      .selectAll("text")
-      .attr("fill", AXIS_COLOR)
-      .style("font-size", AXIS_FONT_SIZE)
-      .style("text-shadow", AXIS_TEXT_SHADOW);
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', axisFontSize)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
 
     svg
-      .append("g")
-      .attr("transform", `translate(${MARGIN.left}, 0)`)
+      .append('g')
+      .attr('transform', `translate(${width * 0.05}, 0)`)
       .call(d3.axisLeft(yScale))
-      .attr("transform", `translate(${width * 0.05}, 0)`)
-      .selectAll("text")
-      .attr("fill", AXIS_COLOR)
-      .style("font-size", AXIS_FONT_SIZE)
-      .style("text-shadow", AXIS_TEXT_SHADOW);
+      .selectAll('text')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', axisFontSize)
+      .style('text-shadow', AXIS_TEXT_SHADOW);
 
-    // axis lines shadow
-    svg
-      .selectAll("path, line")
-      .attr("stroke", AXIS_COLOR)
-      .style("filter", AXIS_LINE_SHADOW);
+    svg.selectAll('path, line')
+      .attr('stroke', AXIS_COLOR)
+      .style('filter', AXIS_LINE_SHADOW);
 
-    // line
     const line = d3
       .line<{ label: string; value: number }>()
       .x((d) => xScale(d.label)!)
@@ -84,35 +207,71 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ data }) => {
       .curve(d3.curveMonotoneX);
 
     svg
-      .append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", DEFAULT_COLOUR)
-      .attr("stroke-width", LINE_STROKE_WIDTH)
-      .attr("d", line);
+      .append('path')
+      .datum(customData)
+      .attr('fill', 'none')
+      .attr('stroke', DEFAULT_COLOUR)
+      .attr('stroke-width', LINE_STROKE_WIDTH)
+      .attr('d', line);
 
-    // points
+    // Draw dots
     svg
-      .selectAll(".dot")
-      .data(data)
-      .join("circle")
-      .attr("cx", (d) => xScale(d.label)!)
-      .attr("cy", (d) => yScale(d.value))
-      .attr("r", POINT_RADIUS)
-      .attr("fill", DEFAULT_COLOUR)
-      .on("mouseover", function () {
-        d3.select(this).attr("fill", SELECT_COLOUR);
+      .selectAll('.dot')
+      .data(customData)
+      .join('circle')
+      .attr('class', 'dot')
+      .attr('cx', (d) => xScale(d.label)!)
+      .attr('cy', (d) => yScale(d.value))
+      .attr('r', POINT_RADIUS * fontScale)
+      .attr('fill', (d) => highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR)
+      .on('mouseover', function () {
+        d3.select(this).attr('fill', SELECT_COLOUR);
       })
-      .on("mouseout", function () {
-        d3.select(this).attr("fill", DEFAULT_COLOUR);
+      .on('mouseout', function (event, d) {
+        d3.select(this).attr('fill', highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR);
       });
+
+    // Draw labels for selected dots
+    svg
+      .selectAll('.dot-label')
+      .data(customData.filter(d => highlightedDots.has(d.label)))
+      .join('text')
+      .attr('class', 'dot-label')
+      .attr('x', d => xScale(d.label)!)
+      .attr('y', d => yScale(d.value) - POINT_RADIUS * fontScale - 8)
+      .attr('text-anchor', 'middle')
+      .attr('fill', AXIS_COLOR)
+      .style('font-size', `calc(16px * ${fontScale})`)
+      .style('font-weight', 'bold')
+      .style('text-shadow', AXIS_TEXT_SHADOW)
+      .text(d => `${d.label} ${d.value}`);
+
+    svg.attr('transform', `scale(${zoomScale})`);
   };
 
   useEffect(() => {
     renderChart();
-    window.addEventListener("resize", renderChart);
-    return () => window.removeEventListener("resize", renderChart);
-  }, [data]);
+    window.addEventListener('resize', () => renderChart());
+    window.addEventListener('chart:highlight', handleHighlight as EventListener);
+    window.addEventListener('chart:clear', handleClear as EventListener);
+    window.addEventListener('chart:zoom', handleZoom as EventListener);
+    window.addEventListener('chart:filter', handleFilter as EventListener);
+
+    return () => {
+      window.removeEventListener('resize', () => renderChart());
+      window.removeEventListener('chart:highlight', handleHighlight as EventListener);
+      window.removeEventListener('chart:clear', handleClear as EventListener);
+      window.removeEventListener('chart:zoom', handleZoom as EventListener);
+      window.removeEventListener('chart:filter', handleFilter as EventListener);
+    };
+  }, [filteredData, data, highlightedDots, zoomScale]);
+
+  // The filters should be reset when the dataset changes
+  useEffect(() => {
+    setFilteredData(data);
+    setHighlightedDots(new Set());
+    setZoomScale(1);
+  }, [dataset]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

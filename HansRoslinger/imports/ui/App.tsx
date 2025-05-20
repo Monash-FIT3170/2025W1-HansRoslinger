@@ -1,84 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { D3LineChart } from "./Charts/D3LineChart";
-import { D3BarChart } from "./Charts/D3BarChart";
-import { WebcamComponent } from "./Video/webcam";
-import { Header } from "./Header";
-import { ImageSegmentation } from "./Video/ImageSegmentation/index";
+import React, { useState, useEffect } from 'react';
+import { D3LineChart } from './Charts/D3LineChart';
+import { D3BarChart } from './Charts/D3BarChart';
+import { WebcamComponent } from './Video/webcam';
+import { Header } from './Header';
+import { ImageSegmentation } from './Video/ImageSegmentation';
+import {useCurrentDataset, ChartType} from './Input/Data'
+import { Title } from './Charts/Title';
 
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [showWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
-  const [zoomStartPosition, setZoomStartPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [zoomStartPosition, setZoomStartPosition] = useState<{ x: number; y: number } | null>(null);
+  const currentDataset = useCurrentDataset();
 
-  const data = [
-    // { label: 'Jan 1', value: 45 },
-    // { label: 'Jan 2', value: 52 },
-    // { label: 'Jan 3', value: 48 },
-    // { label: 'Jan 4', value: 51 },
-
-    // { label: 'Feb 1', value: 55 },
-    // { label: 'Feb 2', value: 60 },
-    // { label: 'Feb 3', value: 58 },
-    // { label: 'Feb 4', value: 62 },
-
-    { label: "Mar 1", value: 65 },
-    { label: "Mar 2", value: 68 },
-    { label: "Mar 3", value: 70 },
-    { label: "Mar 4", value: 72 },
-
-    { label: "Apr 1", value: 90 },
-    { label: "Apr 2", value: 110 },
-    { label: "Apr 3", value: 105 },
-    { label: "Apr 4", value: 115 },
-
-    { label: "May 1", value: 80 },
-    { label: "May 2", value: 78 },
-    { label: "May 3", value: 82 },
-    { label: "May 4", value: 85 },
-
-    { label: "Jun 1", value: 75 },
-    { label: "Jun 2", value: 80 },
-    { label: "Jun 3", value: 78 },
-    { label: "Jun 4", value: 83 },
-
-    { label: "Jul 1", value: 70 },
-    { label: "Jul 2", value: 68 },
-    { label: "Jul 3", value: 72 },
-    { label: "Jul 4", value: 74 },
-
-    { label: "Aug 1", value: 100 },
-    { label: "Aug 2", value: 120 },
-    { label: "Aug 3", value: 115 },
-    { label: "Aug 4", value: 125 },
-
-    { label: "Sep 1", value: 85 },
-    { label: "Sep 2", value: 80 },
-    { label: "Sep 3", value: 78 },
-    { label: "Sep 4", value: 82 },
-
-    { label: "Oct 1", value: 70 },
-    { label: "Oct 2", value: 68 },
-    { label: "Oct 3", value: 72 },
-    { label: "Oct 4", value: 74 },
-
-    // { label: 'Nov 1', value: 60 },
-    // { label: 'Nov 2', value: 65 },
-    // { label: 'Nov 3', value: 62 },
-    // { label: 'Nov 4', value: 68 },
-
-    // { label: 'Dec 1', value: 55 },
-    // { label: 'Dec 2', value: 58 },
-    // { label: 'Dec 3', value: 60 },
-    // { label: 'Dec 4', value: 63 },
-  ];
-
+  // code which handles playing a dot at the start position of the zoom
   useEffect(() => {
     const handleToggleZoom = (event: Event) => {
       const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -101,6 +39,20 @@ export const App: React.FC = () => {
       window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
+  // code which switches the chart type when thumbs up is done
+  useEffect(() => {
+      const handleSwitchChart = () => {
+        setShowLineChart((prev) => !prev);
+      };
+
+      window.addEventListener('chart:switch', handleSwitchChart);
+      return () => window.removeEventListener('chart:switch', handleSwitchChart);
+    }, []);
+
+    useEffect(() => {
+      setShowLineChart(currentDataset.preferredChartType === ChartType.LINE);
+    }, [currentDataset]);
+
   const toolbarClasses = showHeader
     ? [
         "absolute top-4 right-4 bottom-4 w-16",
@@ -118,13 +70,12 @@ export const App: React.FC = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
-      {showWebcam && (
+      <div className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? 'invisible pointer-events-none' : '' }`}>
+        <WebcamComponent grayscale={grayscale} />
+      </div>
+      {backgroundRemoval && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {!backgroundRemoval ? (
-            <WebcamComponent grayscale={grayscale} />
-          ) : (
-            <ImageSegmentation grayscale={grayscale} />
-          )}
+          <ImageSegmentation grayscale={grayscale} />
         </div>
       )}
 
@@ -134,22 +85,29 @@ export const App: React.FC = () => {
           style={{
             left: `${zoomStartPosition.x}px`,
             top: `${zoomStartPosition.y}px`,
-            transform: "translate(-50%, -50%)",
+            transform: 'translate(-50%, -50%)',
           }}
         />
       )}
 
-      {/* Bottom-left transparent charts */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
-        style={{ bottom: "10%", width: "95%", height: "50%" }}
-      >
-        {showLineChart ? (
-          <D3LineChart data={data} />
-        ) : (
-          <D3BarChart data={data} />
-        )}
-      </div>
+      {/* charts */}
+        <div
+          className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+          style={{ bottom: '10%', width: '95%', height: '50%' }}
+        >
+          {showLineChart ? (
+            <D3LineChart dataset={currentDataset} />
+          ) : (
+            <D3BarChart dataset={currentDataset} />
+          )}
+        </div>
+        {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
+        <div
+          className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+          style={{ bottom: 0, width: '95%', height: '10%' }}
+        >
+          <Title dataset={currentDataset} />
+        </div>
 
       {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
       <div className={toolbarClasses}>

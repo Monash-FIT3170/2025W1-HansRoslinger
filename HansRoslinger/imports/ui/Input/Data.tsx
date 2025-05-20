@@ -19,7 +19,7 @@ export interface Dataset {
 }
 
 export function useCurrentDataset() {
-  const [_, setCurrentIndex] = useState(0);
+  const [, setCurrentIndex] = useState(0);
   const [currentDataset, setCurrentDataset] = useState(datasets[0]);
 
   useEffect(() => {

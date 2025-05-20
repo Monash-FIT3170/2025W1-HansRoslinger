@@ -1,9 +1,4 @@
-import { Gesture } from './gesture';
-
-export const processSwitchChartType = (
-  _1: Gesture,
-  _2: Gesture,
-): void => {
+export const processSwitchChartType = (): void => {
 
   const gestureEvent = new CustomEvent('chart:switch', {
   });

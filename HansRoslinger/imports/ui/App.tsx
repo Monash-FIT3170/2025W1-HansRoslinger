@@ -10,7 +10,6 @@ import { Title } from './Charts/Title';
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [showWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
@@ -42,7 +41,7 @@ export const App: React.FC = () => {
 
   // code which switches the chart type when thumbs up is done
   useEffect(() => {
-      const handleSwitchChart = (event: Event) => {
+      const handleSwitchChart = () => {
         setShowLineChart((prev) => !prev);
       };
 

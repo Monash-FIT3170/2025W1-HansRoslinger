@@ -1,9 +1,6 @@
 import { Gesture, gestureToScreenPosition } from "./gesture";
 
-export const processZoomChart = (
-  _1: Gesture,
-  latestGesture: Gesture,
-): void => {
+export const processZoomChart = (_1: Gesture, latestGesture: Gesture): void => {
   const screenPosition = gestureToScreenPosition(
     latestGesture.landmarks[9].x,
     latestGesture.landmarks[9].y,

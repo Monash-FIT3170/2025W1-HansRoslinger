@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { D3LineChart } from './Charts/D3LineChart';
-import { D3BarChart } from './Charts/D3BarChart';
-import { WebcamComponent } from './Video/webcam';
-import { Header } from './Header';
-import { ImageSegmentation } from './Video/ImageSegmentation';
-import {useCurrentDataset, ChartType} from './Input/Data'
-import { Title } from './Charts/Title';
+import React, { useState, useEffect } from "react";
+import { D3LineChart } from "./Charts/D3LineChart";
+import { D3BarChart } from "./Charts/D3BarChart";
+import { WebcamComponent } from "./Video/webcam";
+import { Header } from "./Header";
+import { ImageSegmentation } from "./Video/ImageSegmentation";
+import { useCurrentDataset, ChartType } from "./Input/Data";
+import { Title } from "./Charts/Title";
 
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -13,7 +13,10 @@ export const App: React.FC = () => {
   const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
-  const [zoomStartPosition, setZoomStartPosition] = useState<{ x: number; y: number } | null>(null);
+  const [zoomStartPosition, setZoomStartPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const currentDataset = useCurrentDataset();
 
   // code which handles playing a dot at the start position of the zoom
@@ -41,17 +44,17 @@ export const App: React.FC = () => {
 
   // code which switches the chart type when thumbs up is done
   useEffect(() => {
-      const handleSwitchChart = () => {
-        setShowLineChart((prev) => !prev);
-      };
+    const handleSwitchChart = () => {
+      setShowLineChart((prev) => !prev);
+    };
 
-      window.addEventListener('chart:switch', handleSwitchChart);
-      return () => window.removeEventListener('chart:switch', handleSwitchChart);
-    }, []);
+    window.addEventListener("chart:switch", handleSwitchChart);
+    return () => window.removeEventListener("chart:switch", handleSwitchChart);
+  }, []);
 
-    useEffect(() => {
-      setShowLineChart(currentDataset.preferredChartType === ChartType.LINE);
-    }, [currentDataset]);
+  useEffect(() => {
+    setShowLineChart(currentDataset.preferredChartType === ChartType.LINE);
+  }, [currentDataset]);
 
   const toolbarClasses = showHeader
     ? [
@@ -70,7 +73,9 @@ export const App: React.FC = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
-      <div className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? 'invisible pointer-events-none' : '' }`}>
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
+      >
         <WebcamComponent grayscale={grayscale} />
       </div>
       {backgroundRemoval && (
@@ -85,29 +90,29 @@ export const App: React.FC = () => {
           style={{
             left: `${zoomStartPosition.x}px`,
             top: `${zoomStartPosition.y}px`,
-            transform: 'translate(-50%, -50%)',
+            transform: "translate(-50%, -50%)",
           }}
         />
       )}
 
       {/* charts */}
-        <div
-          className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
-          style={{ bottom: '10%', width: '95%', height: '50%' }}
-        >
-          {showLineChart ? (
-            <D3LineChart dataset={currentDataset} />
-          ) : (
-            <D3BarChart dataset={currentDataset} />
-          )}
-        </div>
-        {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
-        <div
-          className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
-          style={{ bottom: 0, width: '95%', height: '10%' }}
-        >
-          <Title dataset={currentDataset} />
-        </div>
+      <div
+        className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+        style={{ bottom: "10%", width: "95%", height: "50%" }}
+      >
+        {showLineChart ? (
+          <D3LineChart dataset={currentDataset} />
+        ) : (
+          <D3BarChart dataset={currentDataset} />
+        )}
+      </div>
+      {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
+      <div
+        className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+        style={{ bottom: 0, width: "95%", height: "10%" }}
+      >
+        <Title dataset={currentDataset} />
+      </div>
 
       {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
       <div className={toolbarClasses}>

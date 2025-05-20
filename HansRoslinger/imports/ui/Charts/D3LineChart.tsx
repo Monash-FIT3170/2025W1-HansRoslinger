@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
@@ -10,8 +10,8 @@ import {
   AXIS_LINE_SHADOW,
   LINE_STROKE_WIDTH,
   POINT_RADIUS,
-} from './constants';
-import { Dataset } from '../Input/Data';
+} from "./constants";
+import { Dataset } from "../Input/Data";
 
 interface D3LineChartProps {
   dataset: Dataset;
@@ -21,22 +21,30 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
   const [filteredData, setFilteredData] = useState(data);
-  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(new Set());
+  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(
+    new Set(),
+  );
   const [zoomScale, setZoomScale] = useState(1);
 
-  
   // this handles highlighting a particular point when the gesture is hovering over it
   const handleHighlight = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     const { x, y } = customEvent.detail;
     if (!chartRef.current) return;
 
-    const svg = d3.select(chartRef.current).select('svg');
-    const circles = svg.selectAll<SVGCircleElement, { label: string; value: number }>('circle');
+    const svg = d3.select(chartRef.current).select("svg");
+    const circles = svg.selectAll<
+      SVGCircleElement,
+      { label: string; value: number }
+    >("circle");
 
     // Get the position of all dots
-    const positions = [] as { cx: number; cy: number; d: { label: string; value: number }; node: SVGCircleElement }[];
-    
+    const positions = [] as {
+      cx: number;
+      cy: number;
+      d: { label: string; value: number };
+      node: SVGCircleElement;
+    }[];
 
     circles.each(function (d) {
       const bbox = this.getBoundingClientRect();
@@ -50,7 +58,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
     // it will only highlight one dot at a time, so this finds the closest dot to the gestures position
     let minDist = Infinity;
-    let closest = null as typeof positions[0] | null;
+    let closest = null as (typeof positions)[0] | null;
     for (const pos of positions) {
       const dist = Math.hypot(pos.cx - x, pos.cy - y); //sqrt((pos.cs - x)^2 + (pos.cy - y)^2)
       if (dist < minDist) {
@@ -62,7 +70,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     // this selects the closest dot as long as it's closer than 40 pixels away
     // which gives some leeway for selecting
     if (closest && minDist <= 40) {
-      setHighlightedDots(prev => {
+      setHighlightedDots((prev) => {
         const next = new Set(prev);
         if (next.has(closest!.d.label)) {
           next.delete(closest!.d.label);
@@ -82,7 +90,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     if (isFiltered) {
       setFilteredData(data);
       setZoomScale(1);
-    // otherwise it will clear the highlighted dots next
+      // otherwise it will clear the highlighted dots next
     } else if (highlightedDots.size > 0) {
       setHighlightedDots(new Set());
     }
@@ -90,14 +98,15 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
   const handleFilter = () => {
     if (highlightedDots.size > 0) {
-      setFilteredData(data.filter(d => highlightedDots.has(d.label)));
+      setFilteredData(data.filter((d) => highlightedDots.has(d.label)));
     }
   };
 
-
-
   const handleZoom = (event: Event) => {
-    const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
+    const customEvent = event as CustomEvent<{
+      scaleX: number;
+      scaleY: number;
+    }>;
     const { scaleX, scaleY } = customEvent.detail;
 
     // this is making sure that the user can't zoom in so much that part of the graph is not visible (going out of the screen)
@@ -106,7 +115,10 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
     // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
-    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
+    const clampedScaleX = Math.max(
+      0.5,
+      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
+    );
     // the user can at most show 10% of the graph of 100% of the graph
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
@@ -122,16 +134,21 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       if (selected.length > 0) {
         // get the index positions of all the highlighted bars
         const indices = selected
-          .map(label => data.findIndex(d => d.label === label))
-          .filter(i => i !== -1)
+          .map((label) => data.findIndex((d) => d.label === label))
+          .filter((i) => i !== -1)
           .sort((a, b) => a - b);
 
         const minIndex = indices[0];
         const maxIndex = indices[indices.length - 1];
-        const avgIndex = Math.round(indices.reduce((a, b) => a + b, 0) / indices.length);
+        const avgIndex = Math.round(
+          indices.reduce((a, b) => a + b, 0) / indices.length,
+        );
 
         visible = Math.max(visible, maxIndex - minIndex + 1);
-        start = Math.max(0, Math.min(total - visible, avgIndex - Math.floor(visible / 2)));
+        start = Math.max(
+          0,
+          Math.min(total - visible, avgIndex - Math.floor(visible / 2)),
+        );
 
         if (start > minIndex) start = minIndex;
         if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
@@ -154,13 +171,13 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
     const svg = d3
       .select(chartRef.current)
-      .append('svg')
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'none')
-      .style('width', '100%')
-      .style('height', '100%')
-      .style('background-color', 'transparent')
-      .style('overflow', 'visible');
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "none")
+      .style("width", "100%")
+      .style("height", "100%")
+      .style("background-color", "transparent")
+      .style("overflow", "visible");
 
     const xScale = d3
       .scalePoint()
@@ -182,23 +199,24 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .append("g")
       .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', axisFontSize)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", axisFontSize)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
     svg
-      .append('g')
-      .attr('transform', `translate(${width * 0.05}, 0)`)
+      .append("g")
+      .attr("transform", `translate(${width * 0.05}, 0)`)
       .call(d3.axisLeft(yScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', axisFontSize)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", axisFontSize)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
-    svg.selectAll('path, line')
-      .attr('stroke', AXIS_COLOR)
-      .style('filter', AXIS_LINE_SHADOW);
+    svg
+      .selectAll("path, line")
+      .attr("stroke", AXIS_COLOR)
+      .style("filter", AXIS_LINE_SHADOW);
 
     const line = d3
       .line<{ label: string; value: number }>()
@@ -207,62 +225,73 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .curve(d3.curveMonotoneX);
 
     svg
-      .append('path')
+      .append("path")
       .datum(customData)
-      .attr('fill', 'none')
-      .attr('stroke', DEFAULT_COLOUR)
-      .attr('stroke-width', LINE_STROKE_WIDTH)
-      .attr('d', line);
+      .attr("fill", "none")
+      .attr("stroke", DEFAULT_COLOUR)
+      .attr("stroke-width", LINE_STROKE_WIDTH)
+      .attr("d", line);
 
     // Draw dots
     svg
-      .selectAll('.dot')
+      .selectAll(".dot")
       .data(customData)
-      .join('circle')
-      .attr('class', 'dot')
-      .attr('cx', (d) => xScale(d.label)!)
-      .attr('cy', (d) => yScale(d.value))
-      .attr('r', POINT_RADIUS * fontScale)
-      .attr('fill', (d) => highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR)
-      .on('mouseover', function () {
-        d3.select(this).attr('fill', SELECT_COLOUR);
+      .join("circle")
+      .attr("class", "dot")
+      .attr("cx", (d) => xScale(d.label)!)
+      .attr("cy", (d) => yScale(d.value))
+      .attr("r", POINT_RADIUS * fontScale)
+      .attr("fill", (d) =>
+        highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
+      )
+      .on("mouseover", function () {
+        d3.select(this).attr("fill", SELECT_COLOUR);
       })
-      .on('mouseout', function (event, d) {
-        d3.select(this).attr('fill', highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR);
+      .on("mouseout", function (event, d) {
+        d3.select(this).attr(
+          "fill",
+          highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
+        );
       });
 
     // Draw labels for selected dots
     svg
-      .selectAll('.dot-label')
-      .data(customData.filter(d => highlightedDots.has(d.label)))
-      .join('text')
-      .attr('class', 'dot-label')
-      .attr('x', d => xScale(d.label)!)
-      .attr('y', d => yScale(d.value) - POINT_RADIUS * fontScale - 8)
-      .attr('text-anchor', 'middle')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', `calc(16px * ${fontScale})`)
-      .style('font-weight', 'bold')
-      .style('text-shadow', AXIS_TEXT_SHADOW)
-      .text(d => `${d.label} ${d.value}`);
+      .selectAll(".dot-label")
+      .data(customData.filter((d) => highlightedDots.has(d.label)))
+      .join("text")
+      .attr("class", "dot-label")
+      .attr("x", (d) => xScale(d.label)!)
+      .attr("y", (d) => yScale(d.value) - POINT_RADIUS * fontScale - 8)
+      .attr("text-anchor", "middle")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", `calc(16px * ${fontScale})`)
+      .style("font-weight", "bold")
+      .style("text-shadow", AXIS_TEXT_SHADOW)
+      .text((d) => `${d.label} ${d.value}`);
 
-    svg.attr('transform', `scale(${zoomScale})`);
+    svg.attr("transform", `scale(${zoomScale})`);
   };
 
   useEffect(() => {
     renderChart();
-    window.addEventListener('resize', () => renderChart());
-    window.addEventListener('chart:highlight', handleHighlight as EventListener);
-    window.addEventListener('chart:clear', handleClear as EventListener);
-    window.addEventListener('chart:zoom', handleZoom as EventListener);
-    window.addEventListener('chart:filter', handleFilter as EventListener);
+    window.addEventListener("resize", () => renderChart());
+    window.addEventListener(
+      "chart:highlight",
+      handleHighlight as EventListener,
+    );
+    window.addEventListener("chart:clear", handleClear as EventListener);
+    window.addEventListener("chart:zoom", handleZoom as EventListener);
+    window.addEventListener("chart:filter", handleFilter as EventListener);
 
     return () => {
-      window.removeEventListener('resize', () => renderChart());
-      window.removeEventListener('chart:highlight', handleHighlight as EventListener);
-      window.removeEventListener('chart:clear', handleClear as EventListener);
-      window.removeEventListener('chart:zoom', handleZoom as EventListener);
-      window.removeEventListener('chart:filter', handleFilter as EventListener);
+      window.removeEventListener("resize", () => renderChart());
+      window.removeEventListener(
+        "chart:highlight",
+        handleHighlight as EventListener,
+      );
+      window.removeEventListener("chart:clear", handleClear as EventListener);
+      window.removeEventListener("chart:zoom", handleZoom as EventListener);
+      window.removeEventListener("chart:filter", handleFilter as EventListener);
     };
   }, [filteredData, data, highlightedDots, zoomScale]);
 

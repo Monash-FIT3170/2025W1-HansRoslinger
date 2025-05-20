@@ -2,8 +2,8 @@ import { processHighlightChart } from "./highlightChart";
 import { processClearChart } from "./clearChart";
 import { processFilterChart } from "./filterChart";
 import { processZoomChart, processZoom } from "./ZoomChart";
-import { processSwitchChartType} from "./switchChartType";
-import { processSwitchDataset} from "./switchDataset"
+import { processSwitchChartType } from "./switchChartType";
+import { processSwitchDataset } from "./switchDataset";
 
 enum GestureType {
   CLOSED_FIST,
@@ -80,8 +80,7 @@ const handleGestureToFunc = (
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {
       processZoomChart(initialGesture, latestGesture);
-    }
-    else {
+    } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {

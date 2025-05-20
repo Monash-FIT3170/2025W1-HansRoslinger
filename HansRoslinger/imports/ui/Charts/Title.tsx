@@ -1,11 +1,11 @@
-import React from 'react';
-import { Dataset } from '../Input/Data';
+import React from "react";
+import { Dataset } from "../Input/Data";
 import {
   TITLE_FONT_SIZE,
   TITLE_FONT_FAMILY,
   TITLE_COLOR,
   TITLE_TEXT_SHADOW,
-} from './constants';
+} from "./constants";
 
 interface TitleProps {
   dataset: Dataset;
@@ -14,12 +14,12 @@ interface TitleProps {
 export const Title: React.FC<TitleProps> = ({ dataset }) => (
   <div
     style={{
-      textAlign: 'center',
+      textAlign: "center",
       fontSize: TITLE_FONT_SIZE,
       fontFamily: TITLE_FONT_FAMILY,
       color: TITLE_COLOR,
-      fontWeight: 'bold',
-      margin: '16px 0',
+      fontWeight: "bold",
+      margin: "16px 0",
       textShadow: TITLE_TEXT_SHADOW,
     }}
   >

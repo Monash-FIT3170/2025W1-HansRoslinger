@@ -3,7 +3,7 @@ import { D3LineChart } from './Charts/D3LineChart';
 import { D3BarChart } from './Charts/D3BarChart';
 import { WebcamComponent } from './Video/webcam';
 import { Header } from './Header';
-// import { ImageSegmentation } from './Video/ImageSegmentation/index';
+import { ImageSegmentation } from './Video/ImageSegmentation';
 import {useCurrentDataset, ChartType} from './Input/Data'
 import { Title } from './Charts/Title';
 
@@ -67,30 +67,32 @@ export const App: React.FC = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
-      {showWebcam && (
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center ${
+          backgroundRemoval ? 'invisible pointer-events-none' : ''
+        }`}
+      >
+        <WebcamComponent grayscale={grayscale} />
+      </div>
+      {/* Render ImageSegmentation on top when background removal is enabled */}
+      {backgroundRemoval && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {!backgroundRemoval ? (
-            <WebcamComponent grayscale={grayscale} />
-          ) : (
-            <WebcamComponent grayscale={grayscale} />
-
-            // <ImageSegmentation grayscale={grayscale} />
-          )}
+          <ImageSegmentation grayscale={grayscale} />
         </div>
-            )}
+      )}
 
-        {isZoomEnabled && zoomStartPosition && (
-          <div
-            className="absolute w-4 h-4 bg-cyan-400 rounded-full pointer-events-none z-50"
-            style={{
-              left: `${zoomStartPosition.x}px`,
-              top: `${zoomStartPosition.y}px`,
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-        )}
+      {isZoomEnabled && zoomStartPosition && (
+        <div
+          className="absolute w-4 h-4 bg-cyan-400 rounded-full pointer-events-none z-50"
+          style={{
+            left: `${zoomStartPosition.x}px`,
+            top: `${zoomStartPosition.y}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      )}
 
-        {/* charts */}
+      {/* charts */}
         <div
           className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
           style={{ bottom: '10%', width: '95%', height: '50%' }}

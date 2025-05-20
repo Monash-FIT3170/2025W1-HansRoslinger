@@ -67,14 +67,9 @@ export const App: React.FC = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Fullscreen video */}
-      <div
-        className={`absolute inset-0 flex flex-col items-center justify-center ${
-          backgroundRemoval ? 'invisible pointer-events-none' : ''
-        }`}
-      >
+      <div className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? 'invisible pointer-events-none' : '' }`}>
         <WebcamComponent grayscale={grayscale} />
       </div>
-      {/* Render ImageSegmentation on top when background removal is enabled */}
       {backgroundRemoval && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <ImageSegmentation grayscale={grayscale} />

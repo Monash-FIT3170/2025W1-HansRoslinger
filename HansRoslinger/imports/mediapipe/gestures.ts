@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, Handedness, Gesture,  } from "../gesture/gesture";
+import { GestureType, Handedness, Gesture } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
 
 /*
@@ -12,12 +12,12 @@ Sample result from gestureRecognizer.recognizeForVideo(video, performance.now())
 
 const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
   // Gesture Constants
-  const NUM_HANDS_DETECTABLE = 2                    // Maximum number of hands that will be detected in a single recognition
-  const MIN_HAND_DETECTION_CONFIDENCE = 0.6         // e.g., 0.6 means at least 60% confidence required                    
-  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 10   // in ms
-  const SETUP_MAX_RETRIES = 5;                      // how many times to reattempt setting up mediapipe imports
-  const SETUP_RETRY_DELAY = 1000;                   // in ms
-  const VIDEO_HAS_ENOUGH_DATA = 4;                  // HTMLMediaElement.readyState, 4 = HAVE_ENOUGH_DATA which means media can be played long enough for gesture detection
+  const NUM_HANDS_DETECTABLE = 2; // Maximum number of hands that will be detected in a single recognition
+  const MIN_HAND_DETECTION_CONFIDENCE = 0.6; // e.g., 0.6 means at least 60% confidence required
+  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 10; // in ms
+  const SETUP_MAX_RETRIES = 5; // how many times to reattempt setting up mediapipe imports
+  const SETUP_RETRY_DELAY = 1000; // in ms
+  const VIDEO_HAS_ENOUGH_DATA = 4; // HTMLMediaElement.readyState, 4 = HAVE_ENOUGH_DATA which means media can be played long enough for gesture detection
 
   // React specific variables
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>(

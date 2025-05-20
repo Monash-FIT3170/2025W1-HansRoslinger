@@ -27,7 +27,6 @@ export const GestureHandler = () => {
         handleGestureToFunc(gesture.gestureID, currentGesture, gesture);
         // we update the time so we don't have duplicate activations
         currentGesture.timestamp = new Date();
-
       }
     }
   };

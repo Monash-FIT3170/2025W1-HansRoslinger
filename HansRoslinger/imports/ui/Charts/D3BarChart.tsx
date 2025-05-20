@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
@@ -27,12 +27,20 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
     if (!chartRef.current) return;
 
-    const svg = d3.select(chartRef.current).select('svg');
-    const bars = svg.selectAll<SVGRectElement, { label: string; value: number }>('rect.bar');
+    const svg = d3.select(chartRef.current).select("svg");
+    const bars = svg.selectAll<
+      SVGRectElement,
+      { label: string; value: number }
+    >("rect.bar");
 
     bars.each(function (d) {
       const bbox = this.getBoundingClientRect();
-      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+      if (
+        x >= bbox.left &&
+        x <= bbox.right &&
+        y >= bbox.top &&
+        y <= bbox.bottom
+      ) {
         setSelectedBars((prev) => {
           const next = new Set(prev);
           if (next.has(d.label)) {
@@ -59,12 +67,15 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
   const handleFilter = () => {
     if (selectedBars.size > 0) {
-      setFilteredData(data.filter(d => selectedBars.has(d.label)));
+      setFilteredData(data.filter((d) => selectedBars.has(d.label)));
     }
   };
 
   const handleZoom = (event: Event) => {
-    const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
+    const customEvent = event as CustomEvent<{
+      scaleX: number;
+      scaleY: number;
+    }>;
     const { scaleX, scaleY } = customEvent.detail;
 
     // make it so you can't make the allowed scale larger than the screen
@@ -72,7 +83,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     const windowWidth = window.innerWidth;
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
-    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
+    const clampedScaleX = Math.max(
+      0.5,
+      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
+    );
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
     setZoomScale(clampedScaleX);
@@ -85,8 +99,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       const selected = Array.from(selectedBars);
       if (selected.length > 0) {
         const indices = selected
-          .map(label => data.findIndex(d => d.label === label))
-          .filter(i => i !== -1)
+          .map((label) => data.findIndex((d) => d.label === label))
+          .filter((i) => i !== -1)
           .sort((a, b) => a - b);
 
         const minIndex = indices[0];
@@ -94,7 +108,13 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
         visible = Math.max(visible, maxIndex - minIndex + 1);
 
-        start = Math.max(0, Math.min(total - visible, Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2)));
+        start = Math.max(
+          0,
+          Math.min(
+            total - visible,
+            Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2),
+          ),
+        );
 
         if (start > minIndex) start = minIndex;
         if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
@@ -119,13 +139,13 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
 
     const svg = d3
       .select(chartRef.current)
-      .append('svg')
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'none')
-      .style('width', '100%')
-      .style('height', '100%')
-      .style('background-color', 'transparent')
-      .style('overflow', 'visible'); // <-- Add this line
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "none")
+      .style("width", "100%")
+      .style("height", "100%")
+      .style("background-color", "transparent")
+      .style("overflow", "visible"); // <-- Add this line
 
     const xScale = d3
       .scaleBand()
@@ -152,71 +172,80 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       .append("g")
       .attr("transform", `translate(${MARGIN.left}, 0)`)
       .call(d3.axisLeft(yScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', AXIS_FONT_SIZE)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
-
-    svg.selectAll('path, line')
-      .attr('stroke', AXIS_COLOR)
-      .style('filter', AXIS_LINE_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", AXIS_FONT_SIZE)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
     svg
-      .selectAll('.bar')
+      .selectAll("path, line")
+      .attr("stroke", AXIS_COLOR)
+      .style("filter", AXIS_LINE_SHADOW);
+
+    svg
+      .selectAll(".bar")
       .data(filteredData)
-      .join('rect')
-      .attr('class', 'bar')
-      .attr('x', (d) => xScale(d.label) || 0)
-      .attr('y', (d) => yScale(d.value))
-      .attr('width', xScale.bandwidth())
-      .attr('height', (d) => height - MARGIN.bottom - yScale(d.value))
-      .attr('fill', (d) => (selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR))
-      .style('opacity', BAR_OPACITY);
+      .join("rect")
+      .attr("class", "bar")
+      .attr("x", (d) => xScale(d.label) || 0)
+      .attr("y", (d) => yScale(d.value))
+      .attr("width", xScale.bandwidth())
+      .attr("height", (d) => height - MARGIN.bottom - yScale(d.value))
+      .attr("fill", (d) =>
+        selectedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
+      )
+      .style("opacity", BAR_OPACITY);
 
     svg
-      .selectAll('.label')
-      .data(filteredData.filter(d => selectedBars.has(d.label)))
-      .join('text')
-      .attr('class', 'label')
-      .attr('x', d => (xScale(d.label) || 0) + xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d.value) - 5)
-      .attr('text-anchor', 'middle')
-      .attr('fill', AXIS_COLOR)
-      .each(function(d) {
-      // this is making the text on the selected bars be the size of the bar
-      const text = `${d.label} - ${d.value}`;
-      const barWidth = xScale.bandwidth();
-      // minimum size so that it can be visible when fully zoomed out
-      const fontSize = Math.max(20, barWidth * 0.8 / text.length * 1.8);
-      d3.select(this)
-        .style('font-size', `${fontSize}px`)
-        .style('text-shadow', AXIS_TEXT_SHADOW)
-        .html(null)
-        .append('tspan')
-        .attr('font-weight', 'bold')
-        .text(d.label + ' ')
-        .append('tspan')
-        .attr('font-weight', null)
-        .text(d.value);
+      .selectAll(".label")
+      .data(filteredData.filter((d) => selectedBars.has(d.label)))
+      .join("text")
+      .attr("class", "label")
+      .attr("x", (d) => (xScale(d.label) || 0) + xScale.bandwidth() / 2)
+      .attr("y", (d) => yScale(d.value) - 5)
+      .attr("text-anchor", "middle")
+      .attr("fill", AXIS_COLOR)
+      .each(function (d) {
+        // this is making the text on the selected bars be the size of the bar
+        const text = `${d.label} - ${d.value}`;
+        const barWidth = xScale.bandwidth();
+        // minimum size so that it can be visible when fully zoomed out
+        const fontSize = Math.max(20, ((barWidth * 0.8) / text.length) * 1.8);
+        d3.select(this)
+          .style("font-size", `${fontSize}px`)
+          .style("text-shadow", AXIS_TEXT_SHADOW)
+          .html(null)
+          .append("tspan")
+          .attr("font-weight", "bold")
+          .text(d.label + " ")
+          .append("tspan")
+          .attr("font-weight", null)
+          .text(d.value);
       });
 
-    svg.attr('transform', `scale(${zoomScale})`);
+    svg.attr("transform", `scale(${zoomScale})`);
   };
 
   useEffect(() => {
     renderChart();
-    window.addEventListener('resize', renderChart);
-    window.addEventListener('chart:highlight', handleHighlight as EventListener);
-    window.addEventListener('chart:clear', handleClear as EventListener);
-    window.addEventListener('chart:filter', handleFilter as EventListener);
-    window.addEventListener('chart:zoom', handleZoom as EventListener);
+    window.addEventListener("resize", renderChart);
+    window.addEventListener(
+      "chart:highlight",
+      handleHighlight as EventListener,
+    );
+    window.addEventListener("chart:clear", handleClear as EventListener);
+    window.addEventListener("chart:filter", handleFilter as EventListener);
+    window.addEventListener("chart:zoom", handleZoom as EventListener);
 
     return () => {
-      window.removeEventListener('resize', renderChart);
-      window.removeEventListener('chart:clear', handleClear as EventListener);
-      window.removeEventListener('chart:highlight', handleHighlight as EventListener);
-      window.removeEventListener('chart:filter', handleFilter as EventListener);
-      window.removeEventListener('chart:zoom', handleZoom as EventListener);
+      window.removeEventListener("resize", renderChart);
+      window.removeEventListener("chart:clear", handleClear as EventListener);
+      window.removeEventListener(
+        "chart:highlight",
+        handleHighlight as EventListener,
+      );
+      window.removeEventListener("chart:filter", handleFilter as EventListener);
+      window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
   }, [data, filteredData, selectedBars, zoomScale]);
 

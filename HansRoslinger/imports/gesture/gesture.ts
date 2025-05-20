@@ -15,14 +15,14 @@ enum GestureType {
 }
 
 export const labelMapping: Record<string, GestureType> = {
-  "Thumb_Up": GestureType.THUMB_UP,
-  "Thumb_Down": GestureType.THUMB_DOWN,
-  "Pointing_Up": GestureType.POINTING_UP,
-  "Closed_Fist": GestureType.CLOSED_FIST,
-  "I_Love_You": GestureType.I_LOVE_YOU,
-  "Unidentified": GestureType.UNIDENTIFIED,
-  "Open_Palm": GestureType.OPEN_PALM,
-  "Victory": GestureType.VICTORY,
+  Thumb_Up: GestureType.THUMB_UP,
+  Thumb_Down: GestureType.THUMB_DOWN,
+  Pointing_Up: GestureType.POINTING_UP,
+  Closed_Fist: GestureType.CLOSED_FIST,
+  I_Love_You: GestureType.I_LOVE_YOU,
+  Unidentified: GestureType.UNIDENTIFIED,
+  Open_Palm: GestureType.OPEN_PALM,
+  Victory: GestureType.VICTORY,
 };
 
 enum Handedness {
@@ -68,14 +68,17 @@ const defaultMapping = {
 };
 
 // Default mapping, would replace console.log with function to be called.
-const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
+const handleGestureToFunc = (
+  INPUT: GestureType,
+  initialGesture: Gesture,
+  latestGesture: Gesture,
+): void => {
   const label = labelMapping[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {
       processVictorySignGesture(initialGesture, latestGesture);
-    }
-    else {
+    } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
@@ -86,15 +89,21 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
       console.warn(`No handler found for gesture: ${INPUT}`);
     }
   }
-  
 };
 
-export { Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
+export {
+  Gesture,
+  GestureType,
+  Handedness,
+  defaultMapping,
+  handleGestureToFunc,
+  isZoomEnabled,
+};
 
 export const gestureToScreenPosition = (
   x: number,
   y: number,
-  z?: number
+  z?: number,
 ): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;

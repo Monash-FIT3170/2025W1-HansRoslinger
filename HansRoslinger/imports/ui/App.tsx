@@ -10,7 +10,7 @@ import { Title } from './Charts/Title';
 export const App: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [showWebcam, _] = useState(true);
+  const [showWebcam] = useState(true);
   const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
@@ -24,7 +24,10 @@ export const App: React.FC = () => {
       setIsZoomEnabled((prev) => {
         const next = !prev;
         if (next && customEvent.detail) {
-          setZoomStartPosition({ x: customEvent.detail.x, y: customEvent.detail.y });
+          setZoomStartPosition({
+            x: customEvent.detail.x,
+            y: customEvent.detail.y,
+          });
         } else {
           setZoomStartPosition(null);
         }
@@ -32,8 +35,9 @@ export const App: React.FC = () => {
       });
     };
 
-    window.addEventListener('chart:togglezoom', handleToggleZoom);
-    return () => window.removeEventListener('chart:togglezoom', handleToggleZoom);
+    window.addEventListener("chart:togglezoom", handleToggleZoom);
+    return () =>
+      window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
   // code which switches the chart type when thumbs up is done
@@ -52,17 +56,17 @@ export const App: React.FC = () => {
 
   const toolbarClasses = showHeader
     ? [
-        'absolute top-4 right-4 bottom-4 w-16',
-        'bg-gray-800 rounded-2xl shadow-lg',
-        'flex flex-col items-center justify-end py-4 space-y-2',
-        'z-50',
-      ].join(' ')
+        "absolute top-4 right-4 bottom-4 w-16",
+        "bg-gray-800 rounded-2xl shadow-lg",
+        "flex flex-col items-center justify-end py-4 space-y-2",
+        "z-50",
+      ].join(" ")
     : [
-        'absolute bottom-4 right-4 w-16 h-16',
-        'bg-gray-900 rounded-xl shadow-lg',
-        'flex items-center justify-center',
-        'z-50',
-      ].join(' ');
+        "absolute bottom-4 right-4 w-16 h-16",
+        "bg-gray-900 rounded-xl shadow-lg",
+        "flex items-center justify-center",
+        "z-50",
+      ].join(" ");
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -120,7 +124,7 @@ export const App: React.FC = () => {
           className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
           onClick={() => setShowHeader((h) => !h)}
         >
-          {showHeader ? 'Hide' : 'Show'}
+          {showHeader ? "Hide" : "Show"}
         </button>
       </div>
     </div>

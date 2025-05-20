@@ -1,0 +1,26 @@
+name: Prettier
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HansRoslinger
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Prettify code
+        uses: creyD/prettier_action@v4.5
+        with:
+          prettier_options: --write **/*.{ts,tsx}

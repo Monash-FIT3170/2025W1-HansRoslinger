@@ -10,21 +10,21 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP,        // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
   THUMB_DOWN,
   THUMB_UP,
-  VICTORY,            // This is the peace sign
+  VICTORY, // This is the peace sign
 }
 
 export const labelMapping: Record<string, GestureType> = {
-  "Thumb_Up": GestureType.THUMB_UP,
-  "Thumb_Down": GestureType.THUMB_DOWN,
-  "Pointing_Up": GestureType.POINTING_UP,
-  "Closed_Fist": GestureType.CLOSED_FIST,
-  "I_Love_You": GestureType.I_LOVE_YOU,
-  "Unidentified": GestureType.UNIDENTIFIED,
-  "Open_Palm": GestureType.OPEN_PALM,
-  "Victory": GestureType.VICTORY,
+  Thumb_Up: GestureType.THUMB_UP,
+  Thumb_Down: GestureType.THUMB_DOWN,
+  Pointing_Up: GestureType.POINTING_UP,
+  Closed_Fist: GestureType.CLOSED_FIST,
+  I_Love_You: GestureType.I_LOVE_YOU,
+  Unidentified: GestureType.UNIDENTIFIED,
+  Open_Palm: GestureType.OPEN_PALM,
+  Victory: GestureType.VICTORY,
 };
 
 enum Handedness {
@@ -33,10 +33,10 @@ enum Handedness {
 }
 
 type Gesture = {
-  gestureID: GestureType,
-  timestamp: Date,
-  handedness: Handedness,
-  confidence: number;    // 0-1
+  gestureID: GestureType;
+  timestamp: Date;
+  handedness: Handedness;
+  confidence: number; // 0-1
   landmarks: { x: number; y: number; z?: number }[];
 };
 
@@ -70,7 +70,11 @@ const defaultMapping = {
 };
 
 // Default mapping, would replace console.log with function to be called.
-const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
+const handleGestureToFunc = (
+  INPUT: GestureType,
+  initialGesture: Gesture,
+  latestGesture: Gesture,
+): void => {
   const label = labelMapping[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
@@ -88,15 +92,21 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
       console.warn(`No handler found for gesture: ${INPUT}`);
     }
   }
-  
 };
 
-export { Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
+export {
+  Gesture,
+  GestureType,
+  Handedness,
+  defaultMapping,
+  handleGestureToFunc,
+  isZoomEnabled,
+};
 
 export const gestureToScreenPosition = (
   x: number,
   y: number,
-  z?: number
+  z?: number,
 ): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;

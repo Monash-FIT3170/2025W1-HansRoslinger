@@ -1,1 +1,1 @@
-export { WebcamComponent } from './webcam'
+export { WebcamComponent } from "./webcam";

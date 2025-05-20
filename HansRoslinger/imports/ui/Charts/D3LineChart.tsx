@@ -150,7 +150,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
     const { width, height } = chartRef.current.getBoundingClientRect();
     if (width === 0 || height === 0) return;
-    d3.select(chartRef.current).selectAll('*').remove();
+    d3.select(chartRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(chartRef.current)
@@ -179,8 +179,8 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     const axisFontSize = `${AXIS_FONT_SIZE}`;
 
     svg
-      .append('g')
-      .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
+      .append("g")
+      .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
       .selectAll('text')
       .attr('fill', AXIS_COLOR)

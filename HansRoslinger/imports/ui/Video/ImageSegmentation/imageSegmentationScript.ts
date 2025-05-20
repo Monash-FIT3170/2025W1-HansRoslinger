@@ -18,38 +18,38 @@ import { ImageSegmenter, FilesetResolver } from "@mediapipe/tasks-vision";
 const video = document.getElementById("webcam") as HTMLVideoElement;
 const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
 const canvasCtx = canvasElement.getContext("2d");
-const webcamPredictions = document.getElementById("webcamPredictions");
+// const webcamPredictions = document.getElementById("webcamPredictions");
 const demosSection: HTMLElement = document.getElementById("demos");
 let enableWebcamButton: HTMLButtonElement;
-let webcamRunning: Boolean = false;
-const videoHeight: string = "360px";
-const videoWidth: string = "480px";
+let webcamRunning: boolean = false;
+// const videoHeight: string = "360px";
+// const videoWidth: string = "480px";
 let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
-const resultWidthHeigth = 256;
+// const resultWidthHeigth = 256;
 
 let imageSegmenter: ImageSegmenter;
-let labels: Array<string>;
+// let labels: Array<string>;
 
 // Create a transparent background (only keep person)
-const legendColors = [
-  [0, 0, 0, 0],     // Background - fully transparent
-  [255, 255, 255, 255]  // Person - keep original colors
-];
+// const legendColors = [
+//   [0, 0, 0, 0], // Background - fully transparent
+//   [255, 255, 255, 255], // Person - keep original colors
+// ];
 
 const createImageSegmenter = async () => {
   const audio = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm"
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm",
   );
 
   imageSegmenter = await ImageSegmenter.createFromOptions(audio, {
     baseOptions: {
       modelAssetPath:
         "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
-      delegate: "GPU"
+      delegate: "GPU",
     },
     runningMode: runningMode,
     outputCategoryMask: true,
-    outputConfidenceMasks: false
+    outputConfidenceMasks: false,
   });
   labels = imageSegmenter.getLabels();
   demosSection.classList.remove("invisible");
@@ -60,14 +60,22 @@ createImageSegmenter();
 
 function callbackForVideo(result: ImageSegmenterResult) {
   // Resize canvas to match video
-  if (canvasElement.width !== video.videoWidth || canvasElement.height !== video.videoHeight) {
+  if (
+    canvasElement.width !== video.videoWidth ||
+    canvasElement.height !== video.videoHeight
+  ) {
     canvasElement.width = video.videoWidth;
     canvasElement.height = video.videoHeight;
   }
 
   // Draw current video frame to canvas
   canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-  const frame = canvasCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+  const frame = canvasCtx.getImageData(
+    0,
+    0,
+    canvasElement.width,
+    canvasElement.height,
+  );
   const pixels = frame.data;
 
   // Get segmentation mask (values between 0 and 1)
@@ -76,8 +84,9 @@ function callbackForVideo(result: ImageSegmenterResult) {
   // Process each pixel
   for (let i = 0; i < mask.length; i++) {
     const pixelIndex = i * 4;
-    if (Math.round(mask[i]) === 1) {  // Background
-      pixels[pixelIndex + 3] = 0;     // Set alpha to 0 (transparent)
+    if (Math.round(mask[i]) === 1) {
+      // Background
+      pixels[pixelIndex + 3] = 0; // Set alpha to 0 (transparent)
     }
     // Person pixels (mask value 1) remain unchanged
   }
@@ -120,17 +129,17 @@ async function predictWebcam() {
   if (runningMode === "IMAGE") {
     runningMode = "VIDEO";
     await imageSegmenter.setOptions({
-      runningMode: runningMode
+      runningMode: runningMode,
     });
   }
-  let startTimeMs = performance.now();
+  const startTimeMs = performance.now();
 
   // Start segmenting the stream.
   imageSegmenter.segmentForVideo(video, startTimeMs, callbackForVideo);
 }
 
 // Enable the live webcam view and start imageSegmentation.
-async function enableCam(event) {
+async function enableCam() {
   if (imageSegmenter === undefined) {
     return;
   }
@@ -145,7 +154,7 @@ async function enableCam(event) {
 
   // getUsermedia parameters.
   const constraints = {
-    video: true
+    video: true,
   };
 
   // Activate the webcam stream.
@@ -156,7 +165,7 @@ async function enableCam(event) {
 // If webcam supported, add event listener to button.
 if (hasGetUserMedia()) {
   enableWebcamButton = document.getElementById(
-    "webcamButton"
+    "webcamButton",
   ) as HTMLButtonElement;
   enableWebcamButton.addEventListener("click", enableCam);
 } else {

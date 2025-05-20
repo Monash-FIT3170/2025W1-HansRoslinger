@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 import {
   DEFAULT_COLOUR,
   SELECT_COLOUR,
@@ -31,8 +31,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     // don't do anything if the chart is not currently shown to the user
     if (!chartRef.current) return;
 
-    const svg = d3.select(chartRef.current).select('svg');
-    const bars = svg.selectAll<SVGRectElement, { label: string; value: number }>('rect.bar');
+    const svg = d3.select(chartRef.current).select("svg");
+    const bars = svg.selectAll<
+      SVGRectElement,
+      { label: string; value: number }
+    >("rect.bar");
 
     // this is the complicated logic that checks the position of the pointer finter and checks whether it is over any particular bar chart
     bars.each(function (d) {
@@ -40,7 +43,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
         setHighlightedBars((prev) => {
           const next = new Set(prev);
-          next.has(d.label) ? next.delete(d.label) : next.add(d.label);
+          if (next.has(d.label)) {
+            next.delete(d.label);
+          } else {
+            next.add(d.label);
+          }
           return next;
         });
       }
@@ -69,7 +76,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
 
   
   const handleZoom = (event: Event) => {
-    const customEvent = event as CustomEvent<{ scaleX: number; scaleY: number }>;
+    const customEvent = event as CustomEvent<{
+      scaleX: number;
+      scaleY: number;
+    }>;
     const { scaleX, scaleY } = customEvent.detail;
 
     // this is making sure that the user can't zoom in so much that part of the graph is not visible (going out of the screen)
@@ -96,8 +106,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       if (selected.length > 0) {
         // get the index positions of all the highlighted bars
         const indices = selected
-          .map(label => data.findIndex(d => d.label === label))
-          .filter(i => i !== -1)
+          .map((label) => data.findIndex((d) => d.label === label))
+          .filter((i) => i !== -1)
           .sort((a, b) => a - b);
         
 
@@ -128,7 +138,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     const { width, height } = chartRef.current.getBoundingClientRect();
     if (width === 0 || height === 0) return;
 
-    d3.select(chartRef.current).selectAll('*').remove();
+    d3.select(chartRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(chartRef.current)
@@ -153,29 +163,30 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       .range([height - MARGIN.bottom, MARGIN.top]);
 
     svg
-      .append('g')
-      .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
+      .append("g")
+      .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', AXIS_FONT_SIZE)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", AXIS_FONT_SIZE)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
     svg
-      .append('g')
-      .attr('transform', `translate(${MARGIN.left}, 0)`)
+      .append("g")
+      .attr("transform", `translate(${MARGIN.left}, 0)`)
       .call(d3.axisLeft(yScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', AXIS_FONT_SIZE)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
-
-    svg.selectAll('path, line')
-      .attr('stroke', AXIS_COLOR)
-      .style('filter', AXIS_LINE_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", AXIS_FONT_SIZE)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
     svg
-      .selectAll('.bar')
+      .selectAll("path, line")
+      .attr("stroke", AXIS_COLOR)
+      .style("filter", AXIS_LINE_SHADOW);
+
+    svg
+      .selectAll(".bar")
       .data(filteredData)
       .join('rect')
       .attr('class', 'bar')
@@ -211,23 +222,29 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
           .text(d.value);
       });
 
-    svg.attr('transform', `scale(${zoomScale})`);
+    svg.attr("transform", `scale(${zoomScale})`);
   };
 
   useEffect(() => {
     renderChart();
-    window.addEventListener('resize', renderChart);
-    window.addEventListener('chart:highlight', handleHighlight as EventListener);
-    window.addEventListener('chart:clear', handleClear as EventListener);
-    window.addEventListener('chart:filter', handleFilter as EventListener);
-    window.addEventListener('chart:zoom', handleZoom as EventListener);
+    window.addEventListener("resize", renderChart);
+    window.addEventListener(
+      "chart:highlight",
+      handleHighlight as EventListener,
+    );
+    window.addEventListener("chart:clear", handleClear as EventListener);
+    window.addEventListener("chart:filter", handleFilter as EventListener);
+    window.addEventListener("chart:zoom", handleZoom as EventListener);
 
     return () => {
-      window.removeEventListener('resize', renderChart);
-      window.removeEventListener('chart:clear', handleClear as EventListener);
-      window.removeEventListener('chart:highlight', handleHighlight as EventListener);
-      window.removeEventListener('chart:filter', handleFilter as EventListener);
-      window.removeEventListener('chart:zoom', handleZoom as EventListener);
+      window.removeEventListener("resize", renderChart);
+      window.removeEventListener("chart:clear", handleClear as EventListener);
+      window.removeEventListener(
+        "chart:highlight",
+        handleHighlight as EventListener,
+      );
+      window.removeEventListener("chart:filter", handleFilter as EventListener);
+      window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
   }, [data, filteredData, highlightedBars, zoomScale]);
 

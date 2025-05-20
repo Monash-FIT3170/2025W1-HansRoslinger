@@ -1,4 +1,4 @@
-export const processThumbsDown = (): void => {
+export const processSwitchDataset = (): void => {
 
   const gestureEvent = new CustomEvent('chart:next-data', {
   });

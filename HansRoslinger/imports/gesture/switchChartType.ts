@@ -1,6 +1,6 @@
 import { Gesture } from './gesture';
 
-export const processThumbsUp = (
+export const processSwitchChartType = (
   _1: Gesture,
   _2: Gesture,
 ): void => {

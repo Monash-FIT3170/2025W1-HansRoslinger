@@ -1,6 +1,6 @@
 import { Gesture } from './gesture';
 
-export const processOpenPalmGesture = (
+export const processClearChart = (
   _1: Gesture,
   _2: Gesture,
 ): void => {

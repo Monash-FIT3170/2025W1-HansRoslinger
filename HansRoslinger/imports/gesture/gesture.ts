@@ -1,9 +1,9 @@
-import { processPointUpGesture } from "./PointUp";
-import { processOpenPalmGesture } from "./OpenPalm";
-import { processClosedFistGesture } from "./ClosedFist";
-import { processVictorySignGesture, processZoom } from "./VictorySign";
-import { processThumbsUp} from "./ThumbsUp";
-import { processThumbsDown} from "./ThumbsDown"
+import { processHighlightChart } from "./highlightChart";
+import { processClearChart } from "./clearChart";
+import { processFilterChart } from "./filterChart";
+import { processZoomChart, processZoom } from "./ZoomChart";
+import { processSwitchChartType} from "./switchChartType";
+import { processSwitchDataset} from "./switchDataset"
 
 enum GestureType {
   CLOSED_FIST,
@@ -59,14 +59,14 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: processThumbsUp,
-  [GestureType.THUMB_DOWN]: processThumbsDown,
-  [GestureType.POINTING_UP]: processPointUpGesture,
-  [GestureType.CLOSED_FIST]: processClosedFistGesture,
+  [GestureType.THUMB_UP]: processSwitchChartType,
+  [GestureType.THUMB_DOWN]: processSwitchDataset,
+  [GestureType.POINTING_UP]: processHighlightChart,
+  [GestureType.CLOSED_FIST]: processFilterChart,
   [GestureType.I_LOVE_YOU]: console.log,
   [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: processOpenPalmGesture,
-  [GestureType.VICTORY]: processVictorySignGesture,
+  [GestureType.OPEN_PALM]: processClearChart,
+  [GestureType.VICTORY]: processZoomChart,
 };
 
 // Default mapping, would replace console.log with function to be called.
@@ -75,7 +75,7 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {
-      processVictorySignGesture(initialGesture, latestGesture);
+      processZoomChart(initialGesture, latestGesture);
     }
     else {
       processZoom(zoomStartPosition!, latestGesture);

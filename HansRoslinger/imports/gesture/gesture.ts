@@ -8,10 +8,10 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP,        // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
   THUMB_DOWN,
   THUMB_UP,
-  VICTORY,            // This is the peace sign
+  VICTORY, // This is the peace sign
 }
 
 export const labelMapping: Record<string, GestureType> = {
@@ -31,10 +31,10 @@ enum Handedness {
 }
 
 type Gesture = {
-  gestureID: GestureType,
-  timestamp: Date,
-  handedness: Handedness,
-  confidence: number;    // 0-1
+  gestureID: GestureType;
+  timestamp: Date;
+  handedness: Handedness;
+  confidence: number; // 0-1
   landmarks: { x: number; y: number; z?: number }[];
 };
 

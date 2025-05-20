@@ -3,7 +3,7 @@ import { useRef } from "react";
 
 let isZoomEnabled = false;
 
-window.addEventListener("chart:togglezoom", (_: Event) => {
+window.addEventListener("chart:togglezoom", () => {
   isZoomEnabled = !isZoomEnabled;
 });
 

@@ -9,7 +9,7 @@ import {
   AXIS_TEXT_SHADOW,
   AXIS_LINE_SHADOW,
   BAR_OPACITY,
-} from './constants';
+} from "./constants";
 
 interface D3BarChartProps {
   data: { label: string; value: number }[];
@@ -35,7 +35,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
         setSelectedBars((prev) => {
           const next = new Set(prev);
-          next.has(d.label) ? next.delete(d.label) : next.add(d.label);
+          if (next.has(d.label)) {
+            next.delete(d.label);
+          } else {
+            next.add(d.label);
+          }
           return next;
         });
       }
@@ -111,7 +115,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
     const { width, height } = chartRef.current.getBoundingClientRect();
     if (width === 0 || height === 0) return;
 
-    d3.select(chartRef.current).selectAll('*').remove();
+    d3.select(chartRef.current).selectAll("*").remove();
 
     const svg = d3
       .select(chartRef.current)
@@ -136,17 +140,17 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ data }) => {
       .range([height - MARGIN.bottom, MARGIN.top]);
 
     svg
-      .append('g')
-      .attr('transform', `translate(0, ${height - MARGIN.bottom})`)
+      .append("g")
+      .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale))
-      .selectAll('text')
-      .attr('fill', AXIS_COLOR)
-      .style('font-size', AXIS_FONT_SIZE)
-      .style('text-shadow', AXIS_TEXT_SHADOW);
+      .selectAll("text")
+      .attr("fill", AXIS_COLOR)
+      .style("font-size", AXIS_FONT_SIZE)
+      .style("text-shadow", AXIS_TEXT_SHADOW);
 
     svg
-      .append('g')
-      .attr('transform', `translate(${MARGIN.left}, 0)`)
+      .append("g")
+      .attr("transform", `translate(${MARGIN.left}, 0)`)
       .call(d3.axisLeft(yScale))
       .selectAll('text')
       .attr('fill', AXIS_COLOR)

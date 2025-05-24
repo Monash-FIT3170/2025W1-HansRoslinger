@@ -72,17 +72,17 @@ export const App: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Fullscreen video */}
+            {/* Fullscreen video */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
       >
         <WebcamComponent grayscale={grayscale} />
       </div>
-      {backgroundRemoval && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <ImageSegmentation grayscale={grayscale} />
-        </div>
-      )}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center ${!backgroundRemoval ? "invisible pointer-events-none" : ""}`}
+      >
+        <ImageSegmentation grayscale={grayscale} />
+      </div>
 
       {isZoomEnabled && zoomStartPosition && (
         <div
@@ -122,6 +122,8 @@ export const App: React.FC = () => {
             onToggleGrayscale={() => setGrayscale((g) => !g)}
             showLineChart={showLineChart}
             onToggleChart={() => setShowLineChart((c) => !c)}
+            backgroundRemoval={backgroundRemoval}
+            grayscale={grayscale}
           />
         )}
         <button

@@ -149,10 +149,8 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = () => {
 
       if (webcamRunning === true) {
         webcamRunning = false;
-        enableWebcamButton.innerText = "EBR";
       } else {
         webcamRunning = true;
-        enableWebcamButton.innerText = "DBR";
       }
 
       // getUsermedia parameters.

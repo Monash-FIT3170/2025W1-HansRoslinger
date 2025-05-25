@@ -72,7 +72,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-            {/* Fullscreen video */}
+      {/* Fullscreen video */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
       >

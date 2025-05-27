@@ -8,7 +8,9 @@ interface ImageSegmentationProps {
   grayscale: boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale }) => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
+  grayscale,
+}) => {
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
     const canvasElement = document.getElementById(
@@ -95,7 +97,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
           const g = pixels[pixelIndex + 1];
           const b = pixels[pixelIndex + 2];
           const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-    
+
           pixels[pixelIndex] = gray;
           pixels[pixelIndex + 1] = gray;
           pixels[pixelIndex + 2] = gray;

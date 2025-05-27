@@ -8,7 +8,7 @@ interface ImageSegmentationProps {
   grayscale: boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = () => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale }) => {
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
     const canvasElement = document.getElementById(
@@ -90,8 +90,16 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = () => {
         if (Math.round(mask[i]) === 1) {
           // Background
           pixels[pixelIndex + 3] = 0; // Set alpha to 0 (transparent)
+        } else if (grayscale == true) {
+          const r = pixels[pixelIndex];
+          const g = pixels[pixelIndex + 1];
+          const b = pixels[pixelIndex + 2];
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+    
+          pixels[pixelIndex] = gray;
+          pixels[pixelIndex + 1] = gray;
+          pixels[pixelIndex + 2] = gray;
         }
-        // Person pixels (mask value 1) remain unchanged
       }
 
       // Put modified image back

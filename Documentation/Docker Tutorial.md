@@ -58,6 +58,9 @@ Docker can be installed from: [https://docs.docker.com/get-started/get-docker/](
 
 5. Once the build is complete, an image will appear in the Images tab. Select the image name to see its details.
 
+![1748415688714](Images/DockerTutorial/docker-image.png)
+*built container image in the image tab*
+
 ![1748412918402](Images/DockerTutorial/docker-clicking-on-image-name.png)
 
 *details we see when clicking on the image name*

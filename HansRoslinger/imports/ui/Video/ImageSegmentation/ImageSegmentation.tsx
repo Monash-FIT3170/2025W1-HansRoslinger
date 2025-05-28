@@ -5,8 +5,9 @@ import "./imageSegmentation.css";
 // import './imageSegmentationScript'; // Assuming this TypeScript file contains imperative logic
 
 interface ImageSegmentationProps {
-  grayscale: boolean;
+  grayscale: () => boolean;
 }
+
 
 export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
   grayscale,
@@ -85,14 +86,13 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
 
       // Get segmentation mask (values between 0 and 1)
       const mask = result.categoryMask.getAsFloat32Array();
-
-      // Process each pixel
+      
       for (let i = 0; i < mask.length; i++) {
         const pixelIndex = i * 4;
         if (Math.round(mask[i]) === 1) {
           // Background
           pixels[pixelIndex + 3] = 0; // Set alpha to 0 (transparent)
-        } else if (grayscale == true) {
+        } else if (grayscale() == false) {
           const r = pixels[pixelIndex];
           const g = pixels[pixelIndex + 1];
           const b = pixels[pixelIndex + 2];

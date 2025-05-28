@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
@@ -18,6 +18,14 @@ export const App: React.FC = () => {
     y: number;
   } | null>(null);
   const currentDataset = useCurrentDataset();
+
+  const grayscaleRef = useRef(grayscale);
+
+  useEffect(() => {
+    grayscaleRef.current = grayscale;
+  }, [grayscale]);
+
+  const determineGrayscale = () => grayscaleRef.current;
 
   // code which handles playing a dot at the start position of the zoom
   useEffect(() => {
@@ -56,6 +64,10 @@ export const App: React.FC = () => {
     setShowLineChart(currentDataset.preferredChartType === ChartType.LINE);
   }, [currentDataset]);
 
+  const toggleGrayscale = () => {
+    setGrayscale(b => !b)
+  }
+
   const toolbarClasses = showHeader
     ? [
         "absolute top-4 right-4 bottom-4 w-16",
@@ -81,7 +93,7 @@ export const App: React.FC = () => {
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${!backgroundRemoval ? "invisible pointer-events-none" : ""}`}
       >
-        <ImageSegmentation grayscale={grayscale} />
+        <ImageSegmentation grayscale={() => determineGrayscale()} />
       </div>
 
       {isZoomEnabled && zoomStartPosition && (
@@ -119,7 +131,7 @@ export const App: React.FC = () => {
         {showHeader && (
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
-            onToggleGrayscale={() => setGrayscale((g) => !g)}
+            onToggleGrayscale={toggleGrayscale}
             showLineChart={showLineChart}
             onToggleChart={() => setShowLineChart((c) => !c)}
             backgroundRemoval={backgroundRemoval}

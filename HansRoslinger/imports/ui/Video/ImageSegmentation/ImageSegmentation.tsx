@@ -92,7 +92,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
         if (Math.round(mask[i]) === 1) {
           // Background
           pixels[pixelIndex + 3] = 0; // Set alpha to 0 (transparent)
-        } else if (grayscale() == false) {
+        } else if (grayscale() == true) {
           const r = pixels[pixelIndex];
           const g = pixels[pixelIndex + 1];
           const b = pixels[pixelIndex + 2];

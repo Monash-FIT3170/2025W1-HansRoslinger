@@ -135,7 +135,6 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
         // Code to be called when new gestures are detected goes here
-        console.log(currentGestures[index]);
         HandleGesture(currentGestures[index]);
       }
     }

@@ -65,8 +65,8 @@ export const App: React.FC = () => {
   }, [currentDataset]);
 
   const toggleGrayscale = () => {
-    setGrayscale(b => !b)
-  }
+    setGrayscale((b) => !b);
+  };
 
   const toolbarClasses = showHeader
     ? [

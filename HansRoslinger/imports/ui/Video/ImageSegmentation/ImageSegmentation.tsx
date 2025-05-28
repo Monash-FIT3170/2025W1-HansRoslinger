@@ -8,7 +8,6 @@ interface ImageSegmentationProps {
   grayscale: () => boolean;
 }
 
-
 export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
   grayscale,
 }) => {
@@ -86,7 +85,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
 
       // Get segmentation mask (values between 0 and 1)
       const mask = result.categoryMask.getAsFloat32Array();
-      
+
       for (let i = 0; i < mask.length; i++) {
         const pixelIndex = i * 4;
         if (Math.round(mask[i]) === 1) {

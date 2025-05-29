@@ -7,10 +7,10 @@
 | Jiale Hu           | ahuu0017@student.monash.edu       | jl.alexh@gmail.com                    |
 | Max Craig          | mcra0009@student.monash.edu       | maxcraig112@gmail.com                 |
 | Mayank Bajpai      | mbaj0004@student.monash.edu       | mayankbajpaix@gmail.com               |
-| Ranusha Liyanage   | -                                 | ranushal.112@gmail.com                |
+| Ranusha Liyanage   | rliy0007@student.monash.edu       | ranushal.112@gmail.com                |
 | Shehara Hewawasam  | shew0028@student.monash.edu       | sheharh2005@gmail.com                 |
 | Nathan Michailidis | nmic0005@student.monash.edu       | nathan.michailidis@gmail.com          |
-| Harkirat Singh     | -                                 | harkiratsingh135790@gmail.com         |
+| Harkirat Singh     | hlam0035@student.monash.edu       | harkiratsingh135790@gmail.com         |
 | Tejeshvi Sagwal    | tsag0005@student.monash.edu       | tejeshvisagwal7197@gmail.com          |
 | Connor Macdougall  | cmac0046@student.monash.edu       | connoramacdougall@gmail.com           |
 | Liam Chui          | lchu0032@student.monash.edu       | Liamchui88@gmail.com                  |
@@ -23,4 +23,4 @@
 2. Start the code:
 `meteor`
 
-This will start a server at `http://localhost:3000`.
+This will start a server at `http://localhost:3000`

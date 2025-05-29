@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface HeaderProps {
   onToggleBackgroundRemoval: () => void;
@@ -7,6 +7,8 @@ interface HeaderProps {
   onToggleChart: () => void;
   gestureDetectionStatus: boolean;
   onToggleGestureDetectionStatus: () => void;
+  backgroundRemoval: boolean;
+  grayscale: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,32 +18,41 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleChart,
   gestureDetectionStatus,
   onToggleGestureDetectionStatus,
+  backgroundRemoval,
+  grayscale,
 }) => (
   <>
     <button
       onClick={onToggleGestureDetectionStatus}
       id="toggle-gesture-detection"
-      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+      className={`w-10 h-10 rounded-lg text-sm font-medium ${
+        gestureDetectionStatus
+          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
+          : "bg-gray-700 hover:bg-gray-600 text-white"
+      }`}
     >
-      {gestureDetectionStatus ? "DGD" : "EGD"}
+      GD
     </button>
     {/* Background removal enable */}
     <button
-      id="background-removal-enable"
-      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
-    >
-      EBR
-    </button>
-    <button
       onClick={onToggleBackgroundRemoval}
-      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+      id="background-removal-enable"
+      className={`w-10 h-10 rounded-lg text-sm font-medium ${
+        backgroundRemoval
+          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
+          : "bg-gray-700 hover:bg-gray-600 text-white"
+      }`}
     >
       BR
     </button>
     {/* Grayscale toggle */}
     <button
       onClick={onToggleGrayscale}
-      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+      className={`w-10 h-10 rounded-lg text-sm font-medium ${
+        grayscale
+          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
+          : "bg-gray-700 hover:bg-gray-600 text-white"
+      }`}
     >
       GS
     </button>
@@ -51,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
       onClick={onToggleChart}
       className="w-10 h-10 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-sm font-medium"
     >
-      {showLineChart ? 'Bar' : 'Line'}
+      {showLineChart ? "Bar" : "Line"}
     </button>
   </>
 );

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
-import Webcam from 'react-webcam';
+import Webcam from "react-webcam";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, Handedness, Gesture,  } from "../gesture/gesture";
+import { GestureType, Handedness, Gesture } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
-
 
 /*
 Sample result from gestureRecognizer.recognizeForVideo(video, performance.now()) where one hand is detected
@@ -14,40 +13,41 @@ Sample result from gestureRecognizer.recognizeForVideo(video, performance.now())
 
 const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetectionStatus: boolean) => {
   // Gesture Constants
-  const NUM_HANDS_DETECTABLE = 2                    // Maximum number of hands that will be detected in a single recognition
-  const MIN_HAND_DETECTION_CONFIDENCE = 0.6         // e.g., 0.6 means at least 60% confidence required                    
-  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 10   // in ms
-  const SETUP_MAX_RETRIES = 5;                      // how many times to reattempt setting up mediapipe imports
-  const SETUP_RETRY_DELAY = 1000;                   // in ms
-  const VIDEO_HAS_ENOUGH_DATA = 4;                  // HTMLMediaElement.readyState, 4 = HAVE_ENOUGH_DATA which means media can be played long enough for gesture detection
+  const NUM_HANDS_DETECTABLE = 2; // Maximum number of hands that will be detected in a single recognition
+  const MIN_HAND_DETECTION_CONFIDENCE = 0.6; // e.g., 0.6 means at least 60% confidence required
+  const GESTURE_RECOGNITION_TIMEOUT_INTERVAL = 10; // in ms
+  const SETUP_MAX_RETRIES = 5; // how many times to reattempt setting up mediapipe imports
+  const SETUP_RETRY_DELAY = 1000; // in ms
+  const VIDEO_HAS_ENOUGH_DATA = 4; // HTMLMediaElement.readyState, 4 = HAVE_ENOUGH_DATA which means media can be played long enough for gesture detection
 
   // React specific variables
-  const [currentGestures, setCurrentGestures] = useState<Gesture[]>(Array(NUM_HANDS_DETECTABLE));
-  const [gestureRecognizer, setGestureRecognizer] = useState<GestureRecognizer|null>();
+  const [currentGestures, setCurrentGestures] = useState<Gesture[]>(
+    Array(NUM_HANDS_DETECTABLE),
+  );
+  const [gestureRecognizer, setGestureRecognizer] =
+    useState<GestureRecognizer | null>();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { HandleGesture } = GestureHandler();
 
-
   // Helper function
   const cleanupInterval = () => {
-    // Stop recursive interval call for next gesture detection 
+    // Stop recursive interval call for next gesture detection
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-  }
- 
+  };
+
   // Import gesture detection (mediapipe)
   useEffect(() => {
-      const setup = async (retryCount = 0) => {
+    const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
         );
-        
+
         // import gesture detection with configuration constants
-        const gestureRecognizerInternal = await GestureRecognizer.createFromOptions(
-          vision,
-          {
+        const gestureRecognizerInternal =
+          await GestureRecognizer.createFromOptions(vision, {
             baseOptions: {
               modelAssetPath:
                 "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
@@ -55,23 +55,28 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetec
             runningMode: "VIDEO",
             numHands: NUM_HANDS_DETECTABLE,
             minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
-          }
-        );
-  
+          });
+
         setGestureRecognizer(gestureRecognizerInternal);
-  
       } catch (error) {
-        console.error(`GestureRecognizer setup failed (attempt ${retryCount + 1}):`, error);
+        console.error(
+          `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
+          error,
+        );
         if (retryCount < SETUP_MAX_RETRIES) {
           setTimeout(() => setup(retryCount + 1), SETUP_RETRY_DELAY);
         } else {
-          console.error("Failed to initialize GestureRecognizer after maximum of " + SETUP_MAX_RETRIES.toString() + " retries.");
+          console.error(
+            "Failed to initialize GestureRecognizer after maximum of " +
+              SETUP_MAX_RETRIES.toString() +
+              " retries.",
+          );
         }
       }
     };
 
     setup();
-  
+
     return cleanupInterval;
   }, []);
 
@@ -123,12 +128,11 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetec
   useEffect(() => {
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
+        // Code to be called when new gestures are detected goes here
         HandleGesture(currentGestures[index]);
       }
     }
   }, [currentGestures]);
 };
-
-
 
 export default GestureDetector;

@@ -86,7 +86,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetec
       const detectGesture = async () => {
         if (!gestureRecognizer || !videoRef || !videoRef.current) {
           return;
-        };
+        }
 
         const processFrame = async () => {
           // This if statement is to handle any timeout interval that begins whilst gesturedetectionstatus is true but is actioned when gesturedetectionstatus is false
@@ -97,7 +97,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetec
             const video = videoRef.current.video;
             if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
               const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
-              let gestures: Gesture[] = Array(detectedGestures.gestures.length);
+              const gestures: Gesture[] = Array(detectedGestures.gestures.length);
               for (let index = 0; index < detectedGestures.gestures.length; index++) {
                 gestures[index] = {
                   gestureID: detectedGestures.gestures[index][0].categoryName as unknown as GestureType,
@@ -110,7 +110,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetec
               if (!(gestures.length == 0 && currentGestures.length == 0)) {
                 setCurrentGestures(gestures);
               }
-            };
+            }
           }
         };
       // Check gestures periodically

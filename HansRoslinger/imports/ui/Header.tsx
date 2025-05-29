@@ -5,6 +5,8 @@ interface HeaderProps {
   onToggleGrayscale: () => void;
   showLineChart: boolean;
   onToggleChart: () => void;
+  gestureDetectionStatus: boolean;
+  onToggleGestureDetectionStatus: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -12,8 +14,17 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGrayscale,
   showLineChart,
   onToggleChart,
+  gestureDetectionStatus,
+  onToggleGestureDetectionStatus,
 }) => (
   <>
+    <button
+      onClick={onToggleGestureDetectionStatus}
+      id="toggle-gesture-detection"
+      className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm font-medium text-white"
+    >
+      {gestureDetectionStatus ? "DGD" : "EGD"}
+    </button>
     {/* Background removal enable */}
     <button
       id="background-removal-enable"

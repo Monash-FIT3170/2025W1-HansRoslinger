@@ -19,8 +19,8 @@ export const labelMapping: Record<string, GestureType> = {
   "Thumb_Down": GestureType.THUMB_DOWN,
   "Pointing_Up": GestureType.POINTING_UP,
   "Closed_Fist": GestureType.CLOSED_FIST,
-  "I_Love_You": GestureType.I_LOVE_YOU,
-  "Unidentified": GestureType.UNIDENTIFIED,
+  "ILoveYou": GestureType.I_LOVE_YOU,
+  "None": GestureType.UNIDENTIFIED,
   "Open_Palm": GestureType.OPEN_PALM,
   "Victory": GestureType.VICTORY,
 };
@@ -59,10 +59,19 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 // Map to track the ON/OFF status of each gesture
 const gestureStatusMap: Map<GestureType, boolean> = new Map();
 
-// Initialize all gestures to OFF
-Object.values(GestureType)
+/**
+ * Sets the status of all gestures.
+ * @param status - The new status: true = ON, false = OFF.
+ */
+const setAllGestureStatuses = (status: boolean): void => {
+  Object.values(GestureType)
   .filter((v) => typeof v === "number") // Only enum values, not keys
-  .forEach((gesture) => gestureStatusMap.set(gesture as GestureType, false));
+  .forEach((gesture) => gestureStatusMap.set(gesture as GestureType, status));
+  console.log(`Gestures are now ${status ? "ON" : "OFF"}`);
+};
+
+// Initialize all gestures to OFF
+setAllGestureStatuses(true);
 
 /**
  * Sets the status of a gesture.
@@ -93,10 +102,10 @@ const isGestureOn = (gesture: GestureType): boolean => {
   return gestureStatusMap.get(gesture) ?? false;
 };
 
-export {setGestureStatus, toggleGestureStatus, isGestureOn };
+export {setAllGestureStatuses, setGestureStatus, toggleGestureStatus, isGestureOn };
 
 
-
+const disabledGesture = (a: Gesture, b: Gesture): void => {}
 
 const defaultMapping = {
   [GestureType.THUMB_UP]: console.log,

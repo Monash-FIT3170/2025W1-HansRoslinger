@@ -12,7 +12,7 @@ Sample result from gestureRecognizer.recognizeForVideo(video, performance.now())
 */
 
 
-const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
+const GestureDetector = (videoRef: MutableRefObject<Webcam | null>, gestureDetectionStatus: boolean) => {
   // Gesture Constants
   const NUM_HANDS_DETECTABLE = 2                    // Maximum number of hands that will be detected in a single recognition
   const MIN_HAND_DETECTION_CONFIDENCE = 0.6         // e.g., 0.6 means at least 60% confidence required                    
@@ -77,49 +77,52 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
 
   // Detect gestures
   useEffect(() => {
-    const detectGesture = async () => {
-      if (!gestureRecognizer || !videoRef || !videoRef.current) {
-        return;
-      };
-
-      const processFrame = async () => {
-        if (!videoRef || !videoRef.current || !videoRef.current.video) {
+    if (gestureDetectionStatus) {
+      const detectGesture = async () => {
+        if (!gestureRecognizer || !videoRef || !videoRef.current) {
           return;
-        }
-        const video = videoRef.current.video;
-        if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
-          const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
-          let gestures: Gesture[] = Array(detectedGestures.gestures.length);
-          for (let index = 0; index < detectedGestures.gestures.length; index++) {
-            gestures[index] = {
-              gestureID: detectedGestures.gestures[index][0].categoryName as unknown as GestureType,
-              handedness: detectedGestures.handedness[index][0].categoryName as unknown as Handedness,
-              timestamp: new Date(),
-              confidence: detectedGestures.gestures[index][0].score,
-              landmarks: detectedGestures.landmarks[index],
+        };
+
+        const processFrame = async () => {
+          // This if statement is to handle any timeout interval that begins whilst gesturedetectionstatus is true but is actioned when gesturedetectionstatus is false
+          if (gestureDetectionStatus) {
+            if (!videoRef || !videoRef.current || !videoRef.current.video) {
+              return;
+            }
+            const video = videoRef.current.video;
+            if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
+              const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
+              let gestures: Gesture[] = Array(detectedGestures.gestures.length);
+              for (let index = 0; index < detectedGestures.gestures.length; index++) {
+                gestures[index] = {
+                  gestureID: detectedGestures.gestures[index][0].categoryName as unknown as GestureType,
+                  handedness: detectedGestures.handedness[index][0].categoryName as unknown as Handedness,
+                  timestamp: new Date(),
+                  confidence: detectedGestures.gestures[index][0].score,
+                  landmarks: detectedGestures.landmarks[index],
+                };
+              }
+              if (!(gestures.length == 0 && currentGestures.length == 0)) {
+                setCurrentGestures(gestures);
+              }
             };
           }
-          if (!(gestures.length == 0 && currentGestures.length == 0)) {
-            setCurrentGestures(gestures);
-          }
         };
-      };
-      
       // Check gestures periodically
       intervalRef.current = setInterval(processFrame, GESTURE_RECOGNITION_TIMEOUT_INTERVAL);
-    };
-
-    detectGesture();
-
+      };
+      detectGesture();
+    } else {
+      cleanupInterval();
+    }
+    
     return cleanupInterval;
-  }, [gestureRecognizer]); // so that this function is called when gestureRecognizer has been correctly initialised
+  }, [gestureRecognizer, gestureDetectionStatus]); // so that this function is called when gestureRecognizer has been correctly initialised
 
   // Handle newly detected gesture
   useEffect(() => {
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
-        // Code to be called when new gestures are detected goes here
-        console.log(currentGestures[index]);
         HandleGesture(currentGestures[index]);
       }
     }

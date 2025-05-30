@@ -116,7 +116,7 @@ The following are some webpages with more details about specific docker function
 - [What&#39;s next | Docker Docs](https://docs.docker.com/get-started/introduction/whats-next/)
 - [Get Started](https://docs.docker.com/get-started/)
 
-Troubleshooting 
+## Troubleshooting 
 If you come across any issues when attempting to work with docker files, please refer to these common docker issues.
 1. Make sure your docker is running
 2. Check you have available storage on docker desktop, if so you might need to delete some duplicate images/containers

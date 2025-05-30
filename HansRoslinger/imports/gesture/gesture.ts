@@ -17,14 +17,14 @@ enum GestureType {
 }
 
 export const labelMapping: Record<string, GestureType> = {
-  Thumb_Up: GestureType.THUMB_UP,
-  Thumb_Down: GestureType.THUMB_DOWN,
-  Pointing_Up: GestureType.POINTING_UP,
-  Closed_Fist: GestureType.CLOSED_FIST,
-  I_Love_You: GestureType.I_LOVE_YOU,
-  Unidentified: GestureType.UNIDENTIFIED,
-  Open_Palm: GestureType.OPEN_PALM,
-  Victory: GestureType.VICTORY,
+  "Thumb_Up": GestureType.THUMB_UP,
+  "Thumb_Down": GestureType.THUMB_DOWN,
+  "Pointing_Up": GestureType.POINTING_UP,
+  "Closed_Fist": GestureType.CLOSED_FIST,
+  "ILoveYou": GestureType.I_LOVE_YOU,
+  "None": GestureType.UNIDENTIFIED,
+  "Open_Palm": GestureType.OPEN_PALM,
+  "Victory": GestureType.VICTORY,
 };
 
 enum Handedness {

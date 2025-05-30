@@ -12,6 +12,7 @@ export const App: React.FC = () => {
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
   const [showLineChart, setShowLineChart] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
+  const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomStartPosition, setZoomStartPosition] = useState<{
     x: number;
@@ -88,7 +89,7 @@ export const App: React.FC = () => {
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
       >
-        <WebcamComponent grayscale={grayscale} />
+        <WebcamComponent gestureDetectionStatus={gestureDetectionStatus} grayscale={grayscale} />
       </div>
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${!backgroundRemoval ? "invisible pointer-events-none" : ""}`}
@@ -134,6 +135,8 @@ export const App: React.FC = () => {
             onToggleGrayscale={toggleGrayscale}
             showLineChart={showLineChart}
             onToggleChart={() => setShowLineChart((c) => !c)}
+            gestureDetectionStatus={gestureDetectionStatus}
+            onToggleGestureDetectionStatus={() => setGestureDetectionStatus((c) => !c)} 
             backgroundRemoval={backgroundRemoval}
             grayscale={grayscale}
           />

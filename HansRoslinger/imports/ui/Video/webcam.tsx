@@ -7,10 +7,10 @@ interface WebcamProps {
   gestureDetectionStatus: boolean;
 }
 
-export const WebcamComponent: React.FC<WebcamProps> = ({ 
+export const WebcamComponent: React.FC<WebcamProps> = ({
   grayscale,
   gestureDetectionStatus,
- }) => {
+}) => {
   const webcamRef = useRef<Webcam | null>(null);
 
   GestureDetector(webcamRef, gestureDetectionStatus);

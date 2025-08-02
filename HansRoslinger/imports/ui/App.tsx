@@ -8,11 +8,12 @@ import {
 } from "react-router-dom";
 import { Login } from "./Login";
 import { Home } from "./Home";
-import { AllPresentations } from "./AllPresentations";
+import AllPresentations from "./AllPresentations";
 import { Present } from "./Present";
 
 Meteor.subscribe("users");
 Meteor.subscribe("presentations")
+Meteor.subscribe("datasets")
 
 export const App: React.FC = () => (
   <Router>

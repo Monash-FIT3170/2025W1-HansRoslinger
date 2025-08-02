@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuthCookie } from "./authCookie";
+import { getAuthCookie } from "../../cookies/cookies";
 import { verifyJWT } from "./authToken";
 
 export function useAuthGuard() {

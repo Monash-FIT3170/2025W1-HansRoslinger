@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../handlers/auth/authHandlers";
-import { setAuthCookie } from "../handlers/auth/authCookie";
+import { setAuthCookie } from "../cookies/cookies";
 
 export const Login: React.FC = () => {
   const [username, setUsername] = useState("");

@@ -19,7 +19,7 @@ export const loginUser = async (email: string, password: string) => {
         return { success: false, message: "User not found after login." };
     }
     // Generate JWT valid for 1 day
-    const token = generateJWT(user._id,user.email);
+    const token = generateJWT(user._id);
     return { success: true, message: "user logged in", token, userId: user._id };
 };
 

@@ -1,4 +1,5 @@
 import { Mongo } from "meteor/mongo";
+import { Dataset } from "../dataset/dataset";
 
 export interface Presentation {
   _id?: string;
@@ -6,23 +7,6 @@ export interface Presentation {
   createdAt: Date;
   userID: string;
   datasets: Dataset[];
-}
-
-export enum ChartType {
-  BAR = "BAR",
-  LINE = "LINE",
-}
-
-interface DataPoint {
-  label: string;
-  value: number;
-}
-
-// a dataset contains a title, the points, and the preferred chart type when you select it
-export interface Dataset {
-  title: string;
-  data: DataPoint[];
-  preferredChartType: ChartType;
 }
 
 export const PresentationCollection = new Mongo.Collection<Presentation>("presentations");

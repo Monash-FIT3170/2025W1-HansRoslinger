@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # No checkout step needed if you want to build from source here,
+      # but usually you do want checkout to get the code locally:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -22,13 +27,14 @@ jobs:
           project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
           install_components: 'beta'
 
-      - name: Build and Push Docker image from public repo
+      - name: Configure Docker to use gcloud as credential helper
+        run: gcloud auth configure-docker
+
+      - name: Build and push Docker image
         run: |
           IMAGE="gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
-          gcloud builds submit --no-source \
-            --repo-url=https://github.com/Monash-FIT3170/2025W1-HansRoslinger.git \
-            --branch=prod \
-            --tag $IMAGE
+          docker build -t $IMAGE .
+          docker push $IMAGE
 
       - name: Deploy to Cloud Run
         run: |

@@ -11,9 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -25,10 +22,13 @@ jobs:
           project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
           install_components: 'beta'
 
-      - name: Build and Push Docker image
+      - name: Build and Push Docker image from public repo
         run: |
           IMAGE="gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
-          gcloud builds submit --tag $IMAGE .
+          gcloud builds submit --no-source \
+            --repo-url=https://github.com/Monash-FIT3170/2025W1-HansRoslinger.git \
+            --branch=prod \
+            --tag $IMAGE
 
       - name: Deploy to Cloud Run
         run: |

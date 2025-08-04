@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # No checkout step needed if you want to build from source here,
-      # but usually you do want checkout to get the code locally:
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -21,26 +19,27 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up Google Cloud SDK
+      - name: Set up gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
-          install_components: 'beta'
+          install_components: "gcloud"
 
       - name: Configure Docker to use gcloud as credential helper
-        run: gcloud auth configure-docker
+        run: gcloud auth configure-docker us-docker.pkg.dev
 
       - name: Build and push Docker image
         run: |
-          IMAGE="gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+          IMAGE="us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
           docker build -t $IMAGE .
           docker push $IMAGE
+        env:
+          IMAGE: "us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
         run: |
-          IMAGE="gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
           gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image $IMAGE \
+            --image us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
             --platform managed \
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated

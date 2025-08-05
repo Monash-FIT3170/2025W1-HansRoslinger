@@ -72,7 +72,7 @@ const Settings: React.FC = () => {
   
   return (
     <TableContainer component={Paper}>
-        <FormControl fullWidth>
+        <FormControl>
         <Table>
         <TableHead>
           <TableRow>

@@ -104,7 +104,7 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
   
 };
 
-export { Gesture, GestureType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
+export { Gesture, GestureType, FunctionType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
 
 export const gestureToScreenPosition = (
   x: number,

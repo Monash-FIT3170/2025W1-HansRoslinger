@@ -1,80 +1,64 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { Gesture, GestureType, defaultMapping, IDtoEnum } from "imports/gesture/gesture";
+import { GestureType, FunctionType, EnumToFunc, defaultMapping} from "imports/gesture/gesture";
 import { setCookie, getCookie } from "imports/settings/cookies";
 
 // Use the same action types as your existing defaultMapping
-type GestureHandler = (initialGesture: Gesture, latestGesture: Gesture) => void;
+type GestureFunctionMapping = Record<GestureType, FunctionType>
 
 export const useGestureSettings = () => {
-  const [mappings, setMappings] = useState<Record<GestureType, GestureHandler>>(defaultMapping)
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [mappings, setMappings] = useState<GestureFunctionMapping>(defaultMapping);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from cookie on mount
   useEffect(() => {
-    const loadSettings = () => {
+    const loadSettings = async () => {
       try {
-        const saved = getCookie('gestureSettings')
+        const saved = await getCookie('gestureSettings');
         if (saved) {
-          const parsed = JSON.parse(saved)
-          // Start with default mappings
-          const validatedMappings = { ...defaultMapping }
+          const parsed = JSON.parse(saved.data);
+          const loadedMappings = { ...defaultMapping };
           
-          // Override with saved mappings where valid
-          Object.entries(parsed).forEach(([gestureName, handlerName]) => {
-            // Find the GestureType that matches this label
-            const gestureEntry = Object.entries(IDtoEnum).find(
-              ([_, label]) => label === gestureName
-            );
+          // Convert string keys back to enums
+          Object.entries(parsed).forEach(([gestureKey, functionKey]) => {
+            const gestureType = parseInt(gestureKey) as GestureType;
+            const functionType = parseInt(functionKey as string) as FunctionType;
             
-            if (gestureEntry) {
-              const gestureType = Number(gestureEntry[0]) as GestureType;
-              if (typeof handlerName === 'string') {
-                // Map the saved handler name to actual function
-                switch(handlerName) {
-                  case 'console.log':
-                    validatedMappings[gestureType] = console.log;
-                    break;
-                  // Add cases for other handlers if you implement them
-                  default:
-                    validatedMappings[gestureType] = console.log;
-                }
-              }
+            if (gestureType in GestureType && functionType in FunctionType) {
+              loadedMappings[gestureType] = functionType;
             }
-          })
+          });
           
-          setMappings(validatedMappings)
+          setMappings(loadedMappings);
         }
       } catch (e) {
-        console.error('Failed to load gesture settings', e)
+        console.error('Failed to load gesture settings', e);
       }
-      setIsInitialized(true)
-    }
-    loadSettings()
-  }, [])
+      setIsInitialized(true);
+    };
+    loadSettings();
+  }, []);
 
-  const updateMapping = (gesture: GestureType, handler: GestureHandler) => {
-    const newMappings = { ...mappings, [gesture]: handler }
-    setMappings(newMappings)
-  }
+ const updateMapping = (gesture: GestureType, func: FunctionType) => {
+    const newMappings = { ...mappings, [gesture]: func };
+    setMappings(newMappings);
+  };
 
-  const saveSettings = () => {
+  const saveSettings = async () => {
     try {
-      // Convert to serializable format using labelMapping names
-      const serialized: Record<string, string> = {};
-      Object.entries(mappings).forEach(([gesture, handler]) => {
-        const gestureType = Number(gesture) as GestureType;
-        const gestureName = IDtoEnum[gestureType];
-        serialized[gestureName] = handler === console.log ? 'console.log' : 'console.log'; // Update if you add other handlers
+      // Convert enum keys to strings for cookie storage
+      const serialized: Record<string, number> = {};
+      Object.entries(mappings).forEach(([gesture, func]) => {
+        serialized[gesture] = func;
       });
       
-      setCookie('gestureSettings', JSON.stringify(serialized), 365)
-      return true
+      await setCookie('gestureSettings', serialized);
+      return true;
     } catch (e) {
-      console.error('Failed to save gesture settings', e)
-      return false
+      console.error('Failed to save gesture settings', e);
+      return false;
     }
-  }
+  };
 
   return {
     mappings,
@@ -82,6 +66,7 @@ export const useGestureSettings = () => {
     saveSettings,
     isInitialized,
     gestureTypes: Object.values(GestureType).filter(v => typeof v === 'number') as GestureType[],
-    labelMapping: IDtoEnum // Export labelMapping for UI use
-  }
-}
+    functionTypes: Object.values(FunctionType).filter(v => typeof v === 'number') as FunctionType[],
+    getHandler: (gestureType: GestureType) => EnumToFunc[mappings[gestureType]]
+  };
+};

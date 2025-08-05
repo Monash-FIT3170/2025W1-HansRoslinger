@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { Gesture, GestureType, defaultMapping, labelMapping } from "imports/gesture/gesture";
+import { Gesture, GestureType, defaultMapping, IDtoEnum } from "imports/gesture/gesture";
 import { setCookie, getCookie } from "imports/settings/cookies";
 
 // Use the same action types as your existing defaultMapping
@@ -23,7 +23,7 @@ export const useGestureSettings = () => {
           // Override with saved mappings where valid
           Object.entries(parsed).forEach(([gestureName, handlerName]) => {
             // Find the GestureType that matches this label
-            const gestureEntry = Object.entries(labelMapping).find(
+            const gestureEntry = Object.entries(IDtoEnum).find(
               ([_, label]) => label === gestureName
             );
             
@@ -64,7 +64,7 @@ export const useGestureSettings = () => {
       const serialized: Record<string, string> = {};
       Object.entries(mappings).forEach(([gesture, handler]) => {
         const gestureType = Number(gesture) as GestureType;
-        const gestureName = labelMapping[gestureType];
+        const gestureName = IDtoEnum[gestureType];
         serialized[gestureName] = handler === console.log ? 'console.log' : 'console.log'; // Update if you add other handlers
       });
       
@@ -82,6 +82,6 @@ export const useGestureSettings = () => {
     saveSettings,
     isInitialized,
     gestureTypes: Object.values(GestureType).filter(v => typeof v === 'number') as GestureType[],
-    labelMapping // Export labelMapping for UI use
+    labelMapping: IDtoEnum // Export labelMapping for UI use
   }
 }

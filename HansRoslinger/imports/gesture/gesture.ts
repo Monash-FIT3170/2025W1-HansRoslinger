@@ -14,7 +14,7 @@ enum GestureType {
   VICTORY,            // This is the peace sign
 }
 
-export const labelMapping: Record<string, GestureType> = {
+export const IDtoEnum: Record<string, GestureType> = {
   "Thumb_Up": GestureType.THUMB_UP,
   "Thumb_Down": GestureType.THUMB_DOWN,
   "Pointing_Up": GestureType.POINTING_UP,
@@ -69,7 +69,7 @@ const defaultMapping = {
 
 // Default mapping, would replace console.log with function to be called.
 const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
-  const label = labelMapping[INPUT];
+  const label = IDtoEnum[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {

@@ -14,6 +14,7 @@ import type { Dataset } from "../api/database/dataset/dataset";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
 import {
   createDataset,
+  deleteDataset,
   ChartType,
 } from "../api/database/dataset/dataset";
 
@@ -27,14 +28,28 @@ export default function AllPresentations() {
       setShowDatasetSummary(true);
     }
 
+
+    async function handleDeleteDataset() {
+      if (!summaryDataset || !summaryDataset._id) return;
+      try {
+        await deleteDataset(summaryDataset._id);
+        setShowDatasetSummary(false);
+        setSummaryDataset(null);
+        // Refresh datasets for the selected presentation
+        if (selectedPresentation) await loadDatasets(selectedPresentation._id!);
+      } catch {
+        // Optionally handle error
+      }
+    }
+
     function handleCloseDatasetSummary() {
       setShowDatasetSummary(false);
       setSummaryDataset(null);
     }
 
     // Navigate to Present page with dataset ID
-    function handlePresentDataset(dataset: Dataset) {
-      navigate(`/present?datasetId=${dataset._id}`);
+    function handlePresentDataset(presentation: Presentation) {
+      navigate(`/present?presentationId=${presentation._id}`);
     }
     useAuthGuard();
     const [showModal, setShowModal] = useState(false);
@@ -90,7 +105,6 @@ export default function AllPresentations() {
         name: presentationName,
         userID: userId,
         createdAt: new Date(),
-        datasets: [],
       });
       clearModel();
       loadPresentations();
@@ -268,12 +282,20 @@ export default function AllPresentations() {
             <>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">{selectedPresentation.name}</h2>
-                <button
-                  className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors"
-                  onClick={openDatasetModal}
-                >
-                  Add Dataset
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors"
+                    onClick={openDatasetModal}
+                  >
+                    Add Dataset
+                  </button>
+                  <button
+                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors"
+                    onClick={e => { e.stopPropagation(); handlePresentDataset(selectedPresentation); }}
+                  >
+                    Present
+                  </button>
+                </div>
               </div>
               {/* DATASET TILES */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -291,12 +313,6 @@ export default function AllPresentations() {
                       <div className="text-gray-700 text-xs mb-2">
                         Chart: {dataset.preferredChartType}
                       </div>
-                      <button
-                        className="mt-2 bg-cyan-500 text-white px-3 py-1 rounded hover:bg-cyan-600 transition-colors"
-                        onClick={e => { e.stopPropagation(); handlePresentDataset(dataset); }}
-                      >
-                        Present
-                      </button>
                     </div>
                   ))
                 ) : (
@@ -337,12 +353,14 @@ export default function AllPresentations() {
                   <div>No data points.</div>
                 )}
               </div>
-              <button
-                className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors w-full"
-                onClick={() => { handlePresentDataset(summaryDataset); }}
-              >
-                Present This Dataset
-              </button>
+              <div className="flex justify-end gap-2">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                  onClick={handleDeleteDataset}
+                >
+                  Delete
+                </button>
+              </div>
             </>
           )}
         </Modal>

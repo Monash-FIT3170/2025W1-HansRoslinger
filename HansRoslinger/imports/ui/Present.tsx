@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
 import { Header } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
-import { useCurrentDataset, ChartType } from "./Input/Data";
+import { fetchDatasetsForPresentation, useDatasetNavigation } from "./Input/Data";
 import { Title } from "./Charts/Title";
+import { useAuthGuard } from "../handlers/auth/authHook";
+import { ChartType, Dataset, defaultDataset } from "../api/database/dataset/dataset";
 
 export const Present: React.FC = () => {
   const [grayscale, setGrayscale] = useState(false);
@@ -18,7 +21,30 @@ export const Present: React.FC = () => {
     x: number;
     y: number;
   } | null>(null);
-  const currentDataset = useCurrentDataset();
+
+  useAuthGuard();
+
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get("presentationId") ?? "";
+
+  // State for all datasets
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  // Use custom hook to manage current dataset and navigation
+  const { currentDataset } = useDatasetNavigation(datasets);
+
+  // Fetch all datasets for the presentation on mount or when projectId changes
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDatasets = async () => {
+      const data = await fetchDatasetsForPresentation(projectId);
+      if (isMounted) setDatasets(data);
+    };
+    fetchDatasets();
+    return () => {
+      isMounted = false;
+    };
+  }, [projectId]);
+
 
   const grayscaleRef = useRef(grayscale);
 
@@ -62,7 +88,7 @@ export const Present: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setShowLineChart(currentDataset.preferredChartType === ChartType.LINE);
+    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
   }, [currentDataset]);
 
   const toggleGrayscale = () => {
@@ -117,9 +143,9 @@ export const Present: React.FC = () => {
         style={{ bottom: "10%", width: "95%", height: "50%" }}
       >
         {showLineChart ? (
-          <D3LineChart dataset={currentDataset} />
+          <D3LineChart dataset={currentDataset ?? defaultDataset} />
         ) : (
-          <D3BarChart dataset={currentDataset} />
+          <D3BarChart dataset={currentDataset ?? defaultDataset} />
         )}
       </div>
       {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
@@ -127,7 +153,7 @@ export const Present: React.FC = () => {
         className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
         style={{ bottom: 0, width: "95%", height: "10%" }}
       >
-        <Title dataset={currentDataset} />
+        <Title dataset={currentDataset ?? defaultDataset} />
       </div>
 
       {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}

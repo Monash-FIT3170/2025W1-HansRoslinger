@@ -49,8 +49,6 @@ const Functions = [
     FunctionType.ZOOM
 ]
 
-const customMapping = 
-
 export default function settings() {
     const [state, setState] = useState({
     [GestureType.THUMB_UP]: FunctionType.UNUSED,

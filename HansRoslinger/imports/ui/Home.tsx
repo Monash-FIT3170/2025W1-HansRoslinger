@@ -1,7 +1,6 @@
 import React from "react";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
 import { clearAuthCookie } from "../cookies/cookies";
 
 export const Home: React.FC = () => {

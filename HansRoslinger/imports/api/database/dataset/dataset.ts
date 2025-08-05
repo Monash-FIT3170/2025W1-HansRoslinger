@@ -21,6 +21,14 @@ export interface Dataset {
   presentationID: string
 }
 
+export const defaultDataset: Dataset = {
+  _id: "",
+  title: "",
+  data: [],
+  preferredChartType: ChartType.BAR,
+  presentationID: ""
+};
+
 export const DatasetCollection = new Mongo.Collection<Dataset>("datasets");
 DatasetCollection.allow({
   insert: () => true,

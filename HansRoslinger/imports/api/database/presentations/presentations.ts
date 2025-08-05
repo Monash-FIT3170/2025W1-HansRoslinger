@@ -1,12 +1,10 @@
 import { Mongo } from "meteor/mongo";
-import { Dataset } from "../dataset/dataset";
 
 export interface Presentation {
   _id?: string;
   name: string;
   createdAt: Date;
   userID: string;
-  datasets: Dataset[];
 }
 
 export const PresentationCollection = new Mongo.Collection<Presentation>("presentations");

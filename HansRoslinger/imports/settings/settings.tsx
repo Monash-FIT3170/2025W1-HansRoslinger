@@ -9,7 +9,8 @@ import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 
-import { GestureType } from '../gesture/gesture';
+import { GestureType, FunctionType } from '../gesture/gesture';
+import { useState } from 'react';
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -22,6 +23,14 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.VICTORY]: "Victory",
 };
 
+const FunctionToLabel: Record<FunctionType, string> = {
+  [FunctionType.SELECT]: "Select",
+  [FunctionType.CLEAR]: "Clear",
+  [FunctionType.FILTER]: "Filter",
+  [FunctionType.ZOOM]: "Zoom",
+  [FunctionType.UNUSED]: "None",
+};
+
 const Gestures = [
     GestureType.CLOSED_FIST,
     GestureType.I_LOVE_YOU,
@@ -32,18 +41,35 @@ const Gestures = [
     GestureType.VICTORY 
 ]
 
-const customMapping = {
-  [GestureType.THUMB_UP]: console.log,
-  [GestureType.THUMB_DOWN]: console.log,
-  [GestureType.POINTING_UP]: processPointUpGesture,
-  [GestureType.CLOSED_FIST]: processClosedFistGesture,
-  [GestureType.I_LOVE_YOU]: console.log,
-  [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: processOpenPalmGesture,
-  [GestureType.VICTORY]: processVictorySignGesture,
-};
+const Functions = [
+    FunctionType.UNUSED,
+    FunctionType.SELECT,
+    FunctionType.FILTER,
+    FunctionType.CLEAR,
+    FunctionType.ZOOM
+]
+
+const customMapping = 
 
 export default function settings() {
+    const [state, setState] = useState({
+    [GestureType.THUMB_UP]: FunctionType.UNUSED,
+    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+    [GestureType.POINTING_UP]: FunctionType.SELECT,
+    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+    [GestureType.OPEN_PALM]: FunctionType.FILTER,
+    [GestureType.VICTORY]: FunctionType.ZOOM,
+    });
+
+  const handleChange = (key: GestureType, value: FunctionType) => {
+    setState(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+  
   return (
     <TableContainer component={Paper}>
         <FormControl>
@@ -55,13 +81,21 @@ export default function settings() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {Gestures.map((gesture) => (
+          {Gestures
+          .filter(gesture => gesture !== GestureType.UNIDENTIFIED)
+          .map((gesture) => (
             <TableRow key={gesture}>
               <TableCell>
                 {GestureToLabel[gesture]}
               </TableCell>
               <TableCell>
-                <Select></Select>
+                <Select value={state[gesture]} onChange={(e) => handleChange(gesture, e.target.value)}>
+                    {Functions.map(option => (
+                    <option key={gesture} value={option}>
+                        {FunctionToLabel[option]}
+                    </option>
+                    ))}
+                </Select>
               </TableCell>
             </TableRow>
           ))}

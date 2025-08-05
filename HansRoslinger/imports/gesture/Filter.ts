@@ -1,6 +1,6 @@
 import { Gesture } from './gesture';
 
-export const processClosedFistGesture = (
+export const filter = (
   _1: Gesture,
   _2: Gesture,
 ): void => {

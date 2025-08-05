@@ -1,6 +1,6 @@
 import { Gesture, gestureToScreenPosition } from './gesture';
 
-export const processPointUpGesture = (
+export const select = (
   _: Gesture,
   latestGesture: Gesture,
 ): void => {

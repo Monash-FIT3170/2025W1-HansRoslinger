@@ -1,7 +1,7 @@
-import { processPointUpGesture } from "./PointUp";
-import { processOpenPalmGesture } from "./OpenPalm";
-import { processClosedFistGesture } from "./ClosedFist";
-import { processVictorySignGesture, processZoom } from "./VictorySign";
+import { select } from "./Select";
+import { clear } from "./Clear";
+import { filter } from "./Filter";
+import { zoom, processZoom } from "./Zoom";
 
 enum GestureType {
   CLOSED_FIST,
@@ -14,6 +14,14 @@ enum GestureType {
   VICTORY,            // This is the peace sign
 }
 
+enum FunctionType {
+  UNUSED,
+  SELECT,
+  FILTER,
+  CLEAR,
+  ZOOM
+}
+
 export const IDtoEnum: Record<string, GestureType> = {
   "Thumb_Up": GestureType.THUMB_UP,
   "Thumb_Down": GestureType.THUMB_DOWN,
@@ -23,6 +31,14 @@ export const IDtoEnum: Record<string, GestureType> = {
   "Unidentified": GestureType.UNIDENTIFIED,
   "Open_Palm": GestureType.OPEN_PALM,
   "Victory": GestureType.VICTORY,
+};
+
+export const EnumToFunc: Record<FunctionType, any> = {
+  [FunctionType.UNUSED]: console.log,
+  [FunctionType.SELECT]: select,
+  [FunctionType.FILTER]: filter,
+  [FunctionType.CLEAR]: clear,
+  [FunctionType.ZOOM]: zoom,
 };
 
 enum Handedness {
@@ -57,29 +73,28 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: console.log,
-  [GestureType.THUMB_DOWN]: console.log,
-  [GestureType.POINTING_UP]: processPointUpGesture,
-  [GestureType.CLOSED_FIST]: processClosedFistGesture,
-  [GestureType.I_LOVE_YOU]: console.log,
-  [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: processOpenPalmGesture,
-  [GestureType.VICTORY]: processVictorySignGesture,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.POINTING_UP]: FunctionType.SELECT,
+  [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+  [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+  [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+  [GestureType.OPEN_PALM]: FunctionType.FILTER,
+  [GestureType.VICTORY]: FunctionType.ZOOM,
 };
 
-// Default mapping, would replace console.log with function to be called.
 const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
   const label = IDtoEnum[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
-    if (label === GestureType.CLOSED_FIST) {
-      processVictorySignGesture(initialGesture, latestGesture);
+    if (defaultMapping[label] === FunctionType.ZOOM) {
+      zoom(initialGesture, latestGesture);
     }
     else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const handler = defaultMapping[label];
+    const handler = EnumToFunc[defaultMapping[label]];
     if (handler) {
       handler(initialGesture, latestGesture);
     } else {

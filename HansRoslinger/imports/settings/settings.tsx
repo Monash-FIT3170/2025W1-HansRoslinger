@@ -6,6 +6,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
 
 import { GestureType } from '../gesture/gesture';
 
@@ -30,11 +32,22 @@ const Gestures = [
     GestureType.VICTORY 
 ]
 
+const customMapping = {
+  [GestureType.THUMB_UP]: console.log,
+  [GestureType.THUMB_DOWN]: console.log,
+  [GestureType.POINTING_UP]: processPointUpGesture,
+  [GestureType.CLOSED_FIST]: processClosedFistGesture,
+  [GestureType.I_LOVE_YOU]: console.log,
+  [GestureType.UNIDENTIFIED]: console.log,
+  [GestureType.OPEN_PALM]: processOpenPalmGesture,
+  [GestureType.VICTORY]: processVictorySignGesture,
+};
 
 export default function settings() {
   return (
     <TableContainer component={Paper}>
-      <Table>
+        <FormControl>
+        <Table>
         <TableHead>
           <TableRow>
             <TableCell>Gesture</TableCell>
@@ -48,12 +61,13 @@ export default function settings() {
                 {GestureToLabel[gesture]}
               </TableCell>
               <TableCell>
-                {/*Select */}
+                <Select></Select>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      </FormControl>
     </TableContainer>
   );
 }

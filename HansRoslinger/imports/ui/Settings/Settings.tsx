@@ -1,4 +1,4 @@
-
+import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,9 +8,11 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
 
-import { GestureType, FunctionType } from '../gesture/gesture';
+import { GestureType, FunctionType } from '../../gesture/gesture';
 import { useState } from 'react';
+
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -49,8 +51,8 @@ const Functions = [
     FunctionType.ZOOM
 ]
 
-export default function settings() {
-    const [state, setState] = useState({
+const Settings: React.FC = () => {
+    const [state, setState] = useState<Record<GestureType, FunctionType>>({
     [GestureType.THUMB_UP]: FunctionType.UNUSED,
     [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
     [GestureType.POINTING_UP]: FunctionType.SELECT,
@@ -70,7 +72,7 @@ export default function settings() {
   
   return (
     <TableContainer component={Paper}>
-        <FormControl>
+        <FormControl fullWidth>
         <Table>
         <TableHead>
           <TableRow>
@@ -89,9 +91,9 @@ export default function settings() {
               <TableCell>
                 <Select value={state[gesture]} onChange={(e) => handleChange(gesture, e.target.value)}>
                     {Functions.map(option => (
-                    <option key={gesture} value={option}>
+                    <MenuItem key={option} value={option}>
                         {FunctionToLabel[option]}
-                    </option>
+                    </MenuItem>
                     ))}
                 </Select>
               </TableCell>
@@ -103,3 +105,5 @@ export default function settings() {
     </TableContainer>
   );
 }
+
+export {Settings};

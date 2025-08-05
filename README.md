@@ -24,3 +24,10 @@
 `meteor`
 
 This will start a server at `http://localhost:3000`
+
+## Links to external infrastructure
+
+**Note:** You will require explicit access to view/use these external services, please not that substainial use of services do most money, so be careful!
+
+[MongoDB Atlas Project](https://cloud.mongodb.com/v2#/org/68909a50a210527643b70cdd/projects)
+[Google Cloud Project](https://console.cloud.google.com/storage/overview;tab=overview?inv=1&invt=Ab4tKw&project=hansroslinger-468011)

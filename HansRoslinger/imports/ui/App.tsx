@@ -22,7 +22,6 @@ export const App: React.FC = () => (
       <Route path="/home" element={<Home />} />
       <Route path="/allpresentations" element={<AllPresentations />} />
       <Route path="/present" element={<Present />} />
-      {/* Redirect unknown routes to login */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </Router>

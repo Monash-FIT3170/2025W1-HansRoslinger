@@ -1,3 +1,21 @@
+// Custom hook to fetch datasets for a presentation and keep them in state
+export function usePresentationDatasets(presentationId: string) {
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDatasets = async () => {
+      const data = await fetchDatasetsForPresentation(presentationId);
+      if (isMounted) setDatasets(data);
+    };
+    fetchDatasets();
+    return () => {
+      isMounted = false;
+    };
+  }, [presentationId]);
+
+  return datasets;
+}
 import { useState, useEffect } from "react";
 import { Dataset, getDatasetsByPresentationId } from "/imports/api/database/dataset/dataset";
 

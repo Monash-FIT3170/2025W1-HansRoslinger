@@ -5,45 +5,30 @@ import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
 import { Header } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
-import { fetchDatasetsForPresentation, useDatasetNavigation } from "./Input/Data";
+import { useDatasetNavigation, usePresentationDatasets } from "./Input/Data";
 import { Title } from "./Charts/Title";
 import { useAuthGuard } from "../handlers/auth/authHook";
-import { ChartType, Dataset, defaultDataset } from "../api/database/dataset/dataset";
+import { ChartType, defaultDataset } from "../api/database/dataset/dataset";
 
 export const Present: React.FC = () => {
+  // Make sure the user is authenticated, otherwise return to login
+  useAuthGuard();
+
+  // State of tooling features
   const [grayscale, setGrayscale] = useState(false);
   const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [showLineChart, setShowLineChart] = useState(false);
-  const [showHeader, setShowHeader] = useState(true);
   const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
-  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
-  const [zoomStartPosition, setZoomStartPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const [showHeader, setShowHeader] = useState(true);
 
-  useAuthGuard();
+  // State for chart features
+  const [showLineChart, setShowLineChart] = useState(false);
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const [zoomStartPosition, setZoomStartPosition] = useState<{x: number;y: number;}>({x: 0, y: 0});
 
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("presentationId") ?? "";
-
-  // State for all datasets
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
-  // Use custom hook to manage current dataset and navigation
+  const datasets = usePresentationDatasets(projectId);
   const { currentDataset } = useDatasetNavigation(datasets);
-
-  // Fetch all datasets for the presentation on mount or when projectId changes
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDatasets = async () => {
-      const data = await fetchDatasetsForPresentation(projectId);
-      if (isMounted) setDatasets(data);
-    };
-    fetchDatasets();
-    return () => {
-      isMounted = false;
-    };
-  }, [projectId]);
 
 
   const grayscaleRef = useRef(grayscale);
@@ -66,7 +51,7 @@ export const Present: React.FC = () => {
             y: customEvent.detail.y,
           });
         } else {
-          setZoomStartPosition(null);
+          setZoomStartPosition({x: 0, y: 0});
         }
         return next;
       });

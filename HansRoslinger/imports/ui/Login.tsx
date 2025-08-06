@@ -12,23 +12,38 @@ export const Login: React.FC = () => {
   const handleLogin = async () => {
     try {
       const result = await loginUser(username, password);
-      console.log(result)
+
       setMessage(result.message ?? null);
+      
       if (result.success && result.token && result.userId) {
         setAuthCookie(result.token, result.userId);
         navigate("/home");
       }
-    } catch (error: any) {
-      setMessage(error?.message || "An error occurred during login.");
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "message" in error) {
+        setMessage((error as { message?: string }).message || "An error occurred during login.");
+      } else {
+        setMessage("An error occurred during login.");
+      }
     }
   };
 
   const handleRegister = async () => {
     try {
       const result = await registerUser(username, password);
-      setMessage(result.message);
-    } catch (error: any) {
-      setMessage(error?.message || "An error occurred during registration.");
+      
+      setMessage(result.message ?? null);
+      
+      if (result.success && result.token && result.userId) {
+        setAuthCookie(result.token, result.userId);
+        navigate("/home");
+      }
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "message" in error) {
+        setMessage((error as { message?: string }).message || "An error occurred during registration.");
+      } else {
+        setMessage("An error occurred during registration.");
+      }
     }
   };
 

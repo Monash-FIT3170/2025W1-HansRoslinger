@@ -25,7 +25,7 @@ export const Home: React.FC = () => {
         </button>
         <button
           className="bg-cyan-500 text-white text-xl py-6 rounded-lg shadow-lg hover:bg-cyan-600 transition-colors"
-          onClick={() => console.log("Settings not added yet")}
+          onClick={() => navigate("/settings")}
         >
           Settings
         </button>

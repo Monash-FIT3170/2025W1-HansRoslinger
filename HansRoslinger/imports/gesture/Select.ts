@@ -1,6 +1,7 @@
 import { Gesture, gestureToScreenPosition } from "./gesture";
 
-export const processHighlightChart = (
+
+export const select= (
   _: Gesture,
   latestGesture: Gesture,
 ): void => {

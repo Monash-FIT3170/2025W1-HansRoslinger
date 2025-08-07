@@ -23,13 +23,15 @@ export const Present: React.FC = () => {
   // State for chart features
   const [showLineChart, setShowLineChart] = useState(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
-  const [zoomStartPosition, setZoomStartPosition] = useState<{x: number;y: number;}>({x: 0, y: 0});
+  const [zoomStartPosition, setZoomStartPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
 
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("presentationId") ?? "";
   const datasets = usePresentationDatasets(projectId);
   const { currentDataset } = useDatasetNavigation(datasets);
-
 
   const grayscaleRef = useRef(grayscale);
 
@@ -51,7 +53,7 @@ export const Present: React.FC = () => {
             y: customEvent.detail.y,
           });
         } else {
-          setZoomStartPosition({x: 0, y: 0});
+          setZoomStartPosition({ x: 0, y: 0 });
         }
         return next;
       });
@@ -73,7 +75,9 @@ export const Present: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
+    setShowLineChart(
+      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
+    );
   }, [currentDataset]);
 
   const toggleGrayscale = () => {

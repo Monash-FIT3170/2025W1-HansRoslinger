@@ -16,7 +16,7 @@ export function getAuthCookie() {
 }
 
 export function getUserIDCookie() {
-    return Cookies.get(USERID);
+  return Cookies.get(USERID);
 }
 
 export function clearAuthCookie() {

@@ -9,8 +9,8 @@ Meteor.startup(async () => {
   });
   Meteor.publish("presentations", function () {
     return PresentationCollection.find();
-  })
+  });
   Meteor.publish("datasets", function () {
     return DatasetCollection.find();
-  })
+  });
 });

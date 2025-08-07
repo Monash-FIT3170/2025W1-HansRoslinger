@@ -12,8 +12,8 @@ import AllPresentations from "./AllPresentations";
 import { Present } from "./Present";
 
 Meteor.subscribe("users");
-Meteor.subscribe("presentations")
-Meteor.subscribe("datasets")
+Meteor.subscribe("presentations");
+Meteor.subscribe("datasets");
 
 export const App: React.FC = () => (
   <Router>

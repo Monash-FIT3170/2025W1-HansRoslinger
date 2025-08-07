@@ -38,7 +38,10 @@ export async function doesUserExist(email: string): Promise<boolean> {
   return !!user;
 }
 
-export async function correctLogin(email: string, password: string): Promise<boolean> {
+export async function correctLogin(
+  email: string,
+  password: string,
+): Promise<boolean> {
   const user = await getUserByEmail(email);
   if (!user) return false;
   const hashed = hashPassword(password);

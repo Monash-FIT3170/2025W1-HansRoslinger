@@ -5,7 +5,7 @@ import { clearAuthCookie } from "../cookies/cookies";
 
 export const Home: React.FC = () => {
   useAuthGuard();
-  
+
   const navigate = useNavigate();
 
   const handleLogout = () => {

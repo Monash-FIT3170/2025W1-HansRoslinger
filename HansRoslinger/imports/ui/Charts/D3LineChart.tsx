@@ -11,7 +11,7 @@ import {
   LINE_STROKE_WIDTH,
   POINT_RADIUS,
 } from "./constants";
-import { Dataset} from "../../api/database/dataset/dataset";
+import { Dataset } from "../../api/database/dataset/dataset";
 
 interface D3LineChartProps {
   dataset: Dataset;

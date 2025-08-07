@@ -18,7 +18,7 @@ export interface Dataset {
   title: string;
   data: DataPoint[];
   preferredChartType: ChartType;
-  presentationID: string
+  presentationID: string;
 }
 
 export const defaultDataset: Dataset = {
@@ -26,7 +26,7 @@ export const defaultDataset: Dataset = {
   title: "",
   data: [],
   preferredChartType: ChartType.BAR,
-  presentationID: ""
+  presentationID: "",
 };
 
 export const DatasetCollection = new Mongo.Collection<Dataset>("datasets");
@@ -35,7 +35,6 @@ DatasetCollection.allow({
   update: () => true,
   remove: () => true,
 });
-
 
 export async function createDataset(dataset: Dataset): Promise<string> {
   return await DatasetCollection.insertAsync(dataset);
@@ -65,6 +64,8 @@ export async function getDatasetsByTitle(title: string): Promise<Dataset[]> {
   return DatasetCollection.find({ title }).fetch();
 }
 
-export async function getDatasetsByPresentationId(presentationID: string): Promise<Dataset[]> {
+export async function getDatasetsByPresentationId(
+  presentationID: string,
+): Promise<Dataset[]> {
   return DatasetCollection.find({ presentationID }).fetch();
 }

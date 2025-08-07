@@ -17,16 +17,22 @@ export function usePresentationDatasets(presentationId: string) {
   return datasets;
 }
 import { useState, useEffect } from "react";
-import { Dataset, getDatasetsByPresentationId } from "/imports/api/database/dataset/dataset";
+import {
+  Dataset,
+  getDatasetsByPresentationId,
+} from "/imports/api/database/dataset/dataset";
 
 // Async function to fetch all datasets for a presentation
-export async function fetchDatasetsForPresentation(presentationId: string): Promise<Dataset[]> {
+export async function fetchDatasetsForPresentation(
+  presentationId: string,
+): Promise<Dataset[]> {
   return getDatasetsByPresentationId(presentationId);
 }
 
 export function useDatasetNavigation(datasets: Dataset[]) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentDataset = datasets.length > 0 ? datasets[currentIndex] : undefined;
+  const currentDataset =
+    datasets.length > 0 ? datasets[currentIndex] : undefined;
 
   useEffect(() => {
     setCurrentIndex(0); // Reset to first dataset if datasets change

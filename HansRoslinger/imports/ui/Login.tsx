@@ -14,14 +14,17 @@ export const Login: React.FC = () => {
       const result = await loginUser(username, password);
 
       setMessage(result.message ?? null);
-      
+
       if (result.success && result.token && result.userId) {
         setAuthCookie(result.token, result.userId);
         navigate("/home");
       }
     } catch (error: unknown) {
       if (error && typeof error === "object" && "message" in error) {
-        setMessage((error as { message?: string }).message || "An error occurred during login.");
+        setMessage(
+          (error as { message?: string }).message ||
+            "An error occurred during login.",
+        );
       } else {
         setMessage("An error occurred during login.");
       }
@@ -31,16 +34,19 @@ export const Login: React.FC = () => {
   const handleRegister = async () => {
     try {
       const result = await registerUser(username, password);
-      
+
       setMessage(result.message ?? null);
-      
+
       if (result.success && result.token && result.userId) {
         setAuthCookie(result.token, result.userId);
         navigate("/home");
       }
     } catch (error: unknown) {
       if (error && typeof error === "object" && "message" in error) {
-        setMessage((error as { message?: string }).message || "An error occurred during registration.");
+        setMessage(
+          (error as { message?: string }).message ||
+            "An error occurred during registration.",
+        );
       } else {
         setMessage("An error occurred during registration.");
       }

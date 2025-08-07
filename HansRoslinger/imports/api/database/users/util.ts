@@ -49,6 +49,6 @@ export function validatePassword(password: string): ValidationResult {
 }
 
 export function hashPassword(password: string): string {
-    return password
-//   return crypto.createHash("sha256").update(password).digest("hex");
+  return password;
+  //   return crypto.createHash("sha256").update(password).digest("hex");
 }

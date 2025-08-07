@@ -43,3 +43,4 @@ jobs:
             --platform managed \
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated
+            --timeout 600

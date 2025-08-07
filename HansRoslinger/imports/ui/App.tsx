@@ -4,13 +4,13 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import { Login } from "./Login";
 import { Home } from "./Home";
 import AllPresentations from "./AllPresentations";
 import { Present } from "./Present";
-import SettingsPage from './pages/SettingsPage';
+import { Settings } from "./Settings";
+
 
 Meteor.subscribe("users");
 Meteor.subscribe("presentations");
@@ -23,7 +23,7 @@ export const App: React.FC = () => (
       <Route path="/home" element={<Home />} />
       <Route path="/allpresentations" element={<AllPresentations />} />
       <Route path="/present" element={<Present />} />
-      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<h2>404: Page Not Found</h2>} />
     </Routes>
   </Router>

@@ -2,10 +2,6 @@ import { select } from "./Select";
 import { clear } from "./Clear";
 import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
-import { processHighlightChart } from "./highlightChart";
-import { processClearChart } from "./clearChart";
-import { processFilterChart } from "./filterChart";
-import { processZoomChart, processZoom } from "./ZoomChart";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 
@@ -25,7 +21,9 @@ enum FunctionType {
   SELECT,
   FILTER,
   CLEAR,
-  ZOOM
+  ZOOM,
+  SWITCH_CHART,
+  SWITCH_DATA
 }
 
 export const IDtoEnum: Record<string, GestureType> = {
@@ -45,6 +43,9 @@ export const EnumToFunc: Record<FunctionType, any> = {
   [FunctionType.FILTER]: filter,
   [FunctionType.CLEAR]: clear,
   [FunctionType.ZOOM]: zoom,
+  [FunctionType.SWITCH_CHART]: processSwitchChartType,
+  [FunctionType.SWITCH_DATA]: processSwitchDataset,
+
 };
 
 enum Handedness {
@@ -79,8 +80,8 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.UNUSED,
-  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
+  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
   [GestureType.POINTING_UP]: FunctionType.SELECT,
   [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,

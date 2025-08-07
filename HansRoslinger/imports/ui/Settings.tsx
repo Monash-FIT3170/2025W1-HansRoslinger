@@ -10,7 +10,7 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 
-import { GestureType, FunctionType } from '../../gesture/gesture';
+import { GestureType, FunctionType } from '../gesture/gesture';
 import { useState } from 'react';
 
 
@@ -30,6 +30,8 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.CLEAR]: "Clear",
   [FunctionType.FILTER]: "Filter",
   [FunctionType.ZOOM]: "Zoom",
+  [FunctionType.SWITCH_CHART]: "Switch Chart",
+  [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
 };
 

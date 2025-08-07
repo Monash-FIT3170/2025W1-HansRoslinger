@@ -3,7 +3,7 @@ import { useRef } from "react";
 
 let isZoomEnabled = false;
 
-window.addEventListener("chart:togglezoom", (_: Event) => {
+window.addEventListener("chart:togglezoom", () => {
   isZoomEnabled = !isZoomEnabled;
 });
 
@@ -27,7 +27,6 @@ export const GestureHandler = () => {
         handleGestureToFunc(gesture.gestureID, currentGesture, gesture);
         // we update the time so we don't have duplicate activations
         currentGesture.timestamp = new Date();
-
       }
     }
   };

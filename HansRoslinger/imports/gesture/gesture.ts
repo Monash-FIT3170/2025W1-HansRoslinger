@@ -2,16 +2,22 @@ import { select } from "./Select";
 import { clear } from "./Clear";
 import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
+import { processHighlightChart } from "./highlightChart";
+import { processClearChart } from "./clearChart";
+import { processFilterChart } from "./filterChart";
+import { processZoomChart, processZoom } from "./ZoomChart";
+import { processSwitchChartType } from "./switchChartType";
+import { processSwitchDataset } from "./switchDataset";
 
 enum GestureType {
   CLOSED_FIST,
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP,        // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
   THUMB_DOWN,
   THUMB_UP,
-  VICTORY,            // This is the peace sign
+  VICTORY, // This is the peace sign
 }
 
 enum FunctionType {
@@ -47,10 +53,10 @@ enum Handedness {
 }
 
 type Gesture = {
-  gestureID: GestureType,
-  timestamp: Date,
-  handedness: Handedness,
-  confidence: number;    // 0-1
+  gestureID: GestureType;
+  timestamp: Date;
+  handedness: Handedness;
+  confidence: number; // 0-1
   landmarks: { x: number; y: number; z?: number }[];
 };
 
@@ -101,7 +107,6 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
       console.warn(`No handler found for gesture: ${INPUT}`);
     }
   }
-  
 };
 
 export { Gesture, GestureType, FunctionType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
@@ -109,7 +114,7 @@ export { Gesture, GestureType, FunctionType, Handedness, defaultMapping, handleG
 export const gestureToScreenPosition = (
   x: number,
   y: number,
-  z?: number
+  z?: number,
 ): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;

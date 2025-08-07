@@ -1,1 +1,1 @@
-export { ImageSegmentation } from './ImageSegmentation';
+export { ImageSegmentation } from "./ImageSegmentation";

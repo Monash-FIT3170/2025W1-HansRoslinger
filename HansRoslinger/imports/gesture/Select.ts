@@ -1,6 +1,7 @@
-import { Gesture, gestureToScreenPosition } from './gesture';
+import { Gesture, gestureToScreenPosition } from "./gesture";
 
-export const select = (
+
+export const select= (
   _: Gesture,
   latestGesture: Gesture,
 ): void => {
@@ -16,7 +17,7 @@ export const select = (
   );
 
   // Dispatch custom chart event with screen position
-  const gestureEvent = new CustomEvent('chart:highlight', {
+  const gestureEvent = new CustomEvent("chart:highlight", {
     detail: {
       x: screenPosition.screenX,
       y: screenPosition.screenY,

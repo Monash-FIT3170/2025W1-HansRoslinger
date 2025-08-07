@@ -83,10 +83,10 @@ const defaultMapping = {
   [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
   [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
   [GestureType.POINTING_UP]: FunctionType.SELECT,
-  [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+  [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-  [GestureType.OPEN_PALM]: FunctionType.FILTER,
+  [GestureType.OPEN_PALM]: FunctionType.CLEAR,
   [GestureType.VICTORY]: FunctionType.ZOOM,
 };
 

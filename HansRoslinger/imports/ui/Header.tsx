@@ -1,25 +1,25 @@
 import React from "react";
 
 interface HeaderProps {
-  onToggleBackgroundRemoval: () => void;
-  onToggleGrayscale: () => void;
-  showLineChart: boolean;
-  onToggleChart: () => void;
-  gestureDetectionStatus: boolean;
-  onToggleGestureDetectionStatus: () => void;
   backgroundRemoval: boolean;
   grayscale: boolean;
+  showLineChart: boolean;
+  gestureDetectionStatus: boolean;
+  onToggleBackgroundRemoval: () => void;
+  onToggleGrayscale: () => void;
+  onToggleChart: () => void;
+  onToggleGestureDetectionStatus: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onToggleBackgroundRemoval,
-  onToggleGrayscale,
-  showLineChart,
-  onToggleChart,
-  gestureDetectionStatus,
-  onToggleGestureDetectionStatus,
   backgroundRemoval,
   grayscale,
+  showLineChart,
+  gestureDetectionStatus,
+  onToggleBackgroundRemoval,
+  onToggleGrayscale,
+  onToggleChart,
+  onToggleGestureDetectionStatus,
 }) => (
   <>
     <button

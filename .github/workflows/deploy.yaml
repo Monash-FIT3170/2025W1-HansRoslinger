@@ -34,12 +34,12 @@ jobs:
           docker build -t $IMAGE .
           docker push $IMAGE
         env:
-          IMAGE: "us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+          IMAGE: "australia-southeast1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
+            --image australia-southeast1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
             --platform managed \
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated

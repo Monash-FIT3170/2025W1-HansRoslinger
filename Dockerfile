@@ -16,11 +16,11 @@ ENV PATH="/root/.meteor:$PATH"
 # Install Meteor dependencies and build the app
 RUN npm ci
 # RUN meteor build --directory /app-build --architecture os.linux.x86_64 --allow-superuser
-ENV PORT=8080
+ENV PORT=3000
 ENV ROOT_URL=http://127.0.0.1
 ENV MONGO_URL=mongodb+srv://mbaj0004:wf6Mhxe6qbRHcz5P@hansroslinger.l7tcaoi.mongodb.net/?retryWrites=true&w=majority&appName=HansRoslinger
 
-EXPOSE 8080
+EXPOSE 3000
 
 CMD ["meteor", "run", "-p", "8080", "--allow-superuser"]
 

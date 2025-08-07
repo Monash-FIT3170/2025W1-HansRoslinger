@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, Handedness, Gesture } from "../gesture/gesture";
+import { GestureType, Handedness, Gesture, labelMapping } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
 
 /*
@@ -24,7 +24,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
     Array(NUM_HANDS_DETECTABLE),
   );
   const [gestureRecognizer, setGestureRecognizer] =
-    useState<GestureRecognizer | null>();
+    useState<GestureRecognizer | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { HandleGesture } = GestureHandler();
 
@@ -102,21 +102,74 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
             index < detectedGestures.gestures.length;
             index++
           ) {
+            // Old unknown recognition
+//            gestures[index] = {
+//              gestureID: detectedGestures.gestures[index][0]
+//                .categoryName as unknown as GestureType,
+//              handedness: detectedGestures.handedness[index][0]
+//                .categoryName as unknown as Handedness,
+//              timestamp: new Date(),
+//              confidence: detectedGestures.gestures[index][0].score,
+//              landmarks: detectedGestures.landmarks[index],
+//            };
+
+            // updated recognition
+            const landmarks = detectedGestures.landmarks[index];
+            const handedness = detectedGestures.handedness[index][0]
+              .categoryName as Handedness;
+
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
+            const ringTip = landmarks[16];
+            const pinkyTip = landmarks[20];
+            const wrist = landmarks[0];
+
+            // For implementation of pinching
+            // Distance between thumb and index tip
+            const thumbIndexDistance = Math.hypot(
+              thumbTip.x - indexTip.x,
+              thumbTip.y - indexTip.y
+            );
+
+            // Distance between thumb and index tip
+            const thumbMiddleDistance = Math.hypot(
+              thumbTip.x - middleTip.x,
+              thumbTip.y - middleTip.y
+            );
+
+            // Consider it "PINCH" if thumb + index are touching, and other fingers are up
+            const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+            const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
+
+            const isPinchSign = isThumbIndexClose && isThumbMiddleClose;
+
+            //add other elif for new gestures
+                      if (isPinchSign) {
             gestures[index] = {
-              gestureID: detectedGestures.gestures[index][0]
-                .categoryName as unknown as GestureType,
-              handedness: detectedGestures.handedness[index][0]
-                .categoryName as unknown as Handedness,
+              gestureID: GestureType.PINCH,
+              handedness,
+              timestamp: new Date(),
+              confidence: 1.0,
+              landmarks,
+            };
+          } else {
+            const category = detectedGestures.gestures[index][0].categoryName;
+            gestures[index] = {
+              gestureID: labelMapping[category] ?? GestureType.UNIDENTIFIED,
+              handedness,
               timestamp: new Date(),
               confidence: detectedGestures.gestures[index][0].score,
-              landmarks: detectedGestures.landmarks[index],
+              landmarks,
             };
-          }
-          if (!(gestures.length == 0 && currentGestures.length == 0)) {
-            setCurrentGestures(gestures);
-          }
+          } // <-- close else
+        } // <-- close for
+
+        if (!(gestures.length === 0 && currentGestures.length === 0)) {
+          setCurrentGestures(gestures);
         }
-      };
+      } // <-- close if(video.readyState)
+    }; // <-- close processFrame
 
       // Check gestures periodically
       intervalRef.current = setInterval(

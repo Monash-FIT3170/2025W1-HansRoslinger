@@ -44,3 +44,4 @@ jobs:
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated
             --timeout 600
+            --memory 1Gi

@@ -1,4 +1,6 @@
 import { Meteor } from "meteor/meteor";
+import dotenv from 'dotenv';
+dotenv.config(); 
 import { Link, LinksCollection } from "/imports/api/links";
 
 async function insertLink({ title, url }: Pick<Link, "title" | "url">) {

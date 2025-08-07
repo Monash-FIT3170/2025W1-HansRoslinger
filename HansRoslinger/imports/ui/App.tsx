@@ -1,16 +1,11 @@
 import React from "react";
 import { Meteor } from "meteor/meteor";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Login } from "./Login";
 import { Home } from "./Home";
 import AllPresentations from "./AllPresentations";
 import { Present } from "./Present";
 import { Settings } from "./Settings";
-
 
 Meteor.subscribe("users");
 Meteor.subscribe("presentations");

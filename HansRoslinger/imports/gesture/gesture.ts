@@ -23,18 +23,18 @@ enum FunctionType {
   CLEAR,
   ZOOM,
   SWITCH_CHART,
-  SWITCH_DATA
+  SWITCH_DATA,
 }
 
 export const IDtoEnum: Record<string, GestureType> = {
-  "Thumb_Up": GestureType.THUMB_UP,
-  "Thumb_Down": GestureType.THUMB_DOWN,
-  "Pointing_Up": GestureType.POINTING_UP,
-  "Closed_Fist": GestureType.CLOSED_FIST,
-  "I_Love_You": GestureType.I_LOVE_YOU,
-  "Unidentified": GestureType.UNIDENTIFIED,
-  "Open_Palm": GestureType.OPEN_PALM,
-  "Victory": GestureType.VICTORY,
+  Thumb_Up: GestureType.THUMB_UP,
+  Thumb_Down: GestureType.THUMB_DOWN,
+  Pointing_Up: GestureType.POINTING_UP,
+  Closed_Fist: GestureType.CLOSED_FIST,
+  I_Love_You: GestureType.I_LOVE_YOU,
+  Unidentified: GestureType.UNIDENTIFIED,
+  Open_Palm: GestureType.OPEN_PALM,
+  Victory: GestureType.VICTORY,
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -45,7 +45,6 @@ export const EnumToFunc: Record<FunctionType, any> = {
   [FunctionType.ZOOM]: zoom,
   [FunctionType.SWITCH_CHART]: processSwitchChartType,
   [FunctionType.SWITCH_DATA]: processSwitchDataset,
-
 };
 
 enum Handedness {
@@ -90,14 +89,17 @@ const defaultMapping = {
   [GestureType.VICTORY]: FunctionType.ZOOM,
 };
 
-const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture): void => {
+const handleGestureToFunc = (
+  INPUT: GestureType,
+  initialGesture: Gesture,
+  latestGesture: Gesture,
+): void => {
   const label = IDtoEnum[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (defaultMapping[label] === FunctionType.ZOOM) {
       zoom(initialGesture, latestGesture);
-    }
-    else {
+    } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
@@ -110,7 +112,15 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
   }
 };
 
-export { Gesture, GestureType, FunctionType, Handedness, defaultMapping, handleGestureToFunc, isZoomEnabled };
+export {
+  Gesture,
+  GestureType,
+  FunctionType,
+  Handedness,
+  defaultMapping,
+  handleGestureToFunc,
+  isZoomEnabled,
+};
 
 export const gestureToScreenPosition = (
   x: number,

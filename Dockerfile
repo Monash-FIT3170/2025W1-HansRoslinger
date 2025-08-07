@@ -21,9 +21,9 @@ RUN meteor build --directory /app-build --architecture os.linux.x86_64 --allow-s
 FROM node:20
 
 # Set environment variables
-ENV PORT=3000
+ENV PORT=8080
 ENV ROOT_URL=http://127.0.0.1
-# ENV MONGO_URL=mongodb://user:pass@mongo:27017/dbname
+ENV MONGO_URL=mongodb+srv://mbaj0004:wf6Mhxe6qbRHcz5P@hansroslinger.l7tcaoi.mongodb.net/?retryWrites=true&w=majority&appName=HansRoslinger
 
 # Create app directory in the runtime container
 WORKDIR /opt/HansRoslinger/app
@@ -39,7 +39,7 @@ RUN npm install
 WORKDIR /opt/HansRoslinger/app
 
 # Expose the port
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the app
 CMD ["node", "main.js"]

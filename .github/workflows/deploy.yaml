@@ -45,3 +45,4 @@ jobs:
             --allow-unauthenticated
             --timeout 600
             --memory 1Gi
+            --port 3000

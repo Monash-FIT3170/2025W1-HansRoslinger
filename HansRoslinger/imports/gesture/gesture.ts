@@ -14,6 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
+  POINTING_LEFT,
+  POINTING_RIGHT
 }
 
 export const labelMapping: Record<string, GestureType> = {
@@ -25,6 +27,8 @@ export const labelMapping: Record<string, GestureType> = {
   None: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+  Pointing_Left: GestureType.POINTING_LEFT,
+  Pointing_Right: GestureType.POINTING_RIGHT
 };
 
 enum Handedness {
@@ -59,8 +63,10 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: processSwitchChartType,
-  [GestureType.THUMB_DOWN]: processSwitchDataset,
+  [GestureType.THUMB_UP]: console.log,
+  [GestureType.THUMB_DOWN]: console.log,
+  [GestureType.POINTING_LEFT]: processSwitchChartType,
+  [GestureType.POINTING_RIGHT]: processSwitchDataset,
   [GestureType.POINTING_UP]: processHighlightChart,
   [GestureType.CLOSED_FIST]: processFilterChart,
   [GestureType.I_LOVE_YOU]: console.log,
@@ -125,3 +131,4 @@ export const gestureToScreenPosition = (
 
   return { screenX, screenY };
 };
+

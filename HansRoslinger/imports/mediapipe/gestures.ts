@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
-import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
+import { GestureRecognizer, FilesetResolver, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { GestureType, Handedness, Gesture, labelMapping } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
 
@@ -97,61 +97,19 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
             performance.now(),
           );
           const gestures: Gesture[] = Array(detectedGestures.gestures.length);
-          for (
-            let index = 0;
-            index < detectedGestures.gestures.length;
-            index++
-          ) {
-            // Old unknown recognition
-//            gestures[index] = {
-//              gestureID: detectedGestures.gestures[index][0]
-//                .categoryName as unknown as GestureType,
-//              handedness: detectedGestures.handedness[index][0]
-//                .categoryName as unknown as Handedness,
-//              timestamp: new Date(),
-//              confidence: detectedGestures.gestures[index][0].score,
-//              landmarks: detectedGestures.landmarks[index],
-//            };
-
-            // updated recognition
+          for (let index = 0; index < detectedGestures.gestures.length; index++) {
             const landmarks = detectedGestures.landmarks[index];
-            const handedness = detectedGestures.handedness[index][0]
-              .categoryName as Handedness;
-
-            const thumbTip = landmarks[4];
-            const indexTip = landmarks[8];
-            const middleTip = landmarks[12];
-            const ringTip = landmarks[16];
-            const pinkyTip = landmarks[20];
-            const wrist = landmarks[0];
-
-            // For implementation of pinching
-            // Distance between thumb and index tip
-            const thumbIndexDistance = Math.hypot(
-              thumbTip.x - indexTip.x,
-              thumbTip.y - indexTip.y
-            );
-
-            // Distance between thumb and index tip
-            const thumbMiddleDistance = Math.hypot(
-              thumbTip.x - middleTip.x,
-              thumbTip.y - middleTip.y
-            );
-
-            // Consider it "PINCH" if thumb + index are touching, and other fingers are up
-            const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
-            const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
-
-            const isPinchSign = isThumbIndexClose && isThumbMiddleClose;
+            const handedness = detectedGestures.handedness[index][0].categoryName as Handedness;
 
             //add other elif for new gestures
-            if (isPinchSign) {
+            if (isPinchSign(landmarks)) {
               gestures[index] = {
                 gestureID: GestureType.PINCH,
                 handedness,
                 timestamp: new Date(),
                 confidence: 1.0,
-                landmarks,
+                singleGestureLandmarks: landmarks,
+                doubleGestureLandmarks: [],
               };
             } else {
               const category = detectedGestures.gestures[index][0].categoryName;
@@ -160,18 +118,17 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
                 handedness,
                 timestamp: new Date(),
                 confidence: detectedGestures.gestures[index][0].score,
-                landmarks,
+                singleGestureLandmarks: landmarks,
+                doubleGestureLandmarks: [],
               };
-            } // <-- close else
-          } // <-- close for
+            }
+          }
 
-        if (!(gestures.length === 0 && currentGestures.length === 0)) {
-          setCurrentGestures(gestures);
+          if (!(gestures.length === 0 && currentGestures.length === 0)) {
+            setCurrentGestures(gestures);
+          }
         }
-      } // <-- close if(video.readyState)
-    }; // <-- close processFrame
-        
-      
+      };
 
       // Check gestures periodically
       intervalRef.current = setInterval(
@@ -187,13 +144,33 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
 
   // Handle newly detected gesture
   useEffect(() => {
-//    for (let index = 0; index < currentGestures.length; index++) {
-//      if (currentGestures[index]) {
-//        // Code to be called when new gestures are detected goes here
-//        console.log(currentGestures[index]);
-//        HandleGesture(currentGestures[index]);
-//     }
-//    }
+    // Logic for handling 2 handed gestures should be done before handling individual gestures
+    // If a 2 handed gesture is found, we shouldn't handle each single gesture individually
+    // 2 handed gestures should always come from a left and right hand, assuming it is a single person
+    // performing the gesture
+    const leftGesture = currentGestures.find(g => g?.handedness === Handedness.LEFT);
+    const rightGesture = currentGestures.find(g => g?.handedness === Handedness.RIGHT);
+    let twoHandedGesture: Gesture | undefined;
+    if (leftGesture && rightGesture){
+      if (isDoublePinchSign(leftGesture, rightGesture)) {
+        twoHandedGesture = {
+          gestureID: GestureType.DOUBLE_PINCH,
+          handedness: Handedness.BOTH,
+          timestamp: new Date(),
+          confidence: Math.min(leftGesture.confidence, rightGesture.confidence),
+          singleGestureLandmarks: [],
+          doubleGestureLandmarks: [leftGesture.singleGestureLandmarks, rightGesture.singleGestureLandmarks],
+        };
+      }
+      //here you can add an else if to add other two handed gestures
+      if (twoHandedGesture) {
+        console.log(twoHandedGesture)
+        HandleGesture(twoHandedGesture);
+        return;
+      }
+    }
+
+    // this code will only run if a two-handed gesture was not detected
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
         // Code to be called when new gestures are detected goes here
@@ -201,28 +178,45 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
         HandleGesture(currentGestures[index]);
      }
     }
-    const leftGesture = currentGestures.find(g => g?.handedness === Handedness.LEFT);
-    const rightGesture = currentGestures.find(g => g?.handedness === Handedness.RIGHT);
-
-    if (
-      leftGesture &&
-      rightGesture &&
-      leftGesture.gestureID === GestureType.PINCH &&
-      rightGesture.gestureID === GestureType.PINCH
-    ) {
-      const doublePinchGesture: Gesture = {
-        gestureID: GestureType.DOUBLE_PINCH,
-        handedness: Handedness.RIGHT, // or LEFT — doesn’t matter here
-        timestamp: new Date(),
-        confidence: Math.min(leftGesture.confidence, rightGesture.confidence),
-        landmarks: [...leftGesture.landmarks, ...rightGesture.landmarks], // just to pass something
-      };
-
-      console.log("DOUBLE_PINCH recognised")
-      HandleGesture(doublePinchGesture);
-    }
 
   }, [currentGestures]);
 };
 
 export default GestureDetector;
+
+function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
+  // Check if both gestures are PINCH
+  const isLeftPinch = leftGesture.gestureID === GestureType.PINCH;
+  const isRightPinch = rightGesture.gestureID === GestureType.PINCH;
+
+  return isLeftPinch && isRightPinch;
+}
+
+function isPinchSign(landmarks: NormalizedLandmark[]) {
+
+  if (!landmarks || landmarks.length < 21) return false;
+
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+
+  // For implementation of pinching
+  // Distance between thumb and index tip
+  const thumbIndexDistance = Math.hypot(
+    thumbTip.x - indexTip.x,
+    thumbTip.y - indexTip.y
+  );
+
+  // Distance between thumb and index tip
+  const thumbMiddleDistance = Math.hypot(
+    thumbTip.x - middleTip.x,
+    thumbTip.y - middleTip.y
+  );
+
+  // Consider it "PINCH" if thumb + index are touching, and other fingers are up
+  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+  const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
+
+  return isThumbIndexClose && isThumbMiddleClose;
+}
+

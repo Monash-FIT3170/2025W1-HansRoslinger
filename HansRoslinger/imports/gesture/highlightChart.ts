@@ -4,7 +4,7 @@ export const processHighlightChart = (
   _: Gesture,
   latestGesture: Gesture,
 ): void => {
-  const pointerLandmark = latestGesture.landmarks[8];
+  const pointerLandmark = latestGesture.singleGestureLandmarks[8];
   const screenPosition = gestureToScreenPosition(
     pointerLandmark.x,
     pointerLandmark.y,

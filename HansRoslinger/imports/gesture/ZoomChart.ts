@@ -1,15 +1,29 @@
 import { Gesture, gestureToScreenPosition } from "./gesture";
 
 export const processZoomChart = (_1: Gesture, latestGesture: Gesture): void => {
-  const screenPosition = gestureToScreenPosition(
-    latestGesture.landmarks[9].x,
-    latestGesture.landmarks[9].y,
-  );
+  let leftHandScreenPosition, rightHandScreenPosition;
+  try {
+    leftHandScreenPosition = gestureToScreenPosition(
+      latestGesture.doubleGestureLandmarks[0][9].x,
+      latestGesture.doubleGestureLandmarks[0][9].y,
+    );
+    rightHandScreenPosition = gestureToScreenPosition(
+      latestGesture.doubleGestureLandmarks[1][9].x,
+      latestGesture.doubleGestureLandmarks[1][9].y,
+    );
+  // if this catch occurs it means that a closed fist has occured and we should end the zoom
+  // we need this error catching because otherwise the left or right hand position when getting index 9 will crash
+  } catch {
+    leftHandScreenPosition = { screenX: 0, screenY: 0 };
+    rightHandScreenPosition = { screenX: 0, screenY: 0 };
+  }
+  console.log(`starting left hand position: ${JSON.stringify(leftHandScreenPosition)}`);
+  console.log(`starting right hand position: ${JSON.stringify(rightHandScreenPosition)}`);
 
   const gestureEvent = new CustomEvent("chart:togglezoom", {
     detail: {
-      x: screenPosition.screenX,
-      y: screenPosition.screenY,
+      x: leftHandScreenPosition.screenX,
+      y: leftHandScreenPosition.screenY,
     },
   });
 
@@ -20,17 +34,26 @@ export const processZoom = (
   zoomStartPosition: { x: number; y: number },
   gestures: Gesture,
 ): void => {
-  const currentPosition = gestureToScreenPosition(
-    gestures.landmarks[9].x,
-    gestures.landmarks[9].y,
+  console.log(`gesture: ${JSON.stringify(gestures)}`);
+  const leftHandScreenPosition = gestureToScreenPosition(
+    gestures.doubleGestureLandmarks[0][9].x,
+    gestures.doubleGestureLandmarks[0][9].y,
   );
+  const rightHandScreenPosition = gestureToScreenPosition(
+    gestures.doubleGestureLandmarks[1][9].x,
+    gestures.doubleGestureLandmarks[1][9].y,
+  );
+  console.log(`left hand: ${JSON.stringify(leftHandScreenPosition)}`);
+  console.log(`right hand: ${JSON.stringify(rightHandScreenPosition)}`);
+  console.log(`zoom start: ${JSON.stringify(zoomStartPosition)}`);
 
-  const dx = currentPosition.screenX - zoomStartPosition.x;
+  // we need to get the 
+  const dx = leftHandScreenPosition.screenX - zoomStartPosition.x;
   const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedX = Math.min(Math.abs(dx) / maxDistanceX, 1);
   const deltaX = dx >= 0 ? normalizedX * 0.5 : -normalizedX * 0.5;
 
-  const dy = currentPosition.screenY - zoomStartPosition.y;
+  const dy = leftHandScreenPosition.screenY - zoomStartPosition.y;
   const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedY = Math.min(Math.abs(Math.min(dy, 0)) / maxDistanceY, 1);
 

@@ -34,6 +34,7 @@ export const labelMapping: Record<string, GestureType> = {
 enum Handedness {
   LEFT = "Left",
   RIGHT = "Right",
+  BOTH = "Both"
 }
 
 type Gesture = {
@@ -41,7 +42,8 @@ type Gesture = {
   timestamp: Date;
   handedness: Handedness;
   confidence: number; // 0-1
-  landmarks: { x: number; y: number; z?: number }[];
+  singleGestureLandmarks: { x: number; y: number; z?: number }[]
+  doubleGestureLandmarks: { x: number; y: number; z?: number }[][];
 };
 
 // Define a boolean to track the zoom state
@@ -72,7 +74,7 @@ const defaultMapping = {
   [GestureType.OPEN_PALM]: processClearChart,
   [GestureType.VICTORY]: console.log,
   [GestureType.PINCH]: console.log,
-  [GestureType.DOUBLE_PINCH]: console.log,
+  [GestureType.DOUBLE_PINCH]: processZoomChart,
 };
 
 // Default mapping, would replace console.log with function to be called.
@@ -86,7 +88,7 @@ const handleGestureToFunc = (
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {
       processZoomChart(initialGesture, latestGesture);
-    } else {
+    } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {

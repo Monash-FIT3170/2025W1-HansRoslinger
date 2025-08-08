@@ -78,7 +78,7 @@ const handleGestureToFunc = (
   initialGesture: Gesture,
   latestGesture: Gesture,
 ): void => {
-  const label = labelMapping[INPUT];
+  const label = INPUT;
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (label === GestureType.CLOSED_FIST) {

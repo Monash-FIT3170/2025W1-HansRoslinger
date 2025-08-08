@@ -145,7 +145,7 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
             const isPinchSign = isThumbIndexClose && isThumbMiddleClose;
 
             //add other elif for new gestures
-                      if (isPinchSign) {
+             if (isPinchSign) {
             gestures[index] = {
               gestureID: GestureType.PINCH,
               handedness,
@@ -170,6 +170,8 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
         }
       } // <-- close if(video.readyState)
     }; // <-- close processFrame
+        
+      
 
       // Check gestures periodically
       intervalRef.current = setInterval(

@@ -1,0 +1,3 @@
+project_id = "hansroslinger-468011"
+region     = "australia-southeast1"
+repository_name = "cloud-run-repo"

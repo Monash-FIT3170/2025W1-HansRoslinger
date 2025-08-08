@@ -10,7 +10,7 @@ import {
   AXIS_LINE_SHADOW,
   BAR_OPACITY,
 } from "./constants";
-import { Dataset } from "../Input/Data";
+import { Dataset } from "../../api/database/dataset/dataset";
 
 interface D3BarChartProps {
   dataset: Dataset;

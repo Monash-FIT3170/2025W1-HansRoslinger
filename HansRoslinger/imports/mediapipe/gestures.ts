@@ -145,25 +145,25 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
             const isPinchSign = isThumbIndexClose && isThumbMiddleClose;
 
             //add other elif for new gestures
-             if (isPinchSign) {
-            gestures[index] = {
-              gestureID: GestureType.PINCH,
-              handedness,
-              timestamp: new Date(),
-              confidence: 1.0,
-              landmarks,
-            };
-          } else {
-            const category = detectedGestures.gestures[index][0].categoryName;
-            gestures[index] = {
-              gestureID: labelMapping[category] ?? GestureType.UNIDENTIFIED,
-              handedness,
-              timestamp: new Date(),
-              confidence: detectedGestures.gestures[index][0].score,
-              landmarks,
-            };
-          } // <-- close else
-        } // <-- close for
+            if (isPinchSign) {
+              gestures[index] = {
+                gestureID: GestureType.PINCH,
+                handedness,
+                timestamp: new Date(),
+                confidence: 1.0,
+                landmarks,
+              };
+            } else {
+              const category = detectedGestures.gestures[index][0].categoryName;
+              gestures[index] = {
+                gestureID: labelMapping[category] ?? GestureType.UNIDENTIFIED,
+                handedness,
+                timestamp: new Date(),
+                confidence: detectedGestures.gestures[index][0].score,
+                landmarks,
+              };
+            } // <-- close else
+          } // <-- close for
 
         if (!(gestures.length === 0 && currentGestures.length === 0)) {
           setCurrentGestures(gestures);
@@ -187,13 +187,41 @@ const GestureDetector = (videoRef: MutableRefObject<Webcam | null>) => {
 
   // Handle newly detected gesture
   useEffect(() => {
+//    for (let index = 0; index < currentGestures.length; index++) {
+//      if (currentGestures[index]) {
+//        // Code to be called when new gestures are detected goes here
+//        console.log(currentGestures[index]);
+//        HandleGesture(currentGestures[index]);
+//     }
+//    }
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
         // Code to be called when new gestures are detected goes here
         console.log(currentGestures[index]);
         HandleGesture(currentGestures[index]);
-      }
+     }
     }
+    const leftGesture = currentGestures.find(g => g?.handedness === Handedness.LEFT);
+    const rightGesture = currentGestures.find(g => g?.handedness === Handedness.RIGHT);
+
+    if (
+      leftGesture &&
+      rightGesture &&
+      leftGesture.gestureID === GestureType.PINCH &&
+      rightGesture.gestureID === GestureType.PINCH
+    ) {
+      const doublePinchGesture: Gesture = {
+        gestureID: GestureType.DOUBLE_PINCH,
+        handedness: Handedness.RIGHT, // or LEFT — doesn’t matter here
+        timestamp: new Date(),
+        confidence: Math.min(leftGesture.confidence, rightGesture.confidence),
+        landmarks: [...leftGesture.landmarks, ...rightGesture.landmarks], // just to pass something
+      };
+
+      console.log("DOUBLE_PINCH recognised")
+      HandleGesture(doublePinchGesture);
+    }
+
   }, [currentGestures]);
 };
 

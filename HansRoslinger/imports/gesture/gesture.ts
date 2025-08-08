@@ -15,6 +15,7 @@ enum GestureType {
   THUMB_UP,
   VICTORY, // This is the peace sign
   PINCH, // Team 3 double hand gesture
+  DOUBLE_PINCH,
 }
 
 export const labelMapping: Record<string, GestureType> = {
@@ -27,6 +28,7 @@ export const labelMapping: Record<string, GestureType> = {
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
   Pinch: GestureType.PINCH,
+  Double_Pinch: GestureType.DOUBLE_PINCH,
 };
 
 enum Handedness {
@@ -69,7 +71,8 @@ const defaultMapping = {
   [GestureType.UNIDENTIFIED]: console.log,
   [GestureType.OPEN_PALM]: processClearChart,
   [GestureType.VICTORY]: console.log,
-  [GestureType.PINCH]: processZoomChart, //you can do two handedness here with check
+  [GestureType.PINCH]: console.log,
+  [GestureType.DOUBLE_PINCH]: console.log,
 };
 
 // Default mapping, would replace console.log with function to be called.

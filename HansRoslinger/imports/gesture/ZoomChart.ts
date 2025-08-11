@@ -20,10 +20,11 @@ export const processZoomChart = (_1: Gesture, latestGesture: Gesture): void => {
   console.log(`starting left hand position: ${JSON.stringify(leftHandScreenPosition)}`);
   console.log(`starting right hand position: ${JSON.stringify(rightHandScreenPosition)}`);
 
+  // x and y needs to be a midpoint between the two hands
   const gestureEvent = new CustomEvent("chart:togglezoom", {
-    detail: {
-      x: leftHandScreenPosition.screenX,
-      y: leftHandScreenPosition.screenY,
+  detail: {
+    x: (leftHandScreenPosition.screenX + rightHandScreenPosition.screenX) / 2,
+    y: (leftHandScreenPosition.screenY + rightHandScreenPosition.screenY) / 2,
     },
   });
 
@@ -47,18 +48,20 @@ export const processZoom = (
   console.log(`right hand: ${JSON.stringify(rightHandScreenPosition)}`);
   console.log(`zoom start: ${JSON.stringify(zoomStartPosition)}`);
 
-  // we need to get the 
-  const dx = leftHandScreenPosition.screenX - zoomStartPosition.x;
-  const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
-  const normalizedX = Math.min(Math.abs(dx) / maxDistanceX, 1);
-  const deltaX = dx >= 0 ? normalizedX * 0.5 : -normalizedX * 0.5;
+  // Calculate the horizontal difference (dx) and vertical difference (dy) between the two hands
+const dx = rightHandScreenPosition.screenX - leftHandScreenPosition.screenX;
+const dy = rightHandScreenPosition.screenY - leftHandScreenPosition.screenY;
 
-  const dy = leftHandScreenPosition.screenY - zoomStartPosition.y;
-  const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
-  const normalizedY = Math.min(Math.abs(Math.min(dy, 0)) / maxDistanceY, 1);
+// Max distance to normalise the zoom level
+const maxDistance = Math.min(window.innerWidth, window.innerHeight) * 0.5; // 50% of the screen size
 
-  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
-  const scaleY = 1 - normalizedY * 0.9;
+// Normalise the horizontal (dx) and vertical (dy) movements betwween 0-1
+const normalisedDx = Math.min(Math.abs(dx) / maxDistance, 1);
+const normalisedDy = Math.min(Math.abs(dy) / maxDistance, 1); 
+
+// Reverse it so when hands are close, the chart is zoomed out.
+  const scaleX = Math.min(Math.max(1 + normalisedDx, 0.5), 1.5);
+  const scaleY = 1 - normalisedDy * 0.9;
 
   console.log("dx:", dx, "dy:", dy);
   console.log("Zoom scaleX:", scaleX, "scaleY:", scaleY);

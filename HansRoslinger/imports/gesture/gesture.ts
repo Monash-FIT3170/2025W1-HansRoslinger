@@ -10,7 +10,7 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched (now also identifies any pointing)
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
@@ -90,11 +90,12 @@ const defaultMapping = {
 };
 
 const handleGestureToFunc = (
-  INPUT: GestureType,
-  initialGesture: Gesture,
-  latestGesture: Gesture,
+    INPUT: GestureType,
+    initialGesture: Gesture,
+    latestGesture: Gesture,
 ): void => {
-  const label = IDtoEnum[INPUT];
+  const label = INPUT;
+
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (defaultMapping[label] === FunctionType.ZOOM) {
@@ -103,11 +104,19 @@ const handleGestureToFunc = (
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const handler = EnumToFunc[defaultMapping[label]];
-    if (handler) {
+    const functionType = defaultMapping[label];
+    const handler = EnumToFunc[functionType];
+
+    if (handler && functionType !== FunctionType.UNUSED) {
+      // This log helps confirm the correct handler is being called
+      console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
       handler(initialGesture, latestGesture);
+    } else if (functionType === FunctionType.UNUSED) {
+      // This log confirms a gesture is being correctly ignored
+      console.log(`[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`);
     } else {
-      console.warn(`No handler found for gesture: ${INPUT}`);
+      // This warning will now only appear for truly unhandled gestures
+      console.warn(`[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`);
     }
   }
 };
@@ -123,9 +132,9 @@ export {
 };
 
 export const gestureToScreenPosition = (
-  x: number,
-  y: number,
-  z?: number,
+    x: number,
+    y: number,
+    z?: number,
 ): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;

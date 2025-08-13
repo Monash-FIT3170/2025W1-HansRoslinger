@@ -10,8 +10,10 @@ import { Title } from "./Charts/Title";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { ChartType, defaultDataset } from "../api/database/dataset/dataset";
 
+// MUI imports
+import { Box, Button } from "@mui/material";
+
 export const Present: React.FC = () => {
-  // Make sure the user is authenticated, otherwise return to login
   useAuthGuard();
 
   // State of tooling features
@@ -41,7 +43,7 @@ export const Present: React.FC = () => {
 
   const determineGrayscale = () => grayscaleRef.current;
 
-  // code which handles playing a dot at the start position of the zoom
+  // Handle zoom toggle
   useEffect(() => {
     const handleToggleZoom = (event: Event) => {
       const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -64,7 +66,7 @@ export const Present: React.FC = () => {
       window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
-  // code which switches the chart type when thumbs up is done
+  // Handle chart switch
   useEffect(() => {
     const handleSwitchChart = () => {
       setShowLineChart((prev) => !prev);
@@ -74,9 +76,10 @@ export const Present: React.FC = () => {
     return () => window.removeEventListener("chart:switch", handleSwitchChart);
   }, []);
 
+  // Initialize chart type
   useEffect(() => {
     setShowLineChart(
-      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
+      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE
     );
   }, [currentDataset]);
 
@@ -84,41 +87,91 @@ export const Present: React.FC = () => {
     setGrayscale((b) => !b);
   };
 
-  const toolbarClasses = showHeader
-    ? [
-        "absolute top-4 right-4 bottom-4 w-16",
-        "bg-gray-800 rounded-2xl shadow-lg",
-        "flex flex-col items-center justify-end py-4 space-y-2",
-        "z-50",
-      ].join(" ")
-    : [
-        "absolute bottom-4 right-4 w-16 h-16",
-        "bg-gray-900 rounded-xl shadow-lg",
-        "flex items-center justify-center",
-        "z-50",
-      ].join(" ");
+  const toolbarStyles = showHeader
+    ? {
+        position: "absolute" as const,
+        top: 16,
+        right: 16,
+        bottom: 16,
+        width: 64,
+        backgroundColor: "#1f2937",
+        borderRadius: 16,
+        boxShadow: 4,
+        display: "flex",
+        flexDirection: "column" as const,
+        alignItems: "center",
+        justifyContent: "flex-end",
+        paddingY: 2,
+        gap: 8,
+        zIndex: 50,
+      }
+    : {
+        position: "absolute" as const,
+        bottom: 16,
+        right: 16,
+        width: 64,
+        height: 64,
+        backgroundColor: "#111827",
+        borderRadius: 12,
+        boxShadow: 4,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+      };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <Box position="relative" width="100vw" height="100vh" overflow="hidden">
       {/* Fullscreen video */}
-      <div
-        className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          visibility: backgroundRemoval ? "hidden" : "visible",
+          pointerEvents: backgroundRemoval ? "none" : "auto",
+        }}
       >
         <WebcamComponent
           gestureDetectionStatus={gestureDetectionStatus}
           grayscale={grayscale}
         />
-      </div>
-      <div
-        className={`absolute inset-0 flex flex-col items-center justify-center ${!backgroundRemoval ? "invisible pointer-events-none" : ""}`}
+      </Box>
+
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          visibility: !backgroundRemoval ? "hidden" : "visible",
+          pointerEvents: !backgroundRemoval ? "none" : "auto",
+        }}
       >
         <ImageSegmentation grayscale={() => determineGrayscale()} />
-      </div>
+      </Box>
 
       {isZoomEnabled && zoomStartPosition && (
-        <div
-          className="absolute w-4 h-4 bg-cyan-400 rounded-full pointer-events-none z-50"
-          style={{
+        <Box
+          position="absolute"
+          width={16}
+          height={16}
+          bgcolor="cyan.400"
+          borderRadius="50%"
+          sx={{
+            pointerEvents: "none",
+            zIndex: 50,
             left: `${zoomStartPosition.x}px`,
             top: `${zoomStartPosition.y}px`,
             transform: "translate(-50%, -50%)",
@@ -126,9 +179,14 @@ export const Present: React.FC = () => {
         />
       )}
 
-      {/* charts */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+      {/* Charts */}
+      <Box
+        position="absolute"
+        left="50%"
+        sx={{ transform: "translateX(-50%)" }}
+        bgcolor="transparent"
+        display="flex"
+        justifyContent="center"
         style={{ bottom: "10%", width: "95%", height: "50%" }}
       >
         {showLineChart ? (
@@ -136,17 +194,23 @@ export const Present: React.FC = () => {
         ) : (
           <D3BarChart dataset={currentDataset ?? defaultDataset} />
         )}
-      </div>
-      {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
+      </Box>
+
+      {/* Title area */}
+      <Box
+        position="absolute"
+        left="50%"
+        sx={{ transform: "translateX(-50%)" }}
+        bgcolor="transparent"
+        display="flex"
+        justifyContent="center"
         style={{ bottom: 0, width: "95%", height: "10%" }}
       >
         <Title dataset={currentDataset ?? defaultDataset} />
-      </div>
+      </Box>
 
-      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
-      <div className={toolbarClasses}>
+      {/* Toolbar */}
+      <Box sx={toolbarStyles}>
         {showHeader && (
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
@@ -161,13 +225,19 @@ export const Present: React.FC = () => {
             grayscale={grayscale}
           />
         )}
-        <button
-          className="w-10 h-10 rounded-lg bg-gray-600 hover:bg-gray-500 text-sm text-white"
+        <Button
+          variant="contained"
+          size="small"
+          sx={{
+            backgroundColor: "#4b5563",
+            "&:hover": { backgroundColor: "#6b7280" },
+            textTransform: "none",
+          }}
           onClick={() => setShowHeader((h) => !h)}
         >
           {showHeader ? "Hide" : "Show"}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   );
 };

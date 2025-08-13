@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@mui/material";
 
 interface HeaderProps {
   backgroundRemoval: boolean;
@@ -22,47 +23,87 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGestureDetectionStatus,
 }) => (
   <>
-    <button
+    {/* Gesture Detection */}
+    <Button
+      variant="contained"
       onClick={onToggleGestureDetectionStatus}
       id="toggle-gesture-detection"
-      className={`w-10 h-10 rounded-lg text-sm font-medium ${
-        gestureDetectionStatus
-          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-          : "bg-gray-700 hover:bg-gray-600 text-white"
-      }`}
+      sx={{
+        width: 40,
+        height: 40,
+        minWidth: 0,
+        fontSize: "0.75rem",
+        fontWeight: "medium",
+        backgroundColor: gestureDetectionStatus ? "cyan.400" : "grey.700",
+        color: gestureDetectionStatus ? "black" : "white",
+        "&:hover": {
+          backgroundColor: gestureDetectionStatus ? "cyan.300" : "grey.600",
+        },
+      }}
     >
       GD
-    </button>
-    {/* Background removal enable */}
-    <button
+    </Button>
+
+    {/* Background Removal */}
+    <Button
+      variant="contained"
       onClick={onToggleBackgroundRemoval}
       id="background-removal-enable"
-      className={`w-10 h-10 rounded-lg text-sm font-medium ${
-        backgroundRemoval
-          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-          : "bg-gray-700 hover:bg-gray-600 text-white"
-      }`}
+      sx={{
+        width: 40,
+        height: 40,
+        minWidth: 0,
+        fontSize: "0.75rem",
+        fontWeight: "medium",
+        backgroundColor: backgroundRemoval ? "cyan.400" : "grey.700",
+        color: backgroundRemoval ? "black" : "white",
+        "&:hover": {
+          backgroundColor: backgroundRemoval ? "cyan.300" : "grey.600",
+        },
+      }}
     >
       BR
-    </button>
-    {/* Grayscale toggle */}
-    <button
+    </Button>
+
+    {/* Grayscale */}
+    <Button
+      variant="contained"
       onClick={onToggleGrayscale}
-      className={`w-10 h-10 rounded-lg text-sm font-medium ${
-        grayscale
-          ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-          : "bg-gray-700 hover:bg-gray-600 text-white"
-      }`}
+      sx={{
+        width: 40,
+        height: 40,
+        minWidth: 0,
+        fontSize: "0.75rem",
+        fontWeight: "medium",
+        backgroundColor: grayscale ? "cyan.400" : "grey.700",
+        color: grayscale ? "black" : "white",
+        "&:hover": {
+          backgroundColor: grayscale ? "cyan.300" : "grey.600",
+        },
+      }}
     >
       GS
-    </button>
+    </Button>
 
-    {/* Chart toggle */}
-    <button
+    {/* Chart Toggle */}
+    <Button
+      variant="contained"
       onClick={onToggleChart}
-      className="w-10 h-10 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-sm font-medium"
+      sx={{
+        width: 40,
+        height: 40,
+        minWidth: 0,
+        fontSize: "0.75rem",
+        fontWeight: "medium",
+        backgroundColor: "cyan.400",
+        color: "black",
+        "&:hover": {
+          backgroundColor: "cyan.300",
+        },
+      }}
     >
       {showLineChart ? "Bar" : "Line"}
-    </button>
+    </Button>
   </>
 );
+

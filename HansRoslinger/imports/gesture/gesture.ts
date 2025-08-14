@@ -98,7 +98,7 @@ const handleGestureToFunc = (
 
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
-    if (defaultMapping[label] === FunctionType.ZOOM) {
+    if (defaultMapping[label] === FunctionType.CLEAR) {
       zoom(initialGesture, latestGesture);
     } else {
       processZoom(zoomStartPosition!, latestGesture);

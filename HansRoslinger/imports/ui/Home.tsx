@@ -24,6 +24,7 @@ import {
   ExitToApp,
   Collections,
 } from "@mui/icons-material";
+import AddIcon from '@mui/icons-material/Add';
 
 export const Home: React.FC = () => {
   useAuthGuard();
@@ -129,6 +130,21 @@ export const Home: React.FC = () => {
       </Paper>
 
       <Box sx={{ display: "flex", gap: 3 }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{
+            bgcolor: "primary.main",
+            color: "white",
+            px: 4,
+            py: 1.5,
+            borderRadius: "8px",
+            fontWeight: "bold",
+          }}
+          onClick={}
+        >
+          Create Workspace
+        </Button>
         <Button
           variant="contained"
           startIcon={<Collections />}

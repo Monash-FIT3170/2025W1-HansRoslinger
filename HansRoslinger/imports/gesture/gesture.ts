@@ -90,9 +90,9 @@ const defaultMapping = {
 };
 
 const handleGestureToFunc = (
-    INPUT: GestureType,
-    initialGesture: Gesture,
-    latestGesture: Gesture,
+  INPUT: GestureType,
+  initialGesture: Gesture,
+  latestGesture: Gesture,
 ): void => {
   const label = INPUT;
 
@@ -109,14 +109,20 @@ const handleGestureToFunc = (
 
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
-      console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
+      console.log(
+        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
+      );
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
       // This log confirms a gesture is being correctly ignored
-      console.log(`[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`);
+      console.log(
+        `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
+      );
     } else {
       // This warning will now only appear for truly unhandled gestures
-      console.warn(`[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`);
+      console.warn(
+        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
+      );
     }
   }
 };
@@ -132,9 +138,9 @@ export {
 };
 
 export const gestureToScreenPosition = (
-    x: number,
-    y: number,
-    z?: number,
+  x: number,
+  y: number,
+  z?: number,
 ): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;

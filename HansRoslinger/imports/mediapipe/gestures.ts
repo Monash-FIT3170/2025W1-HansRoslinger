@@ -4,6 +4,7 @@ import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 // Import 'IDtoEnum' to map gesture names to the correct number ID
 import { GestureType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
+import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 /*
 Sample result from gestureRecognizer.recognizeForVideo(video, performance.now()) where one hand is detected
@@ -96,34 +97,14 @@ const GestureDetector = (
             if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
               const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
               const gestures: Gesture[] = Array(detectedGestures.gestures.length);
-
+              
               for (let index = 0; index < detectedGestures.gestures.length; index++) {
                 const landmarks = detectedGestures.landmarks[index];
                 const handedness = detectedGestures.handedness[index][0].categoryName as Handedness;
-
-                // --- Custom orientation-independent pointing logic ---
-                const wrist = landmarks[0];
-                const indexTip = landmarks[8];
-                const indexPip = landmarks[6];
-                const middleTip = landmarks[12];
-                const middlePip = landmarks[10];
-                const ringTip = landmarks[16];
-                const ringPip = landmarks[14];
-                const pinkyTip = landmarks[20];
-                const pinkyPip = landmarks[18];
-
-                const dist = (p1: any, p2: any) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
-                const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
-                const areOthersCurled =
-                    dist(wrist, middleTip) < dist(wrist, middlePip) &&
-                    dist(wrist, ringTip) < dist(wrist, ringPip) &&
-                    dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
-                const isPointing = isIndexExtended && areOthersCurled;
-
                 let gestureID: GestureType;
                 let confidence: number;
 
-                if (isPointing) {
+                if (isPointing(landmarks)) {
                   gestureID = GestureType.POINTING_UP;
                   confidence = 1.0;
                 } else {
@@ -133,6 +114,7 @@ const GestureDetector = (
                   confidence = detectedGestures.gestures[index][0].score;
                 }
 
+                // This is to assign the determined gesture
                 gestures[index] = {
                   gestureID,
                   handedness,
@@ -171,3 +153,26 @@ const GestureDetector = (
 };
 
 export default GestureDetector;
+
+// Import types from @mediapipe/tasks-vision for GestureRecognizerResult
+
+function isPointing(landmarks: NormalizedLandmark[]): boolean {
+    const wrist = landmarks[0];
+    const indexTip = landmarks[8];
+    const indexPip = landmarks[6];
+    const middleTip = landmarks[12];
+    const middlePip = landmarks[10];
+    const ringTip = landmarks[16];
+    const ringPip = landmarks[14];
+    const pinkyTip = landmarks[20];
+    const pinkyPip = landmarks[18];
+
+    const dist = (p1: any, p2: any) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
+    const areOthersCurled =
+        dist(wrist, middleTip) < dist(wrist, middlePip) &&
+        dist(wrist, ringTip) < dist(wrist, ringPip) &&
+        dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
+    const isPointing = isIndexExtended && areOthersCurled;
+    return isPointing
+}

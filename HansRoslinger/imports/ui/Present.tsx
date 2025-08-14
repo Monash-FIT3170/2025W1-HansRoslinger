@@ -86,7 +86,7 @@ export const Present: React.FC = () => {
 
   const toolbarClasses = showHeader
     ? [
-        "absolute top-4 right-4 bottom-4 w-16",
+        "absolute right-4 bottom-4 w-16",
         "bg-gray-800 rounded-2xl shadow-lg",
         "flex flex-col items-center justify-end py-4 space-y-2",
         "z-50",
@@ -145,6 +145,17 @@ export const Present: React.FC = () => {
         <Title dataset={currentDataset ?? defaultDataset} />
       </div>
 
+      <button
+        className={`absolute top-4 right-4 w-16 h-16 rounded-lg text-sm ${
+          gestureDetectionStatus
+          ? "bg-gray-700 hover:bg-gray-600 text-white"
+          : "bg-cyan-400 hover:bg-cyan-300 text-black"
+        }`}
+        onClick={() => setGestureDetectionStatus(!gestureDetectionStatus)}
+      >
+        {gestureDetectionStatus ? "Disable Gestures" : "Enable Gestures"}
+      </button>
+
       {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
       <div className={toolbarClasses}>
         {showHeader && (
@@ -153,10 +164,6 @@ export const Present: React.FC = () => {
             onToggleGrayscale={toggleGrayscale}
             showLineChart={showLineChart}
             onToggleChart={() => setShowLineChart((c) => !c)}
-            gestureDetectionStatus={gestureDetectionStatus}
-            onToggleGestureDetectionStatus={() =>
-              setGestureDetectionStatus((c) => !c)
-            }
             backgroundRemoval={backgroundRemoval}
             grayscale={grayscale}
           />

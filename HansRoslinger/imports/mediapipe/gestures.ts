@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, Handedness, Gesture } from "../gesture/gesture";
+// Import 'IDtoEnum' to map gesture names to the correct number ID
+import { GestureType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
+import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 /*
 Sample result from gestureRecognizer.recognizeForVideo(video, performance.now()) where one hand is detected
@@ -11,8 +13,8 @@ Sample result from gestureRecognizer.recognizeForVideo(video, performance.now())
 */
 
 const GestureDetector = (
-  videoRef: MutableRefObject<Webcam | null>,
-  gestureDetectionStatus: boolean,
+    videoRef: MutableRefObject<Webcam | null>,
+    gestureDetectionStatus: boolean,
 ) => {
   // Gesture Constants
   const NUM_HANDS_DETECTABLE = 2; // Maximum number of hands that will be detected in a single recognition
@@ -24,10 +26,10 @@ const GestureDetector = (
 
   // React specific variables
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>(
-    Array(NUM_HANDS_DETECTABLE),
+      Array(NUM_HANDS_DETECTABLE),
   );
   const [gestureRecognizer, setGestureRecognizer] =
-    useState<GestureRecognizer | null>();
+      useState<GestureRecognizer | null>();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { HandleGesture } = GestureHandler();
 
@@ -44,41 +46,39 @@ const GestureDetector = (
     const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
         );
 
         // import gesture detection with configuration constants
         const gestureRecognizerInternal =
-          await GestureRecognizer.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
-            },
-            runningMode: "VIDEO",
-            numHands: NUM_HANDS_DETECTABLE,
-            minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
-          });
+            await GestureRecognizer.createFromOptions(vision, {
+              baseOptions: {
+                modelAssetPath:
+                    "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
+              },
+              runningMode: "VIDEO",
+              numHands: NUM_HANDS_DETECTABLE,
+              minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
+            });
 
         setGestureRecognizer(gestureRecognizerInternal);
       } catch (error) {
         console.error(
-          `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
-          error,
+            `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
+            error,
         );
         if (retryCount < SETUP_MAX_RETRIES) {
           setTimeout(() => setup(retryCount + 1), SETUP_RETRY_DELAY);
         } else {
           console.error(
-            "Failed to initialize GestureRecognizer after maximum of " +
+              "Failed to initialize GestureRecognizer after maximum of " +
               SETUP_MAX_RETRIES.toString() +
               " retries.",
           );
         }
       }
     };
-
     setup();
-
     return cleanupInterval;
   }, []);
 
@@ -86,66 +86,66 @@ const GestureDetector = (
   useEffect(() => {
     if (gestureDetectionStatus) {
       const detectGesture = async () => {
-        if (!gestureRecognizer || !videoRef || !videoRef.current) {
-          return;
-        }
+        if (!gestureRecognizer || !videoRef || !videoRef.current) return;
 
         const processFrame = async () => {
           // This if statement is to handle any timeout interval that begins whilst gesturedetectionstatus is true but is actioned when gesturedetectionstatus is false
           if (gestureDetectionStatus) {
-            if (!videoRef || !videoRef.current || !videoRef.current.video) {
-              return;
-            }
+            if (!videoRef || !videoRef.current || !videoRef.current.video) return;
+
             const video = videoRef.current.video;
             if (video.readyState === VIDEO_HAS_ENOUGH_DATA) {
-              const detectedGestures =
-                await gestureRecognizer.recognizeForVideo(
-                  video,
-                  performance.now(),
-                );
-              const gestures: Gesture[] = Array(
-                detectedGestures.gestures.length,
-              );
-              for (
-                let index = 0;
-                index < detectedGestures.gestures.length;
-                index++
-              ) {
+              const detectedGestures = await gestureRecognizer.recognizeForVideo(video, performance.now());
+              const gestures: Gesture[] = Array(detectedGestures.gestures.length);
+              
+              for (let index = 0; index < detectedGestures.gestures.length; index++) {
+                const landmarks = detectedGestures.landmarks[index];
+                const handedness = detectedGestures.handedness[index][0].categoryName as Handedness;
+                let gestureID: GestureType;
+                let confidence: number;
+
+                if (isPointing(landmarks)) {
+                  gestureID = GestureType.POINTING_UP;
+                  confidence = 1.0;
+                } else {
+                  const categoryName = detectedGestures.gestures[index][0].categoryName;
+                  // Convert the string name (e.g., "Thumb_Up") to the enum number (e.g., 6)
+                  gestureID = IDtoEnum[categoryName] ?? GestureType.UNIDENTIFIED;
+                  confidence = detectedGestures.gestures[index][0].score;
+                }
+
+                // This is to assign the determined gesture
                 gestures[index] = {
-                  gestureID: detectedGestures.gestures[index][0]
-                    .categoryName as unknown as GestureType,
-                  handedness: detectedGestures.handedness[index][0]
-                    .categoryName as unknown as Handedness,
+                  gestureID,
+                  handedness,
                   timestamp: new Date(),
-                  confidence: detectedGestures.gestures[index][0].score,
-                  landmarks: detectedGestures.landmarks[index],
+                  confidence,
+                  landmarks,
                 };
               }
-              if (!(gestures.length == 0 && currentGestures.length == 0)) {
+
+              if (!(gestures.length === 0 && currentGestures.length === 0)) {
                 setCurrentGestures(gestures);
               }
             }
           }
         };
-        // Check gestures periodically
-        intervalRef.current = setInterval(
-          processFrame,
-          GESTURE_RECOGNITION_TIMEOUT_INTERVAL,
-        );
+
+        intervalRef.current = setInterval(processFrame, GESTURE_RECOGNITION_TIMEOUT_INTERVAL);
       };
       detectGesture();
     } else {
       cleanupInterval();
     }
-
     return cleanupInterval;
-  }, [gestureRecognizer, gestureDetectionStatus]); // so that this function is called when gestureRecognizer has been correctly initialised
+  }, [gestureRecognizer, gestureDetectionStatus]);
 
   // Handle newly detected gesture
   useEffect(() => {
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
-        // Code to be called when new gestures are detected goes here
+        // Confirm that the correct gesture ID number is being sent
+        console.log(`[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`);
         HandleGesture(currentGestures[index]);
       }
     }
@@ -153,3 +153,26 @@ const GestureDetector = (
 };
 
 export default GestureDetector;
+
+// Import types from @mediapipe/tasks-vision for GestureRecognizerResult
+
+function isPointing(landmarks: NormalizedLandmark[]): boolean {
+    const wrist = landmarks[0];
+    const indexTip = landmarks[8];
+    const indexPip = landmarks[6];
+    const middleTip = landmarks[12];
+    const middlePip = landmarks[10];
+    const ringTip = landmarks[16];
+    const ringPip = landmarks[14];
+    const pinkyTip = landmarks[20];
+    const pinkyPip = landmarks[18];
+
+    const dist = (p1: any, p2: any) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
+    const areOthersCurled =
+        dist(wrist, middleTip) < dist(wrist, middlePip) &&
+        dist(wrist, ringTip) < dist(wrist, ringPip) &&
+        dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
+    const isPointing = isIndexExtended && areOthersCurled;
+    return isPointing
+}

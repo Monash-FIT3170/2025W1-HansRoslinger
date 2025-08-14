@@ -1,70 +1,94 @@
 import { Gesture, gestureToScreenPosition } from "./gesture";
 
-export const processZoomChart = (_1: Gesture, latestGesture: Gesture): void => {
-  let leftHandScreenPosition, rightHandScreenPosition;
+// We store the starting separations so we can compute ratios per frame
+let initialDx = 0;
+let initialDy = 0;
+
+/**
+ * Helper: get normalized hand coordinates for the two hands.
+ * Uses landmark 8 (index finger tip) per hand for stability.
+ * Falls back to landmark 9 if needed.
+ */
+function getHandsXY(latestGesture: Gesture): {
+  left: { x: number; y: number } | null;
+  right: { x: number; y: number } | null;
+} {
   try {
-    leftHandScreenPosition = gestureToScreenPosition(
-      latestGesture.doubleGestureLandmarks[0][9].x,
-      latestGesture.doubleGestureLandmarks[0][9].y,
-    );
-    rightHandScreenPosition = gestureToScreenPosition(
-      latestGesture.doubleGestureLandmarks[1][9].x,
-      latestGesture.doubleGestureLandmarks[1][9].y,
-    );
-  // if this catch occurs it means that a closed fist has occured and we should end the zoom
-  // we need this error catching because otherwise the left or right hand position when getting index 9 will crash
+    const leftHand = latestGesture.doubleGestureLandmarks[0];
+    const rightHand = latestGesture.doubleGestureLandmarks[1];
+
+    // Prefer 8 (index fingertip); if missing, try 9 to match your previous code
+    const l = leftHand[8] ?? leftHand[9];
+    const r = rightHand[8] ?? rightHand[9];
+
+    if (!l || !r) return { left: null, right: null };
+    return {
+      left: { x: l.x, y: l.y },
+      right: { x: r.x, y: r.y },
+    };
   } catch {
-    leftHandScreenPosition = { screenX: 0, screenY: 0 };
-    rightHandScreenPosition = { screenX: 0, screenY: 0 };
+    return { left: null, right: null };
   }
-  console.log(`starting left hand position: ${JSON.stringify(leftHandScreenPosition)}`);
-  console.log(`starting right hand position: ${JSON.stringify(rightHandScreenPosition)}`);
+}
 
-  // x and y needs to be a midpoint between the two hands
-  const gestureEvent = new CustomEvent("chart:togglezoom", {
-  detail: {
-    x: (leftHandScreenPosition.screenX + rightHandScreenPosition.screenX) / 2,
-    y: (leftHandScreenPosition.screenY + rightHandScreenPosition.screenY) / 2,
-    },
-  });
+/**
+ * Called when a zoom gesture is (re)started.
+ * - Saves the initial horizontal/vertical separations (dx, dy)
+ * - Emits chart:togglezoom centered at the midpoint between hands
+ */
+export const processZoomChart = (_initial: Gesture, latestGesture: Gesture): void => {
+  const hands = getHandsXY(latestGesture);
 
-  window.dispatchEvent(gestureEvent);
+  if (!hands.left || !hands.right) {
+    // If we can't read both hands (e.g., closed fist terminates), just toggle zoom off safely
+    window.dispatchEvent(new CustomEvent("chart:togglezoom"));
+    return;
+  }
+
+  // Save starting separations (normalized coordinates)
+  initialDx = Math.abs(hands.right.x - hands.left.x);
+  initialDy = Math.abs(hands.right.y - hands.left.y);
+
+  // Avoid zero-division later: set minimal epsilon
+  if (initialDx < 1e-4) initialDx = 1e-4;
+  if (initialDy < 1e-4) initialDy = 1e-4;
+
+  // Midpoint in screen pixels to focus the zoom around it
+  const leftScreen = gestureToScreenPosition(hands.left.x, hands.left.y);
+  const rightScreen = gestureToScreenPosition(hands.right.x, hands.right.y);
+  const midX = (leftScreen.screenX + rightScreen.screenX) / 2;
+  const midY = (leftScreen.screenY + rightScreen.screenY) / 2;
+
+  window.dispatchEvent(
+    new CustomEvent("chart:togglezoom", {
+      detail: { x: midX, y: midY },
+    }),
+  );
 };
 
-export const processZoom = (
-  zoomStartPosition: { x: number; y: number },
-  gestures: Gesture,
-): void => {
-  console.log(`gesture: ${JSON.stringify(gestures)}`);
-  const leftHandScreenPosition = gestureToScreenPosition(
-    gestures.doubleGestureLandmarks[0][9].x,
-    gestures.doubleGestureLandmarks[0][9].y,
-  );
-  const rightHandScreenPosition = gestureToScreenPosition(
-    gestures.doubleGestureLandmarks[1][9].x,
-    gestures.doubleGestureLandmarks[1][9].y,
-  );
-  console.log(`left hand: ${JSON.stringify(leftHandScreenPosition)}`);
-  console.log(`right hand: ${JSON.stringify(rightHandScreenPosition)}`);
-  console.log(`zoom start: ${JSON.stringify(zoomStartPosition)}`);
+/**
+ * Called every frame while zoom is active.
+ * - Computes current separations and sends scaleX/scaleY ratios
+ */
+export const processZoom = (_zoomStartPosition: { x: number; y: number }, latestGesture: Gesture): void => {
+  const hands = getHandsXY(latestGesture);
+  if (!hands.left || !hands.right) return;
 
-  // Calculate the horizontal difference (dx) and vertical difference (dy) between the two hands
-const dx = rightHandScreenPosition.screenX - leftHandScreenPosition.screenX;
-const dy = rightHandScreenPosition.screenY - leftHandScreenPosition.screenY;
+  const currentDx = Math.abs(hands.right.x - hands.left.x);
+  const currentDy = Math.abs(hands.right.y - hands.left.y);
 
-// Max distance to normalise the zoom level
-const maxDistance = Math.min(window.innerWidth, window.innerHeight) * 0.5; // 50% of the screen size
+  // Compute scale as ratio vs. initial; clamp to reasonable bounds
+  let scaleX = currentDx / initialDx;
+  let scaleY = currentDy / initialDy;
 
-// Normalise the horizontal (dx) and vertical (dy) movements betwween 0-1
-const normalisedDx = Math.min(Math.abs(dx) / maxDistance, 1);
-const normalisedDy = Math.min(Math.abs(dy) / maxDistance, 1); 
+  // Clamp both axes. Feel free to tweak:
+  // - X: 0.5–1.8 (horizontal zoom in/out)
+  // - Y: 0.5–1.5 (vertical zoom in/out)
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+  scaleX = clamp(scaleX, 0.5, 1.8);
+  scaleY = clamp(scaleY, 0.5, 1.5);
 
-// Reverse it so when hands are close, the chart is zoomed out.
-  const scaleX = Math.min(Math.max(1 + normalisedDx, 0.5), 1.5);
-  const scaleY = 1 - normalisedDy * 0.9;
-
-  console.log("dx:", dx, "dy:", dy);
-  console.log("Zoom scaleX:", scaleX, "scaleY:", scaleY);
+  // Dispatch for D3 components to apply visual + domain zoom
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
       detail: { scaleX, scaleY },

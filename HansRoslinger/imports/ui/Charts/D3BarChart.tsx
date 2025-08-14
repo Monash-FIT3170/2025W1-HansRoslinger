@@ -24,7 +24,6 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
   );
   const [filteredData, setFilteredData] = useState(data);
   const [zoomScale, setZoomScale] = useState(1);
-  const [zoomScaleY, setZoomScaleY] = useState(1);
 
   // this handles highlighting a particular bar when the gesture is hovering over it
   const handleHighlight = (event: Event) => {
@@ -71,7 +70,6 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       setFilteredData(data);
       setZoomScale(1);
       // otherwise it will clear the highlighted bars next
-      setZoomScaleY(1);
     } else if (highlightedBars.size > 0) {
       setHighlightedBars(new Set());
     }
@@ -92,11 +90,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
 
     // this is making sure that the user can't zoom in so much that part of the graph is not visible (going out of the screen)
     const chartWidth = chartRef.current?.getBoundingClientRect().width || 1;
-    const chartHeight = chartRef.current?.getBoundingClientRect().height || 1;
     const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
-    const maxAllowedScaleY = (0.95 * windowHeight) / chartHeight;
 
     // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
     const clampedScaleX = Math.max(
@@ -104,13 +99,9 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
     );
     // the user can at most show 10% of the graph of 100% of the graph
-    const clampedScaleY = Math.max(
-      0.5,
-      Math.min(1.5, Math.min(scaleY, maxAllowedScaleY)),
-    );
+    const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
     setZoomScale(clampedScaleX);
-    setZoomScaleY(clampedScaleY);
 
     // this logic is making sure that when you zoom in, it will focus around the centre of all the bars you have highlighted
     if (clampedScaleY < 1) {
@@ -245,7 +236,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
           .text(d.value);
       });
 
-    svg.attr("transform", `scale(${zoomScale}, ${zoomScaleY})`);
+    svg.attr("transform", `scale(${zoomScale})`);
   };
 
   useEffect(() => {
@@ -269,15 +260,15 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       window.removeEventListener("chart:filter", handleFilter as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
-  }, [data, filteredData, highlightedBars, zoomScale, zoomScaleY]);
+  }, [data, filteredData, highlightedBars, zoomScale]);
 
   // The filters should be reset when the dataset changes
   useEffect(() => {
     setFilteredData(data);
     setHighlightedBars(new Set());
     setZoomScale(1);
-    setZoomScaleY(1);
   }, [dataset]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };
+

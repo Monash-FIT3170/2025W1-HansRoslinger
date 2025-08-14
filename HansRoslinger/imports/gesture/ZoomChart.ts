@@ -77,16 +77,19 @@ export const processZoom = (_zoomStartPosition: { x: number; y: number }, latest
   const currentDx = Math.abs(hands.right.x - hands.left.x);
   const currentDy = Math.abs(hands.right.y - hands.left.y);
 
+  console.log(`initial position: dx=${initialDx}, dy=${initialDy}`);
+  console.log(`Current separations: dx=${currentDx}, dy=${currentDy}`);
   // Compute scale as ratio vs. initial; clamp to reasonable bounds
-  let scaleX = currentDx / initialDx;
-  let scaleY = currentDy / initialDy;
+  let scaleY = currentDx / initialDx;
+  let scaleX = currentDy / initialDy;
 
   // Clamp both axes. Feel free to tweak:
   // - X: 0.5–1.8 (horizontal zoom in/out)
   // - Y: 0.5–1.5 (vertical zoom in/out)
   const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-  scaleX = clamp(scaleX, 0.5, 1.8);
-  scaleY = clamp(scaleY, 0.5, 1.5);
+  console.log(`scaleX: ${scaleX}, scaleY: ${scaleY}`);
+  scaleX = clamp(scaleX, 1, 1.8);
+  scaleY = clamp(scaleY, 0.1, 1.5);
 
   // Dispatch for D3 components to apply visual + domain zoom
   window.dispatchEvent(

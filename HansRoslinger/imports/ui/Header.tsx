@@ -1,21 +1,21 @@
 import React from "react";
 
 interface HeaderProps {
-  onToggleBackgroundRemoval: () => void;
-  onToggleGrayscale: () => void;
-  showLineChart: boolean;
-  onToggleChart: () => void;
   backgroundRemoval: boolean;
   grayscale: boolean;
+  showLineChart: boolean;
+  onToggleBackgroundRemoval: () => void;
+  onToggleGrayscale: () => void;
+  onToggleChart: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onToggleBackgroundRemoval,
-  onToggleGrayscale,
-  showLineChart,
-  onToggleChart,
   backgroundRemoval,
   grayscale,
+  showLineChart,
+  onToggleBackgroundRemoval,
+  onToggleGrayscale,
+  onToggleChart,
 }) => (
   <>
     {/* Background removal enable */}

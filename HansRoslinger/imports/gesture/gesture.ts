@@ -1,7 +1,7 @@
-import { processHighlightChart } from "./highlightChart";
-import { processClearChart } from "./clearChart";
-import { processFilterChart } from "./filterChart";
-import { processZoomChart, processZoom } from "./ZoomChart";
+import { select } from "./Select";
+import { clear } from "./Clear";
+import { filter } from "./Filter";
+import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 
@@ -16,15 +16,35 @@ enum GestureType {
   VICTORY, // This is the peace sign
 }
 
-export const labelMapping: Record<string, GestureType> = {
+enum FunctionType {
+  UNUSED,
+  SELECT,
+  FILTER,
+  CLEAR,
+  ZOOM,
+  SWITCH_CHART,
+  SWITCH_DATA,
+}
+
+export const IDtoEnum: Record<string, GestureType> = {
   Thumb_Up: GestureType.THUMB_UP,
   Thumb_Down: GestureType.THUMB_DOWN,
   Pointing_Up: GestureType.POINTING_UP,
   Closed_Fist: GestureType.CLOSED_FIST,
-  ILoveYou: GestureType.I_LOVE_YOU,
-  None: GestureType.UNIDENTIFIED,
+  I_Love_You: GestureType.I_LOVE_YOU,
+  Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+};
+
+export const EnumToFunc: Record<FunctionType, any> = {
+  [FunctionType.UNUSED]: console.log,
+  [FunctionType.SELECT]: select,
+  [FunctionType.FILTER]: filter,
+  [FunctionType.CLEAR]: clear,
+  [FunctionType.ZOOM]: zoom,
+  [FunctionType.SWITCH_CHART]: processSwitchChartType,
+  [FunctionType.SWITCH_DATA]: processSwitchDataset,
 };
 
 enum Handedness {
@@ -59,32 +79,31 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: processSwitchChartType,
-  [GestureType.THUMB_DOWN]: processSwitchDataset,
-  [GestureType.POINTING_UP]: processHighlightChart,
-  [GestureType.CLOSED_FIST]: processFilterChart,
-  [GestureType.I_LOVE_YOU]: console.log,
-  [GestureType.UNIDENTIFIED]: console.log,
-  [GestureType.OPEN_PALM]: processClearChart,
-  [GestureType.VICTORY]: processZoomChart,
+  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
+  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
+  [GestureType.POINTING_UP]: FunctionType.SELECT,
+  [GestureType.CLOSED_FIST]: FunctionType.FILTER,
+  [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+  [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+  [GestureType.OPEN_PALM]: FunctionType.CLEAR,
+  [GestureType.VICTORY]: FunctionType.ZOOM,
 };
 
-// Default mapping, would replace console.log with function to be called.
 const handleGestureToFunc = (
   INPUT: GestureType,
   initialGesture: Gesture,
   latestGesture: Gesture,
 ): void => {
-  const label = labelMapping[INPUT];
+  const label = IDtoEnum[INPUT];
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
-    if (label === GestureType.CLOSED_FIST) {
-      processZoomChart(initialGesture, latestGesture);
+    if (defaultMapping[label] === FunctionType.ZOOM) {
+      zoom(initialGesture, latestGesture);
     } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const handler = defaultMapping[label];
+    const handler = EnumToFunc[defaultMapping[label]];
     if (handler) {
       handler(initialGesture, latestGesture);
     } else {
@@ -96,6 +115,7 @@ const handleGestureToFunc = (
 export {
   Gesture,
   GestureType,
+  FunctionType,
   Handedness,
   defaultMapping,
   handleGestureToFunc,

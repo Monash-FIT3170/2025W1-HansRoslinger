@@ -42,14 +42,18 @@ export const GestureHandler = () => {
 export default GestureHandler;
 
 function getGestureType(landmarks, gesture): GestureType {
-  if (landmarks[8].x < landmarks[6].x < landmarks[0].x &&
+  console.log("Reading")
+  if (landmarks[8].x < landmarks[6].x && 
+    landmarks[6].x < landmarks[0].x &&
     landmarks[4].y > landmarks[2].y &&
     landmarks[12].y > landmarks[7].y &&
     landmarks[16].y > landmarks[7].y &&
     landmarks[20].y > landmarks[7].y
+    
   ) return GestureType.POINTING_LEFT;
 
-  if (landmarks[8].x > landmarks[6].x > landmarks[0].x &&
+  if (landmarks[8].x > landmarks[6].x &&
+    landmarks[6].x > landmarks[0].x &&
     landmarks[4].y > landmarks[2].y &&
     landmarks[12].y < landmarks[7].y &&
     landmarks[16].y < landmarks[7].y &&

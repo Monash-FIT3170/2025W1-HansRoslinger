@@ -14,8 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
-  POINTING_LEFT,
-  POINTING_RIGHT
+  TWO_FINGER_POINTING_LEFT,
+  TWO_FINGER_POINTING_RIGHT,
 }
 
 enum FunctionType {
@@ -37,8 +37,8 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
-  Pointing_Left: GestureType.POINTING_LEFT,
-  Pointing_Right: GestureType.POINTING_RIGHT
+  Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
+  Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -83,14 +83,16 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
-  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
   [GestureType.POINTING_UP]: FunctionType.SELECT,
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
   [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
 
 const handleGestureToFunc = (

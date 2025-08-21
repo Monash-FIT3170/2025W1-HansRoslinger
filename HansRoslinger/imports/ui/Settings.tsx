@@ -7,8 +7,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
+import { Button, Box } from "@mui/material";
 
 import { GestureType, FunctionType } from "../gesture/gesture";
 import { useState } from "react";
@@ -18,7 +18,7 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_DOWN]: "Thumb Down",
   [GestureType.POINTING_UP]: "Pointing Up",
   [GestureType.CLOSED_FIST]: "Closed Fist",
-  [GestureType.I_LOVE_YOU]: "I Love You",
+  [GestureType.I_LOVE_YOU]: "Heart",
   [GestureType.UNIDENTIFIED]: "Unidentified",
   [GestureType.OPEN_PALM]: "Open Palm",
   [GestureType.VICTORY]: "Victory",
@@ -71,40 +71,51 @@ const Settings: React.FC = () => {
     }));
   };
 
+  const handleSave = () => {
+    {/* TODO */}
+  }
+
   return (
-    <TableContainer component={Paper}>
-      <FormControl>
+     <Box sx={{ p: 2 }}>
+      <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Gesture</TableCell>
-              <TableCell>Function</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Gesture</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Function</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {Gestures.filter(
-              (gesture) => gesture !== GestureType.UNIDENTIFIED,
-            ).map((gesture) => (
-              <TableRow key={gesture}>
-                <TableCell>{GestureToLabel[gesture]}</TableCell>
-                <TableCell>
-                  <Select
-                    value={state[gesture]}
-                    onChange={(e) => handleChange(gesture, e.target.value)}
-                  >
-                    {Functions.map((option) => (
-                      <MenuItem key={option} value={option}>
-                        {FunctionToLabel[option]}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </TableCell>
-              </TableRow>
-            ))}
+            {Gestures.filter((gesture) => gesture !== GestureType.UNIDENTIFIED)
+              .map((gesture) => (
+                <TableRow key={gesture}>
+                  <TableCell>{GestureToLabel[gesture]}</TableCell>
+                  <TableCell>
+                    <Select
+                      fullWidth
+                      size="small"
+                      value={state[gesture] ?? ""}
+                      onChange={(e) => handleChange(gesture, e.target.value)}
+                    >
+                      {Functions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {FunctionToLabel[option]}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
-      </FormControl>
-    </TableContainer>
+      </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+        <Button variant="contained" color="primary" onClick={handleSave} sx={{ borderRadius: 2, px: 3 }}>
+          Save
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

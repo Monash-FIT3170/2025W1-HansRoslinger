@@ -217,6 +217,6 @@ function isPinchSign(landmarks: NormalizedLandmark[]) {
   const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
   const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
 
-  return isThumbIndexClose && isThumbMiddleClose;
+  return isThumbIndexClose //&& isThumbMiddleClose;
 }
 

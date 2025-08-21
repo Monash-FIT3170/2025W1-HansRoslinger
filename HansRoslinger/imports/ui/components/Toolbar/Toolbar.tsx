@@ -1,4 +1,6 @@
 import React from "react";
+import { Box, Typography, Stack } from "@mui/material";
+import { cyan } from "@mui/material/colors"; // Import cyan color scale
 
 interface ToolbarProps {
   title: string;
@@ -7,12 +9,34 @@ interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ title, actions, className }) => (
-  <div
-    className={`w-full bg-cyan-500 p-4 flex items-center shadow relative ${className || ""}`}
+  <Box
+    className={className}
+    sx={{
+      width: "100%",
+      backgroundColor: cyan[500],
+      p: 2,
+      display: "flex",
+      alignItems: "center",
+      boxShadow: 3,
+      position: "relative",
+    }}
   >
-    <h2 className="text-white text-2xl font-bold flex-1">{title}</h2>
-    <div className="flex space-x-4">{actions}</div>
-  </div>
+    <Typography
+      variant="h5"
+      sx={{
+        color: "white",
+        fontWeight: "bold",
+        flex: 1,
+      }}
+    >
+      {title}
+    </Typography>
+
+    <Stack direction="row" spacing={2}>
+      {actions}
+    </Stack>
+  </Box>
 );
 
 export default Toolbar;
+

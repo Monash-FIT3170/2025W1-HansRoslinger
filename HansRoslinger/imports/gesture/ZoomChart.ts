@@ -70,31 +70,66 @@ export const processZoomChart = (_initial: Gesture, latestGesture: Gesture): voi
  * Called every frame while zoom is active.
  * - Computes current separations and sends scaleX/scaleY ratios
  */
-export const processZoom = (_zoomStartPosition: { x: number; y: number }, latestGesture: Gesture): void => {
+// ZoomChart.ts
+
+export const processZoom = (
+  _zoomStartPosition: { x: number; y: number },
+  latestGesture: Gesture
+): void => {
   const hands = getHandsXY(latestGesture);
   if (!hands.left || !hands.right) return;
 
   const currentDx = Math.abs(hands.right.x - hands.left.x);
   const currentDy = Math.abs(hands.right.y - hands.left.y);
 
-  console.log(`initial position: dx=${initialDx}, dy=${initialDy}`);
-  console.log(`Current separations: dx=${currentDx}, dy=${currentDy}`);
-  // Compute scale as ratio vs. initial; clamp to reasonable bounds
-  let scaleY = currentDx / initialDx;
-  let scaleX = currentDy / initialDy;
+  // Ratios vs the saved starting separations
+  const ratioX = currentDx / initialDx;
+  const ratioY = currentDy / initialDy;
 
-  // Clamp both axes. Feel free to tweak:
-  // - X: 0.5–1.8 (horizontal zoom in/out)
-  // - Y: 0.5–1.5 (vertical zoom in/out)
-  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-  console.log(`scaleX: ${scaleX}, scaleY: ${scaleY}`);
+  // Helper
+  const clamp = (v: number, lo: number, hi: number) =>
+    Math.max(lo, Math.min(hi, v));
+
+  // --- NEW: vertical-dominant detection
+  // If vertical separation change dominates horizontal by >30%, treat as "global zoom" mode
+  const VERTICAL_DOMINANCE_FACTOR = 1.3;
+  const verticalDominant = ratioY > ratioX * VERTICAL_DOMINANCE_FACTOR;
+
+  // Hand ordering (in MediaPipe, smaller y is higher on the screen)
+  const isRightAboveLeft = hands.right.y < hands.left.y;
+
+  if (verticalDominant) {
+    // --- NEW: Global (uniform) zoom based on vertical expansion/contraction
+    // Pulling apart increases ratioY (>1). Direction is decided by hand ordering:
+    // - Right above & left below => interpret as "zoom OUT" -> invert factor
+    // - Right below & left above => "zoom IN" -> use factor as-is
+    let uniform = clamp(ratioY, 0.5, 2.0);
+    if (isRightAboveLeft) {
+      // Zoom OUT when right hand is above
+      uniform = 1 / uniform;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
+        detail: { scaleX: uniform, scaleY: uniform },
+      })
+    );
+    return; // Do not also run the axis-specific path this frame
+  }
+
+  // --- Existing behavior (axis-specific zoom):
+  // Scale X from vertical change; Scale Y from horizontal change
+  let scaleX = ratioY; // "more/less bars" behavior 
+  let scaleY = ratioX;
+
+  // Original clamps (tweak if desired)
   scaleX = clamp(scaleX, 1, 1.8);
   scaleY = clamp(scaleY, 0.1, 1.5);
 
-  // Dispatch for D3 components to apply visual + domain zoom
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
       detail: { scaleX, scaleY },
-    }),
+    })
   );
 };
+

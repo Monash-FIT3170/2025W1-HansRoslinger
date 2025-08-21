@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -13,7 +13,8 @@ import { Button, Box } from "@mui/material";
 import { GestureType, FunctionType } from "../gesture/gesture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { setSettingsCookie, getSettingsCookie } from "../cookies/cookies";
+import { setSettingsCookie, getSettingsCookie, getAuthCookie } from "../cookies/cookies";
+import { getUserSettings, updateUserSettings } from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -55,7 +56,33 @@ const Functions = [
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] = useState<Record<GestureType, FunctionType>>(getSettingsCookie());
+  const [state, setState] = useState<Record<GestureType, FunctionType>>({
+    [GestureType.THUMB_UP]: FunctionType.UNUSED,
+    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+    [GestureType.POINTING_UP]: FunctionType.SELECT,
+    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+    [GestureType.OPEN_PALM]: FunctionType.FILTER,
+    [GestureType.VICTORY]: FunctionType.ZOOM,
+  });
+
+  useEffect(() => {
+    const userId = getAuthCookie()?.userId;
+    if (!userId) return;
+
+    async function loadSettings() {
+      if (userId != null) {
+        const settings = await getUserSettings(userId);
+        if (settings) {
+          setState(settings);
+        }
+      }
+      
+    }
+
+    loadSettings();
+  }, []);
 
   const handleChange = (key: GestureType, value: FunctionType) => {
     setState((prev) => ({
@@ -65,7 +92,11 @@ const Settings: React.FC = () => {
   };
 
   const handleSave = () => {
-    setSettingsCookie(state);
+    const cookie = getAuthCookie();
+    if ((cookie != null) && (cookie.userId != null)) {
+      updateUserSettings(cookie.userId, state);
+    }
+    
   }
 
   const navigate = useNavigate()

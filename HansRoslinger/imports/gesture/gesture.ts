@@ -4,6 +4,7 @@ import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
+import { getSettingsCookie } from "../cookies/cookies";
 
 enum GestureType {
   CLOSED_FIST,
@@ -64,6 +65,7 @@ type Gesture = {
 let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
+if (typeof window !== "undefined") {
 // Watch for the "chart:zoom" event and toggle the boolean
 window.addEventListener("chart:togglezoom", (event: Event) => {
   const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -76,34 +78,25 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
     zoomStartPosition = null;
     console.log(`Zoom disabled.`);
   }
-});
+})};
 
-const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
-  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
-  [GestureType.POINTING_UP]: FunctionType.SELECT,
-  [GestureType.CLOSED_FIST]: FunctionType.FILTER,
-  [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-  [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-  [GestureType.OPEN_PALM]: FunctionType.CLEAR,
-  [GestureType.VICTORY]: FunctionType.ZOOM,
-};
 
 const handleGestureToFunc = (
   INPUT: GestureType,
   initialGesture: Gesture,
   latestGesture: Gesture,
 ): void => {
-  const label = IDtoEnum[INPUT];
+  const label: GestureType = IDtoEnum[INPUT];
+  var mapping: Record<GestureType, FunctionType> = getSettingsCookie();
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
-    if (defaultMapping[label] === FunctionType.ZOOM) {
+    if (mapping[label] === FunctionType.ZOOM) {
       zoom(initialGesture, latestGesture);
     } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const handler = EnumToFunc[defaultMapping[label]];
+    const handler = EnumToFunc[mapping[label]];
     if (handler) {
       handler(initialGesture, latestGesture);
     } else {
@@ -117,7 +110,6 @@ export {
   GestureType,
   FunctionType,
   Handedness,
-  defaultMapping,
   handleGestureToFunc,
   isZoomEnabled,
 };

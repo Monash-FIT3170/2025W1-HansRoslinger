@@ -14,8 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
-  TWO_FINGER_POINTING_LEFT,
-  TWO_FINGER_POINTING_RIGHT,
+  TWO_POINTING_LEFT,
+  TWO_POINTING_RIGHT,
 }
 
 enum FunctionType {
@@ -37,8 +37,8 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
-  Two_Finger_Two_Pointing_Left: GestureType.TWO_FINGER_TWO_POINTING_LEFT,
-  Two_Finger_Two_Pointing_Right: GestureType.TWO_FINGER_TWO_POINTING_RIGHT
+  Two_Pointing_Left: GestureType.TWO_POINTING_LEFT,
+  Two_Pointing_Right: GestureType.TWO_POINTING_RIGHT
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -91,8 +91,8 @@ const defaultMapping = {
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
   [GestureType.VICTORY]: FunctionType.ZOOM,
-  [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
-  [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
+  [GestureType.TWO_POINTING_LEFT]: FunctionType.SWITCH_CHART,
+  [GestureType.TWO_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
 
 const handleGestureToFunc = (

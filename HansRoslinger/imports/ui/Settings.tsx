@@ -12,6 +12,8 @@ import { Button, Box } from "@mui/material";
 
 import { GestureType, FunctionType } from "../gesture/gesture";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { setSettingsCookie, getSettingsCookie } from "../cookies/cookies";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -53,16 +55,7 @@ const Functions = [
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] = useState<Record<GestureType, FunctionType>>({
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  });
+  const [state, setState] = useState<Record<GestureType, FunctionType>>(getSettingsCookie());
 
   const handleChange = (key: GestureType, value: FunctionType) => {
     setState((prev) => ({
@@ -72,7 +65,12 @@ const Settings: React.FC = () => {
   };
 
   const handleSave = () => {
-    {/* TODO */}
+    setSettingsCookie(state);
+  }
+
+  const navigate = useNavigate()
+  const handleReturn = () => {
+    navigate("/");
   }
 
   return (
@@ -109,8 +107,12 @@ const Settings: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 5}}>
+        <Button variant="outlined" onClick={handleReturn} sx={{ borderRadius: 2, px: 3 }}>
+          Return
+        </Button>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
         <Button variant="contained" color="primary" onClick={handleSave} sx={{ borderRadius: 2, px: 3 }}>
           Save
         </Button>

@@ -1,5 +1,4 @@
-import { GestureRecognizerResult } from "@mediapipe/tasks-vision";
-import { Gesture, GestureType, Handedness, handleGestureToFunc } from "./gesture";
+import { Gesture, Handedness, handleGestureToFunc } from "./gesture";
 import { useRef } from "react";
 
 let isZoomEnabled = false;
@@ -17,10 +16,6 @@ export const GestureHandler = () => {
   });
 
   const HandleGesture = (gesture: Gesture) => {
-    const landmarks = gesture.landmarks
-
-    gesture.gestureID = getGestureType(landmarks, gesture)
-
     const now: number = Date.now();
     const currentGesture = activeGestures.current[gesture.handedness];
 
@@ -40,25 +35,3 @@ export const GestureHandler = () => {
 };
 
 export default GestureHandler;
-
-function getGestureType(landmarks, gesture): GestureType {
-  console.log("Reading")
-  if (landmarks[8].x < landmarks[6].x && 
-    landmarks[6].x < landmarks[0].x &&
-    landmarks[4].y > landmarks[2].y &&
-    landmarks[12].y > landmarks[7].y &&
-    landmarks[16].y > landmarks[7].y &&
-    landmarks[20].y > landmarks[7].y
-    
-  ) return GestureType.POINTING_LEFT;
-
-  if (landmarks[8].x > landmarks[6].x &&
-    landmarks[6].x > landmarks[0].x &&
-    landmarks[4].y > landmarks[2].y &&
-    landmarks[12].y < landmarks[7].y &&
-    landmarks[16].y < landmarks[7].y &&
-    landmarks[20].y < landmarks[7].y
-  ) return GestureType.POINTING_RIGHT;
-
-  return gesture.gestureID
-}

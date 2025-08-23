@@ -4,49 +4,42 @@ FROM node:20 AS builder
 # Install Meteor
 RUN curl https://install.meteor.com/ | sh
 
+# Create app directory
 WORKDIR /app
 
 # Copy app source code
 ADD ./HansRoslinger /app
 
+# Set PATH to include Meteor
 ENV PATH="/root/.meteor:$PATH"
 
+# Install Meteor dependencies and build the app
 RUN npm ci
 RUN meteor build --directory /app-build --architecture os.linux.x86_64 --allow-superuser
 
-
-# Stage 2: Runtime image
+# Stage 2: Create final runtime image
 FROM node:20
-
-# Install nginx + supervisor (to run multiple processes)
-RUN apt-get update && apt-get install -y nginx supervisor && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
 ENV PORT=3000
 ENV ROOT_URL=http://127.0.0.1
+# ENV MONGO_URL=mongodb://user:pass@mongo:27017/dbname
 
-# Create app directory
+# Create app directory in the runtime container
 WORKDIR /opt/HansRoslinger/app
 
-# Copy built app
+# Copy built app from builder
 COPY --from=builder /app-build/bundle /opt/HansRoslinger/app
 
-# Install server dependencies
+# Install production node modules for server
 WORKDIR /opt/HansRoslinger/app/programs/server
 RUN npm install
 
-# Back to app root
+# Back to app root to run
 WORKDIR /opt/HansRoslinger/app
 
-# Configure nginx as reverse proxy
-RUN rm /etc/nginx/sites-enabled/default
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Expose the port
+EXPOSE 3000
 
-# Configure supervisor to run both Nginx + Meteor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Expose Cloud Run’s port
-EXPOSE 8080
-
-# Start both processes
-CMD ["/usr/bin/supervisord", "-n"]
+# Start the app
+CMD ["node", "main.js"]

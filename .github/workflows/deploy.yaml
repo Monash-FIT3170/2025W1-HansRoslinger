@@ -42,5 +42,5 @@ jobs:
             --image australia-southeast1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
             --platform managed \
             --region ${{ secrets.REGION }} \
-            --allow-unauthenticated
+            --allow-unauthenticated \
             --set-env-vars MONGO_URL={{ secrets.MONGO_URL }}

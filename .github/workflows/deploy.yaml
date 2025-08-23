@@ -43,3 +43,4 @@ jobs:
             --platform managed \
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated
+            --set-env-vars PORT=${{ secrets.PORT }},MONGO_URL={{ secrets.MONGO_URL }}

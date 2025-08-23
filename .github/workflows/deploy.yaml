@@ -43,4 +43,3 @@ jobs:
             --platform managed \
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated
-            --memory 1Gi

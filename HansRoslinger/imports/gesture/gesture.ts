@@ -116,7 +116,7 @@ const handleGestureToFunc = (
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
       console.log(
-        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
+        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}' with handler '${handler}'`,
       );
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
@@ -127,7 +127,7 @@ const handleGestureToFunc = (
     } else {
       // This warning will now only appear for truly unhandled gestures
       console.warn(
-        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
+        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT}) with handler ${handler}`,
       );
     }
   }

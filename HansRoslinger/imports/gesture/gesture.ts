@@ -14,6 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
+  TWO_POINTING_LEFT,
+  TWO_POINTING_RIGHT,
 }
 
 enum FunctionType {
@@ -35,6 +37,8 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+  Two_Pointing_Left: GestureType.TWO_POINTING_LEFT,
+  Two_Pointing_Right: GestureType.TWO_POINTING_RIGHT
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -79,14 +83,16 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
 });
 
 const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
-  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
   [GestureType.POINTING_UP]: FunctionType.SELECT,
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
   [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.TWO_POINTING_LEFT]: FunctionType.SWITCH_CHART,
+  [GestureType.TWO_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
 
 const handleGestureToFunc = (
@@ -110,7 +116,7 @@ const handleGestureToFunc = (
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
       console.log(
-        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
+        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}' with handler '${handler}'`,
       );
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
@@ -121,7 +127,7 @@ const handleGestureToFunc = (
     } else {
       // This warning will now only appear for truly unhandled gestures
       console.warn(
-        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
+        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT}) with handler ${handler}`,
       );
     }
   }
@@ -160,3 +166,4 @@ export const gestureToScreenPosition = (
 
   return { screenX, screenY };
 };
+

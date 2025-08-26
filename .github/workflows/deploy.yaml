@@ -1,9 +1,12 @@
 name: Deploy to Cloud Run
 
 on:
-  push:
-    branches:
-      - prod
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag (defaults to commit SHA)'
+        required: false
+        default: ''
 
 jobs:
   deploy:

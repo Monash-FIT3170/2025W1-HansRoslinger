@@ -38,7 +38,7 @@ export const IDtoEnum: Record<string, GestureType> = {
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
   Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
-  Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT
+  Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -166,4 +166,3 @@ export const gestureToScreenPosition = (
 
   return { screenX, screenY };
 };
-

@@ -8,13 +8,13 @@ RUN curl https://install.meteor.com/ | sh
 WORKDIR /app
 
 # Copy package and package lock
-ADD ./HansRoslinger/package*.json /app
+ADD ./HansRoslinger/package.json /app
 
 # Set PATH to include Meteor
 ENV PATH="/root/.meteor:$PATH"
 
 # Install Meteor dependencies and build the app
-RUN npm ci
+RUN npm install
 
 # Copy the rest of the app
 COPY ./HansRoslinger ./

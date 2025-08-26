@@ -7,15 +7,13 @@ RUN curl https://install.meteor.com/ | sh
 # Create app directory
 WORKDIR /app
 
-# Copy app source code
-ADD ./HansRoslinger /app
-
 # Set PATH to include Meteor
 ENV PATH="/root/.meteor:$PATH"
 
-# Install Meteor dependencies and build the app
-RUN npm ci
-RUN npm rebuild lightningcss
+# Copy the rest of the app
+COPY ./HansRoslinger ./
+
+# Rebuild the bad package and build app
 RUN meteor build --directory /app-build --architecture os.linux.x86_64 --allow-superuser
 
 # Stage 2: Create final runtime image

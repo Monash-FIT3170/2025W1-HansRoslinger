@@ -15,6 +15,7 @@ ENV PATH="/root/.meteor:$PATH"
 
 # Install Meteor dependencies and build the app
 RUN npm ci
+RUN npm rebuild lightningcss
 RUN meteor build --directory /app-build --architecture os.linux.x86_64 --allow-superuser
 
 # Stage 2: Create final runtime image

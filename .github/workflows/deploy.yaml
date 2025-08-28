@@ -47,4 +47,5 @@ jobs:
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated \
             --port=${{ secrets.PORT }} \
-            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }}
+            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }} \
+            --max-instances=1

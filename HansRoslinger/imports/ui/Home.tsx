@@ -117,10 +117,7 @@ export const Home: React.FC = () => {
                   onClick={() => handleItemSelect(item.index)}
                 >
                   <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={item.category}
-                  />
+                  <ListItemText primary={item.name} secondary={item.category} />
                 </ListItemButton>
               ))}
             </List>

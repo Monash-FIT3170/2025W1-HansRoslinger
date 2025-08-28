@@ -5,7 +5,6 @@ import { GestureType, FunctionType } from "../gesture/gesture";
 const USERID = "user_id";
 const AUTHTOKEN = "auth_token";
 
-
 export function setAuthCookie(token: string, userId: string) {
   Cookies.set(AUTHTOKEN, token, { expires: 1 }); // 1 day
   Cookies.set(USERID, userId, { expires: 1 });
@@ -43,9 +42,8 @@ export function getSettingsCookie() {
       [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
       [GestureType.OPEN_PALM]: FunctionType.FILTER,
       [GestureType.VICTORY]: FunctionType.ZOOM,
-    }
+    };
   } else {
-    return JSON.parse(cookie)
+    return JSON.parse(cookie);
   }
-  
 }

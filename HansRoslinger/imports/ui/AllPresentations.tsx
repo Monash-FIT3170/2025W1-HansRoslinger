@@ -18,7 +18,28 @@ import {
   ChartType,
 } from "../api/database/dataset/dataset";
 
-import { Alert, Box, Button, Grid, Typography, TextField, CardActionArea, Card, CardContent, Stack, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Select, MenuItem, Container } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Typography,
+  TextField,
+  CardActionArea,
+  Card,
+  CardContent,
+  Stack,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Select,
+  MenuItem,
+  Container,
+} from "@mui/material";
 
 export default function AllPresentations() {
   // State for dataset summary modal
@@ -223,22 +244,13 @@ export default function AllPresentations() {
         title="Presentations"
         actions={
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="contained"
-              onClick={showModel}
-            >
+            <Button variant="contained" onClick={showModel}>
               Create Presentation
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleHome}
-            >
+            <Button variant="contained" onClick={handleHome}>
               Home
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleLogout}
-            >
+            <Button variant="contained" onClick={handleLogout}>
               Logout
             </Button>
           </Stack>
@@ -250,7 +262,9 @@ export default function AllPresentations() {
           <Typography variant="h5">
             Enter the name of your new presentation
           </Typography>
-          <Stack direction="row" spacing={2}
+          <Stack
+            direction="row"
+            spacing={2}
             sx={{
               justifyContent: "center",
               alignItems: "center", // vertical alignment within the row
@@ -261,9 +275,7 @@ export default function AllPresentations() {
               value={presentationName}
               onChange={(e) => setPresentationName(e.target.value)}
             />
-            {message && (
-              <Alert severity="info">{message}</Alert>
-            )}
+            {message && <Alert severity="info">{message}</Alert>}
             <Button
               variant="contained"
               onClick={handleCreate}
@@ -275,34 +287,40 @@ export default function AllPresentations() {
         </Stack>
       </Modal>
       {/* Presentation Tiles */}
-      <Box sx={{
-        width: 1,
-        p: 2
-      }}>
-        <Typography variant="h2"
+      <Box
+        sx={{
+          width: 1,
+          p: 2,
+        }}
+      >
+        <Typography
+          variant="h2"
           sx={{
             p: 2,
-            textAlign: "center"
-          }}        
-        >All Presentations</Typography>
-        <Grid container spacing={3}
+            textAlign: "center",
+          }}
+        >
+          All Presentations
+        </Typography>
+        <Grid
+          container
+          spacing={3}
           sx={{
             width: 1,
-            gap: 2
-            }}
+            gap: 2,
+          }}
         >
           {presentations.map((presentation) => (
             <Grid size={4}>
-              <Card
-              >
+              <Card>
                 <CardActionArea
                   key={presentation._id}
-                  onClick={async () => await openPresentationModal(presentation)}
+                  onClick={async () =>
+                    await openPresentationModal(presentation)
+                  }
                 >
                   <CardContent>
-                    <Typography variant="h5">
-                      {presentation.name}
-                    </Typography>
+                    <Typography variant="h5">{presentation.name}</Typography>
                     <Typography variant="h6">
                       Added:{" "}
                       {presentation.createdAt
@@ -332,9 +350,7 @@ export default function AllPresentations() {
                 mb: 2, // optional margin below
               }}
             >
-              <Typography variant="h2">
-                {selectedPresentation.name}
-              </Typography>
+              <Typography variant="h2">{selectedPresentation.name}</Typography>
               <Stack direction="row" spacing={2}>
                 <Button variant="contained" onClick={openDatasetModal}>
                   Add Dataset
@@ -351,25 +367,25 @@ export default function AllPresentations() {
               </Stack>
             </Box>
             {/* DATASET TILES */}
-            <Grid container spacing={2}
+            <Grid
+              container
+              spacing={2}
               sx={{
-                mt: 2
+                mt: 2,
               }}
             >
               {datasets && datasets.length > 0 ? (
                 datasets.map((dataset: Dataset, idx: number) => (
                   <Grid size={6}>
                     <Card key={dataset._id || idx}>
-                      <CardActionArea 
+                      <CardActionArea
                         key={dataset._id || idx}
                         onClick={() => handleShowDatasetSummary(dataset)}
                         sx={{
-                          p: 2
+                          p: 2,
                         }}
                       >
-                        <Typography variant="h5">
-                          {dataset.title}
-                        </Typography>
+                        <Typography variant="h5">{dataset.title}</Typography>
                         <Typography variant="h6">
                           {dataset.data ? dataset.data.length : 0} data point
                           {dataset.data && dataset.data.length !== 1 ? "s" : ""}
@@ -383,9 +399,7 @@ export default function AllPresentations() {
                 ))
               ) : (
                 <Grid size={12}>
-                  <Typography variant="h5">
-                    No datasets yet.
-                  </Typography>
+                  <Typography variant="h5">No datasets yet.</Typography>
                 </Grid>
               )}
             </Grid>
@@ -417,11 +431,11 @@ export default function AllPresentations() {
             </Typography>
             <Stack>
               {summaryDataset.data && summaryDataset.data.length > 0 ? (
-                <TableContainer 
+                <TableContainer
                   component={Paper}
                   sx={{
                     maxHeight: "40vh",
-                    overflow: 'auto',
+                    overflow: "auto",
                   }}
                 >
                   <Table>
@@ -445,11 +459,7 @@ export default function AllPresentations() {
                 <Typography variant="h5">No data points.</Typography>
               )}
             </Stack>
-              <Button
-                onClick={handleDeleteDataset}
-              >
-                Delete
-              </Button>
+            <Button onClick={handleDeleteDataset}>Delete</Button>
           </Stack>
         )}
       </Modal>
@@ -461,11 +471,12 @@ export default function AllPresentations() {
       >
         <Stack spacing={2}>
           <Typography variant="h3">Add Dataset</Typography>
-          <TextField 
+          <TextField
             label="Dataset Title"
             variant="outlined"
             value={datasetTitle}
-            onChange={(e) => setDatasetTitle(e.target.value)}/>
+            onChange={(e) => setDatasetTitle(e.target.value)}
+          />
           <Select
             value={datasetChartType}
             onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
@@ -480,9 +491,7 @@ export default function AllPresentations() {
             multiline
             maxRows={6}
           />
-          {datasetMessage && (
-            <Alert severity="info">{datasetMessage}</Alert>
-          )}
+          {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
           <Button
             onClick={handleCreateDataset}
             disabled={!datasetTitle.trim() || !datasetCSV.trim()}

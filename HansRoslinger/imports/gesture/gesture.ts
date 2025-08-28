@@ -68,6 +68,7 @@ type Gesture = {
 let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
+if (typeof window !== "undefined") {
 // Watch for the "chart:zoom" event and toggle the boolean
 window.addEventListener("chart:togglezoom", (event: Event) => {
   const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -80,7 +81,7 @@ window.addEventListener("chart:togglezoom", (event: Event) => {
     zoomStartPosition = null;
     console.log(`Zoom disabled.`);
   }
-});
+})};
 
 const defaultMapping = {
   [GestureType.THUMB_UP]: FunctionType.UNUSED,
@@ -138,7 +139,6 @@ export {
   GestureType,
   FunctionType,
   Handedness,
-  defaultMapping,
   handleGestureToFunc,
   isZoomEnabled,
 };

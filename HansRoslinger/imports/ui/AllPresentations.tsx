@@ -222,7 +222,7 @@ export default function AllPresentations() {
       <Toolbar
         title="Presentations"
         actions={
-          <>
+          <Stack direction="row" spacing={2}>
             <Button
               variant="contained"
               onClick={showModel}
@@ -241,37 +241,60 @@ export default function AllPresentations() {
             >
               Logout
             </Button>
-          </>
+          </Stack>
         }
       />
       {/* Create Presentation Modal */}
-      <Modal isOpen={showModal} onClose={clearModel} widthClass="w-96">
-        <Typography variant="h5">
-          Enter the name of your new presentation
-        </Typography>
-        <TextField
-          label="Presentation Name"
-          value={presentationName}
-          onChange={(e) => setPresentationName(e.target.value)}
-        />
-        {message && (
-          <Alert severity="info">{message}</Alert>
-        )}
-        <Button
-          variant="contained"
-          onClick={handleCreate}
-          disabled={!presentationName.trim()}
-        >
-          Create
-        </Button>
+      <Modal isOpen={showModal} onClose={clearModel} maxwidth={"550px"}>
+        <Stack spacing={2}>
+          <Typography variant="h5">
+            Enter the name of your new presentation
+          </Typography>
+          <Stack direction="row" spacing={2}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center", // vertical alignment within the row
+            }}
+          >
+            <TextField
+              label="Presentation Name"
+              value={presentationName}
+              onChange={(e) => setPresentationName(e.target.value)}
+            />
+            {message && (
+              <Alert severity="info">{message}</Alert>
+            )}
+            <Button
+              variant="contained"
+              onClick={handleCreate}
+              disabled={!presentationName.trim()}
+            >
+              Create
+            </Button>
+          </Stack>
+        </Stack>
       </Modal>
       {/* Presentation Tiles */}
-      <Box sx={{width: "full"}}>
-        <Typography variant="h1">All Presentations</Typography>
-        <Grid container spacing={3}>
+      <Box sx={{
+        width: 1,
+        p: 2
+      }}>
+        <Typography variant="h2"
+          sx={{
+            p: 2,
+            textAlign: "center"
+          }}        
+        >All Presentations</Typography>
+        <Grid container spacing={3}
+          sx={{
+            width: 1,
+            gap: 2
+            }}
+        >
           {presentations.map((presentation) => (
             <Grid size={4}>
-              <Card>
+              <Card
+              >
                 <CardActionArea
                   key={presentation._id}
                   onClick={async () => await openPresentationModal(presentation)}
@@ -297,32 +320,42 @@ export default function AllPresentations() {
       <Modal
         isOpen={!!selectedPresentation}
         onClose={closePresentationModal}
-        widthClass="w-[60rem] max-w-full"
+        maxwidth={"60vw"}
       >
         {selectedPresentation && (
           <>
-            <Stack direction="row">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2, // optional margin below
+              }}
+            >
               <Typography variant="h2">
                 {selectedPresentation.name}
               </Typography>
-              <Button
-                variant="contained"
-                onClick={openDatasetModal}
-              >
-                Add Dataset
-              </Button>
-              <Button
-                variant="contained"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePresentDataset(selectedPresentation);
-                }}
-              >
-                Present
-              </Button>
-            </Stack>
+              <Stack direction="row" spacing={2}>
+                <Button variant="contained" onClick={openDatasetModal}>
+                  Add Dataset
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePresentDataset(selectedPresentation);
+                  }}
+                >
+                  Present
+                </Button>
+              </Stack>
+            </Box>
             {/* DATASET TILES */}
-            <Grid container spacing={2}>
+            <Grid container spacing={2}
+              sx={{
+                mt: 2
+              }}
+            >
               {datasets && datasets.length > 0 ? (
                 datasets.map((dataset: Dataset, idx: number) => (
                   <Grid size={6}>
@@ -330,6 +363,9 @@ export default function AllPresentations() {
                       <CardActionArea 
                         key={dataset._id || idx}
                         onClick={() => handleShowDatasetSummary(dataset)}
+                        sx={{
+                          p: 2
+                        }}
                       >
                         <Typography variant="h5">
                           {dataset.title}
@@ -360,10 +396,10 @@ export default function AllPresentations() {
       <Modal
         isOpen={showDatasetSummary && !!summaryDataset}
         onClose={handleCloseDatasetSummary}
-        widthClass="w-[28rem] max-w-full"
+        maxwidth={"50vw"}
       >
         {summaryDataset && (
-          <Stack>
+          <Stack spacing={2}>
             <Typography variant="h4">Dataset Summary</Typography>
             <Typography variant="h5">
               <span className="font-bold">Title:</span> {summaryDataset.title}
@@ -381,7 +417,13 @@ export default function AllPresentations() {
             </Typography>
             <Stack>
               {summaryDataset.data && summaryDataset.data.length > 0 ? (
-                <TableContainer component={Paper}>
+                <TableContainer 
+                  component={Paper}
+                  sx={{
+                    maxHeight: "40vh",
+                    overflow: 'auto',
+                  }}
+                >
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -415,9 +457,9 @@ export default function AllPresentations() {
       <Modal
         isOpen={showDatasetModal}
         onClose={closeDatasetModal}
-        widthClass="w-[32rem] max-w-full"
+        maxwidth={"40vw"}
       >
-        <Stack>
+        <Stack spacing={2}>
           <Typography variant="h3">Add Dataset</Typography>
           <TextField 
             label="Dataset Title"

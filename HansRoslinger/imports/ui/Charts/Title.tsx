@@ -1,5 +1,5 @@
 import React from "react";
-import { Dataset } from "../Input/Data";
+import { Dataset } from "../../api/database/dataset/dataset";
 import {
   TITLE_FONT_SIZE,
   TITLE_FONT_FAMILY,

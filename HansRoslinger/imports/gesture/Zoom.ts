@@ -36,7 +36,7 @@ function getHandsXY(latestGesture: Gesture): {
  * - Saves the initial horizontal/vertical separations (dx, dy)
  * - Emits chart:togglezoom centered at the midpoint between hands
  */
-export const processZoomChart = (_initial: Gesture, latestGesture: Gesture): void => {
+export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   const hands = getHandsXY(latestGesture);
 
   if (!hands.left || !hands.right) {

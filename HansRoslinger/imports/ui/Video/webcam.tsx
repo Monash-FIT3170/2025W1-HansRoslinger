@@ -4,12 +4,16 @@ import GestureDetector from "/imports/mediapipe/gestures";
 
 interface WebcamProps {
   grayscale: boolean;
+  gestureDetectionStatus: boolean;
 }
 
-export const WebcamComponent: React.FC<WebcamProps> = ({ grayscale }) => {
+export const WebcamComponent: React.FC<WebcamProps> = ({
+  grayscale,
+  gestureDetectionStatus,
+}) => {
   const webcamRef = useRef<Webcam | null>(null);
 
-  GestureDetector(webcamRef);
+  GestureDetector(webcamRef, gestureDetectionStatus);
 
   return (
     <div

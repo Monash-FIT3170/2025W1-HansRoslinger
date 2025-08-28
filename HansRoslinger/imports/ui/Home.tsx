@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import CreateAssetModal from "./components/Assets/CreateAssetModal";
+import AssetList from "./components/Assets/AssetList";
+import { useAssetsWithImageCount, createAssetWithImages } from "./handlers/assets/useAssets";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
 import { clearAuthCookie } from "../cookies/cookies";
@@ -31,6 +34,8 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const assets = useAssetsWithImageCount();
 
   const handleClick = () => {
     setOpen(!open);
@@ -67,6 +72,10 @@ export const Home: React.FC = () => {
 
   const handleItemSelect = (index: number) => {
     navigate(`/project/${index}`); // ** Change to see file with data maybe **
+  };
+
+  const handleCreateAsset = async (data: { name: string; icon: string; files: File[] }) => {
+    await createAssetWithImages(data);
   };
 
   return (
@@ -106,25 +115,13 @@ export const Home: React.FC = () => {
             <ListItemIcon>
               <Folder color="primary" />
             </ListItemIcon>
-            <ListItemText primary="Workspace/Assets" />
+            <ListItemText primary="Assets" />
             {open ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {projectItems.map((item) => (
-                <ListItemButton
-                  key={item.id}
-                  sx={{ pl: 4 }}
-                  onClick={() => handleItemSelect(item.index)}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={item.category}
-                  />
-                </ListItemButton>
-              ))}
-            </List>
+            <Box sx={{ pl: 4 }}>
+              <AssetList assets={assets} />
+            </Box>
           </Collapse>
         </List>
       </Paper>
@@ -141,10 +138,11 @@ export const Home: React.FC = () => {
             borderRadius: "8px",
             fontWeight: "bold",
           }}
-          onClick={}
+          onClick={() => setModalOpen(true)}
         >
-          Create Workspace
+          Import Assets
         </Button>
+        <CreateAssetModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onCreate={handleCreateAsset} />
         <Button
           variant="contained"
           startIcon={<Collections />}

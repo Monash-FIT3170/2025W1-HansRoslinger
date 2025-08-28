@@ -19,6 +19,8 @@ import {
 } from "../api/database/dataset/dataset";
 
 import { Alert, Box, Button, Grid, Typography, TextField, CardActionArea, Card, CardContent, Stack, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Select, MenuItem, Container } from "@mui/material";
+import { AssetCollection, Asset } from "../api/database/assets/assets";
+import { useTracker } from 'meteor/react-meteor-data';
 
 export default function AllPresentations() {
   // State for dataset summary modal
@@ -60,6 +62,9 @@ export default function AllPresentations() {
   const [selectedPresentation, setSelectedPresentation] =
     useState<Presentation | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [selectedAssetId, setSelectedAssetId] = useState<string>("");
+  // Get all assets for dropdown
+  const assets: Asset[] = useTracker(() => AssetCollection.find({}).fetch(), []);
 
   // Dataset modal state
   const [showDatasetModal, setShowDatasetModal] = useState(false);
@@ -132,11 +137,13 @@ export default function AllPresentations() {
   // Open modal and load datasets for the selected presentation
   async function openPresentationModal(presentation: Presentation) {
     setSelectedPresentation(presentation);
+    setSelectedAssetId(presentation.assetId || "");
     await loadDatasets(presentation._id!);
   }
 
   function closePresentationModal() {
     setSelectedPresentation(null);
+    setSelectedAssetId("");
   }
 
   // --- Dataset Modal Logic ---
@@ -335,7 +342,26 @@ export default function AllPresentations() {
               <Typography variant="h2">
                 {selectedPresentation.name}
               </Typography>
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Select
+                  value={selectedAssetId}
+                  onChange={async (e) => {
+                    const assetId = e.target.value;
+                    setSelectedAssetId(assetId);
+                    if (selectedPresentation && selectedPresentation._id) {
+                      await Meteor.callAsync('presentations.update', selectedPresentation._id, { assetId });
+                    }
+                  }}
+                  displayEmpty
+                  sx={{ minWidth: 180 }}
+                >
+                  <MenuItem value="">None</MenuItem>
+                  {assets.map((asset) => (
+                    <MenuItem value={asset._id} key={asset._id}>
+                      {asset.name} ({asset._id})
+                    </MenuItem>
+                  ))}
+                </Select>
                 <Button variant="contained" onClick={openDatasetModal}>
                   Add Dataset
                 </Button>

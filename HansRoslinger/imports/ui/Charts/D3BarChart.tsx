@@ -271,3 +271,4 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
 
   return <div ref={chartRef} className="w-full h-full" />;
 };
+

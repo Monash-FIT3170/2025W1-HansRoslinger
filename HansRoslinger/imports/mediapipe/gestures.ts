@@ -14,7 +14,7 @@ Sample result from gestureRecognizer.recognizeForVideo(video, performance.now())
 
 const GestureDetector = (
   videoRef: MutableRefObject<Webcam | null>,
-  gestureDetectionStatus: boolean,
+  gestureDetectionStatus: boolean
 ) => {
   // Gesture Constants
   const NUM_HANDS_DETECTABLE = 2; // Maximum number of hands that will be detected in a single recognition
@@ -26,10 +26,10 @@ const GestureDetector = (
 
   // React specific variables
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>(
-    Array(NUM_HANDS_DETECTABLE),
+    Array(NUM_HANDS_DETECTABLE)
   );
   const [gestureRecognizer, setGestureRecognizer] =
-    useState<GestureRecognizer | null>();
+    useState<GestureRecognizer | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { HandleGesture } = GestureHandler();
 
@@ -46,7 +46,7 @@ const GestureDetector = (
     const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
 
         // import gesture detection with configuration constants
@@ -65,7 +65,7 @@ const GestureDetector = (
       } catch (error) {
         console.error(
           `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
-          error,
+          error
         );
         if (retryCount < SETUP_MAX_RETRIES) {
           setTimeout(() => setup(retryCount + 1), SETUP_RETRY_DELAY);
@@ -73,7 +73,7 @@ const GestureDetector = (
           console.error(
             "Failed to initialize GestureRecognizer after maximum of " +
               SETUP_MAX_RETRIES.toString() +
-              " retries.",
+              " retries."
           );
         }
       }
@@ -99,10 +99,10 @@ const GestureDetector = (
               const detectedGestures =
                 await gestureRecognizer.recognizeForVideo(
                   video,
-                  performance.now(),
+                  performance.now()
                 );
               const gestures: Gesture[] = Array(
-                detectedGestures.gestures.length,
+                detectedGestures.gestures.length
               );
 
               for (
@@ -113,35 +113,43 @@ const GestureDetector = (
                 const landmarks = detectedGestures.landmarks[index];
                 const handedness = detectedGestures.handedness[index][0]
                   .categoryName as Handedness;
-                let gestureID: GestureType;
-                let confidence: number;
+                let gestureID: GestureType | undefined = undefined;
+                let confidence: number = 0;
 
-                if (isPointing(landmarks)) {
-                  // gestureID = GestureType.POINTING_UP;
-                  confidence = 1.0;
-                } else if (isTwoFingerPointing(landmarks)) {
-                  if (handedness === Handedness.LEFT) {
-                    gestureID = GestureType.TWO_FINGER_POINTING_LEFT;
-                  } else {
-                    gestureID = GestureType.TWO_FINGER_POINTING_RIGHT;
+                const categoryName =
+                  detectedGestures.gestures[index][0].categoryName;
+                // Convert the string name (e.g., "Thumb_Up") to the enum number (e.g., 6)
+                gestureID = IDtoEnum[categoryName] ?? GestureType.UNIDENTIFIED;
+                confidence = detectedGestures.gestures[index][0].score;
+                if (gestureID === GestureType.UNIDENTIFIED) {
+                  if (isPointing(landmarks)) {
+                    gestureID = GestureType.POINTING_UP;
+                    confidence = 1.0;
                   }
-                  confidence = 1.0;
-                } else {
-                  const categoryName =
-                    detectedGestures.gestures[index][0].categoryName;
-                  // Convert the string name (e.g., "Thumb_Up") to the enum number (e.g., 6)
-                  gestureID =
-                    IDtoEnum[categoryName] ?? GestureType.UNIDENTIFIED;
-                  confidence = detectedGestures.gestures[index][0].score;
+
+                  if (isTwoFingerPointing(landmarks)) {
+                    if (handedness === Handedness.LEFT) {
+                      gestureID = GestureType.TWO_FINGER_POINTING_LEFT;
+                    } else {
+                      gestureID = GestureType.TWO_FINGER_POINTING_RIGHT;
+                    }
+                    confidence = 1.0;
+                  }
+
+                  if (isPinchSign(landmarks)) {
+                    gestureID = GestureType.PINCH;
+                    confidence = 1.0;
+                  }
                 }
 
                 // This is to assign the determined gesture
                 gestures[index] = {
-                  gestureID,
+                  gestureID: gestureID ?? GestureType.UNIDENTIFIED,
                   handedness,
                   timestamp: new Date(),
                   confidence,
-                  landmarks,
+                  singleGestureLandmarks: landmarks,
+                  doubleGestureLandmarks: [],
                 };
               }
 
@@ -154,7 +162,7 @@ const GestureDetector = (
 
         intervalRef.current = setInterval(
           processFrame,
-          GESTURE_RECOGNITION_TIMEOUT_INTERVAL,
+          GESTURE_RECOGNITION_TIMEOUT_INTERVAL
         );
       };
       detectGesture();
@@ -166,11 +174,44 @@ const GestureDetector = (
 
   // Handle newly detected gesture
   useEffect(() => {
+    // Logic for handling 2 handed gestures should be done before handling individual gestures
+    // If a 2 handed gesture is found, we shouldn't handle each single gesture individually
+    // 2 handed gestures should always come from a left and right hand, assuming it is a single person
+    // performing the gesture
+    const leftGesture = currentGestures.find(
+      (g) => g?.handedness === Handedness.LEFT
+    );
+    const rightGesture = currentGestures.find(
+      (g) => g?.handedness === Handedness.RIGHT
+    );
+    let twoHandedGesture: Gesture | undefined;
+    if (leftGesture && rightGesture) {
+      if (isDoublePinchSign(leftGesture, rightGesture)) {
+        twoHandedGesture = {
+          gestureID: GestureType.DOUBLE_PINCH,
+          handedness: Handedness.BOTH,
+          timestamp: new Date(),
+          confidence: Math.min(leftGesture.confidence, rightGesture.confidence),
+          singleGestureLandmarks: [],
+          doubleGestureLandmarks: [
+            leftGesture.singleGestureLandmarks,
+            rightGesture.singleGestureLandmarks,
+          ],
+        };
+      }
+      //here you can add an else if to add other two handed gestures
+      if (twoHandedGesture) {
+        HandleGesture(twoHandedGesture);
+        return;
+      }
+    }
+
+    // this code will only run if a two-handed gesture was not detected
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
         // Confirm that the correct gesture ID number is being sent
         console.log(
-          `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`,
+          `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`
         );
         HandleGesture(currentGestures[index]);
       }
@@ -201,8 +242,10 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, middleTip) < dist(wrist, middlePip) &&
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
-  const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
+  // const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
+  const thumbExtended = true;
   const isPointing = isIndexExtended && areOthersCurled && thumbExtended;
+
   return isPointing;
 }
 
@@ -229,4 +272,40 @@ function isTwoFingerPointing(landmarks: NormalizedLandmark[]): boolean {
   const isPointing =
     isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended;
   return isPointing;
+}
+
+function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
+  // Check if both gestures are PINCH
+  const isLeftPinch = leftGesture.gestureID === GestureType.PINCH;
+  const isRightPinch = rightGesture.gestureID === GestureType.PINCH;
+
+  console.log(`double pinch check: left ${isLeftPinch}, right ${isRightPinch}`);
+  return isLeftPinch && isRightPinch;
+}
+
+function isPinchSign(landmarks: NormalizedLandmark[]) {
+  if (!landmarks || landmarks.length < 21) return false;
+
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+
+  // For implementation of pinching
+  // Distance between thumb and index tip
+  const thumbIndexDistance = Math.hypot(
+    thumbTip.x - indexTip.x,
+    thumbTip.y - indexTip.y
+  );
+
+  // Distance between thumb and index tip
+  const thumbMiddleDistance = Math.hypot(
+    thumbTip.x - middleTip.x,
+    thumbTip.y - middleTip.y
+  );
+
+  // Consider it "PINCH" if thumb + index are touching, and other fingers are up
+  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+  const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
+
+  return isThumbIndexClose; //&& isThumbMiddleClose;
 }

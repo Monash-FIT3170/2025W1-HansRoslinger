@@ -13,6 +13,7 @@ export const GestureHandler = () => {
   const activeGestures = useRef<Record<Handedness, Gesture | null>>({
     [Handedness.LEFT]: null,
     [Handedness.RIGHT]: null,
+    [Handedness.BOTH]: null,
   });
 
   const HandleGesture = (gesture: Gesture) => {

@@ -119,9 +119,18 @@ export const Home: React.FC = () => {
             {open ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ pl: 4 }}>
-              <AssetList assets={assets} />
-            </Box>
+            <List component="div" disablePadding>
+              {projectItems.map((item) => (
+                <ListItemButton
+                  key={item.id}
+                  sx={{ pl: 4 }}
+                  onClick={() => handleItemSelect(item.index)}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.name} secondary={item.category} />
+                </ListItemButton>
+              ))}
+            </List>
           </Collapse>
         </List>
       </Paper>

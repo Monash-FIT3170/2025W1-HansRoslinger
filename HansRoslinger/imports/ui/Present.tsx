@@ -79,7 +79,7 @@ export const Present: React.FC = () => {
   // Initialize chart type
   useEffect(() => {
     setShowLineChart(
-      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE
+      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
     );
   }, [currentDataset]);
 

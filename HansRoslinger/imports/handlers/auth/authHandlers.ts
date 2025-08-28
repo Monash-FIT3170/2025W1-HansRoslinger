@@ -60,15 +60,15 @@ export const registerUser = async (email: string, password: string) => {
       password: hashedPassword,
       createdAt: new Date(),
       settings: {
-            [GestureType.THUMB_UP]: FunctionType.UNUSED,
-            [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-            [GestureType.POINTING_UP]: FunctionType.SELECT,
-            [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-            [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-            [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-            [GestureType.OPEN_PALM]: FunctionType.FILTER,
-            [GestureType.VICTORY]: FunctionType.ZOOM,
-          }
+        [GestureType.THUMB_UP]: FunctionType.UNUSED,
+        [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+        [GestureType.POINTING_UP]: FunctionType.SELECT,
+        [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+        [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+        [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+        [GestureType.OPEN_PALM]: FunctionType.FILTER,
+        [GestureType.VICTORY]: FunctionType.ZOOM,
+      },
     });
 
     // Generate JWT valid for 1 day

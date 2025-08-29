@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../handlers/auth/authHandlers";
-import { setAuthCookie } from "../cookies/cookies";
 import {
   Box,
   Button,
@@ -16,18 +15,11 @@ import {
 } from "@mui/material";
 
 export const Login: React.FC = () => {
-  type FloatingQuote = {
-    idx: number;
-    x: number;
-    y: number;
-    speed: number;
-    key: string;
-  };
+  type FloatingQuote = { idx: number; x: number; y: number; speed: number; key: string };
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
-  // Registration modal state
   const [registerOpen, setRegisterOpen] = useState(false);
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
@@ -36,57 +28,40 @@ export const Login: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // ===== LOGIN =====
   const handleLogin = async () => {
     try {
       const result = await loginUser(username, password);
       setMessage(result.message ?? null);
-
       if (result.success && result.token && result.userId) {
         setAuthCookie(result.token, result.userId);
         navigate("/home");
       }
-    } catch (error: unknown) {
-      setMessage(
-        error && typeof error === "object" && "message" in error
-          ? (error as { message?: string }).message ||
-              "An error occurred during login."
-          : "An error occurred during login.",
-      );
+    } catch {
+      setMessage("An error occurred during login.");
     }
   };
 
-  // ===== REGISTER =====
   const handleRegister = async () => {
     if (regPassword !== regConfirmPassword) {
       setRegMessage("Passwords do not match.");
       return;
     }
-
     try {
       const result = await registerUser(regUsername, regPassword);
       setRegMessage(result.message ?? null);
-
       if (result.success && result.token && result.userId) {
         setAuthCookie(result.token, result.userId);
         setRegisterOpen(false);
         navigate("/home");
       }
-    } catch (error: unknown) {
-      setRegMessage(
-        error && typeof error === "object" && "message" in error
-          ? (error as { message?: string }).message ||
-              "An error occurred during registration."
-          : "An error occurred during registration.",
-      );
+    } catch {
+      setRegMessage("An error occurred during registration.");
     }
   };
 
-
-  // Animated multi-quote logic
   const quotes = [
-    { text: "This is the deserves at least a HD!", author: "- Adrian K" },
-    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C"}
+    { text: "This deserves at least a HD!", author: "- Adrian K" },
+    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C" },
     { text: "Presentations are literally in the palm of my hands!", author: "- Alan T." },
     { text: "My boss thinks I'm a genius now.", author: "- Grace H." },
     { text: "So modern, so easy!", author: "- Linus T." },
@@ -94,10 +69,8 @@ export const Login: React.FC = () => {
     { text: "The best thing since sliced bread.", author: "- Tim B.L." },
   ];
 
-  // Floating quotes state: each quote is an object with its own animation
   const [floatingQuotes, setFloatingQuotes] = useState<FloatingQuote[]>([]);
 
-  // Add a new floating quote every 5 seconds
   useEffect(() => {
     const addQuote = () => {
       setFloatingQuotes((prev) => [
@@ -105,35 +78,28 @@ export const Login: React.FC = () => {
         {
           idx: Math.floor(Math.random() * quotes.length),
           x: -40,
-          y: 300 + Math.random() * (window.innerHeight - 320), // avoid title area
+          y: 300 + Math.random() * (window.innerHeight - 320),
           speed: 0.075 + Math.random() * 0.05,
           key: Math.random().toString(36).slice(2),
         },
       ]);
     };
-    // Spawn one immediately
     addQuote();
-    // Then every 10 seconds
     const interval = setInterval(addQuote, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Animate all floating quotes
   useEffect(() => {
     const interval = setInterval(() => {
-      setFloatingQuotes((prev) => {
-        const updated = prev
+      setFloatingQuotes((prev) =>
+        prev
           .map((q) => {
             const newX = q.x + q.speed;
-            if (newX > 110) {
-              // Remove quote when it leaves the screen
-              return null;
-            }
+            if (newX > 110) return null;
             return { ...q, x: newX };
-          });
-        // Only keep non-null quotes
-        return updated.filter((q): q is FloatingQuote => q !== null);
-      });
+          })
+          .filter((q): q is FloatingQuote => q !== null)
+      );
     }, 30);
     return () => clearInterval(interval);
   }, []);
@@ -148,8 +114,6 @@ export const Login: React.FC = () => {
         overflow: "hidden",
       }}
     >
-
-      {/* Multiple floating animated quotes */}
       {floatingQuotes.map((fq) => (
         <Box
           key={fq.key}
@@ -171,32 +135,48 @@ export const Login: React.FC = () => {
         </Box>
       ))}
 
-      {/* Title and Motto at the very top */}
-  <Box width="100%" textAlign="center" pt={6} mb={2} sx={{ position: 'relative', zIndex: 1 }}>
-        <Typography variant="h1" fontWeight="bold" sx={{ fontSize: { xs: 40, sm: 56, md: 72 }, letterSpacing: 2, color: "#1e293b" }}>
+      {/* Logo first */}
+  <Box width="100%" textAlign="center" pt={4} mb={0.4} sx={{ position: "relative", zIndex: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <img
+            src="/images/logo.jpg"
+            alt="Logo"
+            style={{
+              height: 250,
+              borderRadius: 16,
+              boxShadow: "0 4px 16px rgba(30,41,59,0.10)",
+            }}
+          />
+        </Box>
+        <Typography
+          variant="h1"
+          fontWeight="bold"
+          sx={{ fontSize: { xs: 40, sm: 56, md: 64 }, letterSpacing: 1, color: "#1e293b" }}
+        >
           HansRoslinger
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary" sx={{ fontSize: { xs: 16, sm: 22, md: 26 }, mt: 1, fontStyle: "italic" }}>
+        <Typography
+          variant="subtitle1"
+          color="text.secondary"
+          sx={{ fontSize: { xs: 16, sm: 20, md: 24 }, mt: 1, fontStyle: "italic" }}
+        >
           the modern solution for the same old graph
         </Typography>
       </Box>
 
-      {/* Centered Login Form Card */}
+      {/* Login form */}
       <Box
         display="flex"
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
-        minHeight="70vh"
-        gap={3}
-        sx={{ position: 'relative', zIndex: 1 }}
+        minHeight="50vh"
+        gap={1}
+        sx={{ position: "relative", zIndex: 1 }}
       >
-        <Typography variant="subtitle1" sx={{ mb: 2, color: '#334155', fontWeight: 500, fontSize: { xs: 16, sm: 20 }, letterSpacing: 1 }}>
-          Elevate your presentations. Impress your audience. Start now...
-        </Typography>
         <Box
           sx={{
-            background: "rgba(255,255,255,0.85)",
+            background: "rgba(255,255,255,0.9)",
             borderRadius: 4,
             boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.15)",
             p: 4,
@@ -206,8 +186,6 @@ export const Login: React.FC = () => {
             flexDirection: "column",
             alignItems: "center",
             gap: 2,
-            position: 'relative',
-            zIndex: 1,
           }}
         >
           <Typography variant="h5" fontWeight="bold" sx={{ color: "#334155" }}>
@@ -230,7 +208,6 @@ export const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
             />
-
             <Stack direction="row" spacing={2}>
               <Button
                 variant="contained"
@@ -251,7 +228,6 @@ export const Login: React.FC = () => {
                 Register
               </Button>
             </Stack>
-
             {message && (
               <Alert severity="error" variant="filled">
                 {message}
@@ -261,7 +237,7 @@ export const Login: React.FC = () => {
         </Box>
       </Box>
 
-      {/* REGISTER MODAL */}
+      {/* Register Modal */}
       <Dialog open={registerOpen} onClose={() => setRegisterOpen(false)}>
         <DialogTitle>Register</DialogTitle>
         <DialogContent>

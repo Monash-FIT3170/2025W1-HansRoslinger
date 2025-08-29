@@ -86,6 +86,7 @@ export const Login: React.FC = () => {
   // Animated multi-quote logic
   const quotes = [
     { text: "This is the deserves at least a HD!", author: "- Adrian K" },
+    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C"}
     { text: "Presentations are literally in the palm of my hands!", author: "- Alan T." },
     { text: "My boss thinks I'm a genius now.", author: "- Grace H." },
     { text: "So modern, so easy!", author: "- Linus T." },

@@ -9,7 +9,15 @@ terraform {
 
 resource "google_artifact_registry_repository" "repo" {
   project        = var.project_id
-  location       = var.region
+  location       = var.aus_region
+  repository_id  = var.repository_name
+  format         = "DOCKER"
+  description    = "Docker repository for application images"
+}
+
+resource "google_artifact_registry_repository" "repo" {
+  project        = var.project_id
+  location       = var.us_region
   repository_id  = var.repository_name
   format         = "DOCKER"
   description    = "Docker repository for application images"

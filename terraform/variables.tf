@@ -3,10 +3,16 @@ variable "project_id" {
   type        = string
 }
 
-variable "region" {
+variable "aus_region" {
   description = "The GCP region"
   type        = string
   default     = "australia-southeast1"
+}
+
+variable "us_region" {
+  description = "The GCP region"
+  type        = string
+  default     = "us-central1"
 }
 
 variable "repository_name" {

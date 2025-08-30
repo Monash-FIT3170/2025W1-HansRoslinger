@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, IconButton } from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
+import { Box, List, ListItem, ListItemIcon, ListItemText, IconButton } from "@mui/material";
+import * as MuiIconsRaw from "@mui/icons-material";
+const MuiIcons: Record<string, React.ElementType> = MuiIconsRaw as Record<string, React.ElementType>;
 import DeleteIcon from '@mui/icons-material/Delete';
 import AssetFilesModal from './AssetFilesModal';
 import { useTracker } from 'meteor/react-meteor-data';
-import { ImageCollection } from '../../../api/database/images/images';
+import { ImageCollection, ImageDoc } from '../../../api/database/images/images';
 import { deleteAssetAndFiles } from '../../handlers/assets/useDeleteAsset';
 
 export interface AssetListItem {
@@ -29,7 +30,7 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
   };
 
   const handleOpenModal = (asset: AssetListItem) => {
-    const files = allImages.filter(img => img.assetId === asset._id).map(img => ({ fileName: img.fileName, url: img.url }));
+    const files = allImages.filter((img: ImageDoc) => img.assetId === asset._id).map((img: ImageDoc) => ({ fileName: img.fileName, url: img.url }));
     setModalFiles(files);
     setModalAssetName(asset.name);
     setModalOpen(true);
@@ -51,7 +52,9 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
               )
             }
           >
-            <ListItemIcon>{React.createElement((MuiIcons as any)[asset.icon])}</ListItemIcon>
+            <ListItemIcon>
+              {MuiIcons[asset.icon] ? React.createElement(MuiIcons[asset.icon]) : null}
+            </ListItemIcon>
             <ListItemText
               primary={asset.name}
               secondary={`${asset.imageCount} file(s)`}

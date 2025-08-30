@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Toolbar from "./components/Toolbar/Toolbar";
 import Modal from "./components/Modal/Modal";
+import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
 import { useAuthGuard } from "../handlers/auth/authHook";
+import { useAssetsWithImageCount } from "./handlers/assets/useAssets";
 import {
   doesPresentationExist,
   createPresentation,
@@ -18,9 +20,8 @@ import {
   ChartType,
 } from "../api/database/dataset/dataset";
 
-import { Alert, Box, Button, Grid, Typography, TextField, CardActionArea, Card, CardContent, Stack, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Select, MenuItem, Container } from "@mui/material";
-import { AssetCollection, Asset } from "../api/database/assets/assets";
-import { useTracker } from 'meteor/react-meteor-data';
+import { Alert, Box, Button, Grid, Typography, TextField, CardActionArea, Card, CardContent, Stack, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Select, MenuItem } from "@mui/material";
+import { Asset } from "../api/database/assets/assets";
 
 export default function AllPresentations() {
   // State for dataset summary modal
@@ -49,7 +50,6 @@ export default function AllPresentations() {
     setShowDatasetSummary(false);
     setSummaryDataset(null);
   }
-
   // Navigate to Present page with dataset ID
   function handlePresentDataset(presentation: Presentation) {
     navigate(`/present?presentationId=${presentation._id}`);
@@ -63,8 +63,8 @@ export default function AllPresentations() {
     useState<Presentation | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
-  // Get all assets for dropdown
-  const assets: Asset[] = useTracker(() => AssetCollection.find({}).fetch(), []);
+  // Get all assets for dropdown (only those owned by the user)
+  const assets: Asset[] = useAssetsWithImageCount();
 
   // Dataset modal state
   const [showDatasetModal, setShowDatasetModal] = useState(false);
@@ -114,6 +114,7 @@ export default function AllPresentations() {
       name: presentationName,
       userID: userId,
       createdAt: new Date(),
+      assetID: "",
     });
     clearModel();
     loadPresentations();
@@ -137,7 +138,7 @@ export default function AllPresentations() {
   // Open modal and load datasets for the selected presentation
   async function openPresentationModal(presentation: Presentation) {
     setSelectedPresentation(presentation);
-    setSelectedAssetId(presentation.assetId || "");
+    setSelectedAssetId(presentation.assetID || "");
     await loadDatasets(presentation._id!);
   }
 
@@ -297,7 +298,7 @@ export default function AllPresentations() {
           }}
         >
           {presentations.map((presentation) => (
-            <Grid size={4}>
+            <Grid size={4} key={presentation._id}>
               <Card>
                 <CardActionArea
                   key={presentation._id}
@@ -346,13 +347,27 @@ export default function AllPresentations() {
                     const assetId = e.target.value;
                     setSelectedAssetId(assetId);
                     if (selectedPresentation && selectedPresentation._id) {
+                      // Update the presentation's assetId
                       await Meteor.callAsync('presentations.update', selectedPresentation._id, { assetId });
+                      // Update all datasets for this presentation to set assetId
+                      if (datasets && datasets.length > 0) {
+                        for (const dataset of datasets) {
+                          if (dataset._id) {
+                            await Meteor.callAsync('datasets.update', dataset._id, { assetId });
+                          }
+                        }
+                      }
                     }
                   }}
                   displayEmpty
                   sx={{ minWidth: 180 }}
+                  renderValue={selected => {
+                    if (!selected) return 'Select Asset';
+                    const found = assets.find(a => a._id === selected);
+                    return found ? found.name : 'Select Asset';
+                  }}
                 >
-                  <MenuItem value="">None</MenuItem>
+                  <MenuItem value=""><em>None</em></MenuItem>
                   {assets.map((asset) => (
                     <MenuItem value={asset._id} key={asset._id}>
                       {asset.name} ({asset._id})
@@ -383,10 +398,9 @@ export default function AllPresentations() {
             >
               {datasets && datasets.length > 0 ? (
                 datasets.map((dataset: Dataset, idx: number) => (
-                  <Grid size={6}>
-                    <Card key={dataset._id || idx}>
+                  <Grid size={6} key={dataset._id || idx}>
+                    <Card>
                       <CardActionArea
-                        key={dataset._id || idx}
                         onClick={() => handleShowDatasetSummary(dataset)}
                         sx={{
                           p: 2,

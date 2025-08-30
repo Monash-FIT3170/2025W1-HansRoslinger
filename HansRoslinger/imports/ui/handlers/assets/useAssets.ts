@@ -1,6 +1,7 @@
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 import { AssetCollection } from '../../../api/database/assets/assets';
+import { getUserIDCookie } from '../../../cookies/cookies';
 import { ImageCollection } from '../../../api/database/images/images';
 
 // Hook: return assets with image count
@@ -8,7 +9,8 @@ export function useAssetsWithImageCount() {
   return useTracker(() => {
     Meteor.subscribe('assets');
     Meteor.subscribe('images');
-    const assets = AssetCollection.find({}).fetch();
+    const userId = getUserIDCookie();
+    const assets = AssetCollection.find({ userId }).fetch();
     const images = ImageCollection.find({}).fetch();
     return assets.map(asset => ({
       ...asset,
@@ -16,6 +18,7 @@ export function useAssetsWithImageCount() {
     }));
   }, []);
 }
+
 
 // Helper: safe ArrayBuffer -> base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -39,8 +42,12 @@ export async function createAssetWithImages({
   icon: string;
   files: File[];
 }) {
-  // Insert asset
-  const assetId = await AssetCollection.insertAsync({ name, icon });
+  const userId = getUserIDCookie();
+  if (!userId) {
+    throw new Error('User ID is required to create an asset.');
+  }
+  // Insert asset with userId
+  const assetId = await AssetCollection.insertAsync({ name, icon, userId });
   console.log('Created asset with id:', assetId, 'Uploading', files.length, 'images');
   // Wait briefly to ensure asset is available in DB (Meteor eventual consistency)
   await new Promise(res => setTimeout(res, 300));

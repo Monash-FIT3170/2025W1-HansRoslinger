@@ -1,3 +1,17 @@
+import { updateDataset } from "/imports/api/database/dataset/dataset";
+// Meteor method to update a dataset
+Meteor.methods({
+  async 'datasets.update'(datasetId: string, updates: any) {
+    return await updateDataset(datasetId, updates);
+  },
+});
+import { updatePresentation } from "/imports/api/database/presentations/presentations";
+// Meteor method to update a presentation
+Meteor.methods({
+  async 'presentations.update'(presentationId: string, updates: any) {
+    return await updatePresentation(presentationId, updates);
+  },
+});
 import './gcp';
 import { Meteor } from "meteor/meteor";
 import { UserCollection } from "/imports/api/database/users/users";

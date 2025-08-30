@@ -4,6 +4,7 @@ export interface Asset {
   _id?: string;
   name: string;
   icon: string;
+  userId: string;
 }
 
 export const AssetCollection = new Mongo.Collection<Asset>("assets");
@@ -18,6 +19,6 @@ export async function insertAsset(asset: Omit<Asset, "_id">) {
   return await AssetCollection.insertAsync(asset);
 }
 
-export async function getAssets() {
-  return await AssetCollection.find({}).fetch();
+export async function getAssetsByUser(userId: string) {
+  return await AssetCollection.find({ userId }).fetch();
 }

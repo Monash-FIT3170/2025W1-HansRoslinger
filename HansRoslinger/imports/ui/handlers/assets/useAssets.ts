@@ -1,12 +1,13 @@
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { AssetCollection } from '../../../api/database/assets/assets';
+import { Asset, AssetCollection } from '../../../api/database/assets/assets';
 import { getUserIDCookie } from '../../../cookies/cookies';
 import { ImageCollection } from '../../../api/database/images/images';
 
-// Hook: return assets with image count
-export function useAssetsWithImageCount() {
-  return useTracker(() => {
+export interface AssetWithCount extends Asset { imageCount: number }
+
+export function useAssetsWithImageCount(): AssetWithCount[] {
+  return useTracker<AssetWithCount[]>(() => {
     Meteor.subscribe('assets');
     Meteor.subscribe('images');
     const userId = getUserIDCookie();
@@ -27,7 +28,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const chunkSize = 0x8000; // 32KB per chunk
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode.apply(null, chunk as any);
+    binary += String.fromCharCode(...Array.from(chunk as Uint8Array));
   }
   return btoa(binary);
 }

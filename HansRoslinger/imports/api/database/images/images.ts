@@ -5,6 +5,7 @@ export interface ImageDoc {
   fileName: string;
   url: string;
   assetId: string;
+  order?: number;
 }
 
 export const ImageCollection = new Mongo.Collection<ImageDoc>("images");

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import CreateAssetModal from "./components/Assets/CreateAssetModal";
-import AssetList from "./components/Assets/AssetList";
-import { useAssetsWithImageCount, createAssetWithImages } from "./handlers/assets/useAssets";
+import { useAssetsWithImageCount, createAssetWithImages, AssetWithCount } from "./handlers/assets/useAssets";
 import { deleteAssetAndFiles } from "./handlers/assets/useDeleteAsset";
 import { ImageCollection, ImageDoc } from "../api/database/images/images";
 import { useAuthGuard } from "../handlers/auth/authHook";
@@ -17,6 +16,9 @@ import {
   Collapse,
   ListItemButton,
   ListItemIcon,
+  ListItem,
+  IconButton,
+  Link as MuiLink,
 } from "@mui/material";
 import {
   ExpandLess,
@@ -28,6 +30,8 @@ import {
 import * as MuiIcons from "@mui/icons-material";
 import Folder from "@mui/icons-material/Folder";
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 export const Home: React.FC = () => {
   useAuthGuard();
@@ -35,7 +39,7 @@ export const Home: React.FC = () => {
 
   const [open, setOpen] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const assets = useAssetsWithImageCount();
+  const assets: AssetWithCount[] = useAssetsWithImageCount();
   const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
   const [hoveredAssetId, setHoveredAssetId] = useState<string | null>(null);
   const [imagesByAsset, setImagesByAsset] = useState<Record<string, ImageDoc[]>>({});
@@ -58,11 +62,24 @@ export const Home: React.FC = () => {
       return;
     }
     setExpandedAssetId(assetId);
-    // Fetch images for this asset if not already loaded
-    if (!imagesByAsset[assetId]) {
-      const imgs = await ImageCollection.find({ assetId }).fetch();
-      setImagesByAsset((prev) => ({ ...prev, [assetId]: imgs }));
+    // Fetch images for this asset (sorted), and backfill missing order values
+    const fetchSorted = async (): Promise<ImageDoc[]> => {
+      const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
+      const imgs = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
+      return imgs;
+    };
+    let imgs = await fetchSorted();
+    if (imgs.some(i => typeof i.order !== 'number')) {
+      await Promise.all(
+        imgs.map((img, idx) =>
+          typeof img.order === 'number'
+            ? Promise.resolve()
+            : ImageCollection.updateAsync(img._id!, { $set: { order: idx } })
+        )
+      );
+      imgs = await fetchSorted();
     }
+    setImagesByAsset((prev) => ({ ...prev, [assetId]: imgs }));
   };
 
   const handleDeleteAsset = async (assetId: string) => {
@@ -74,6 +91,23 @@ export const Home: React.FC = () => {
 
   const handleCreateAsset = async (data: { name: string; icon: string; files: File[] }) => {
     await createAssetWithImages(data);
+  };
+
+  const moveImage = async (assetId: string, fromIdx: number, toIdx: number) => {
+    const list = imagesByAsset[assetId] || [];
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= list.length || toIdx >= list.length) return;
+    const a = list[fromIdx];
+    const b = list[toIdx];
+    const orderA = typeof a.order === 'number' ? a.order : fromIdx;
+    const orderB = typeof b.order === 'number' ? b.order : toIdx;
+    await Promise.all([
+      ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }),
+      ImageCollection.updateAsync(b._id!, { $set: { order: orderA } }),
+    ]);
+    // Refetch sorted list and update state
+  const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
+  const refreshed = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
+    setImagesByAsset(prev => ({ ...prev, [assetId]: refreshed }));
   };
 
   return (
@@ -118,20 +152,20 @@ export const Home: React.FC = () => {
           </ListItemButton>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {assets.map((asset: any) => {
+              {assets.map((asset: AssetWithCount) => {
                 const isExpanded = expandedAssetId === asset._id;
                 const isHovered = hoveredAssetId === asset._id;
                 return (
                   <React.Fragment key={asset._id}>
                     <ListItemButton
                       sx={{ pl: 4, position: 'relative' }}
-                      onClick={() => handleExpandAsset(asset._id)}
-                      onMouseEnter={() => setHoveredAssetId(asset._id)}
+                      onClick={() => handleExpandAsset(asset._id!)}
+                      onMouseEnter={() => setHoveredAssetId(asset._id!)}
                       onMouseLeave={() => setHoveredAssetId(null)}
                     >
                       <ListItemIcon>
-                        {asset.icon && MuiIcons[asset.icon]
-                          ? React.createElement((MuiIcons as any)[asset.icon], { fontSize: 'medium' })
+                        {asset.icon && (MuiIcons as Record<string, React.ElementType>)[asset.icon]
+                          ? React.createElement((MuiIcons as Record<string, React.ElementType>)[asset.icon], { fontSize: 'medium' })
                           : <Collections />}
                       </ListItemIcon>
                       <ListItemText
@@ -144,7 +178,7 @@ export const Home: React.FC = () => {
                           size="small"
                           color="error"
                           sx={{ minWidth: 0, position: 'absolute', right: 12 }}
-                          onClick={e => { e.stopPropagation(); handleDeleteAsset(asset._id); }}
+                          onClick={e => { e.stopPropagation(); handleDeleteAsset(asset._id!); }}
                           disabled={deleting === asset._id}
                         >
                           <span role="img" aria-label="delete">🗑️</span>
@@ -154,20 +188,40 @@ export const Home: React.FC = () => {
                     {/* Show images if expanded */}
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                       <List component="div" disablePadding sx={{ pl: 8 }}>
-                        {(imagesByAsset[asset._id] || []).length === 0 && (
+                        {(imagesByAsset[asset._id!] || []).length === 0 && (
                           <ListItemText primary="No images in this asset." />
                         )}
-                        {(imagesByAsset[asset._id] || []).map((img) => (
-                          <ListItemButton
-                            key={img._id}
-                            component="a"
-                            href={img.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            sx={{ pl: 2 }}
+                        {(imagesByAsset[asset._id!] || []).map((img: ImageDoc, idx: number) => (
+                          <ListItem key={img._id} sx={{ pl: 1 }}
+                            secondaryAction={
+                              <Box>
+                                <IconButton
+                                  size="small"
+                                  aria-label="move up"
+                                  onClick={(e) => { e.stopPropagation(); moveImage(asset._id!, idx, idx - 1); }}
+                                  disabled={idx === 0}
+                                  sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+                                >
+                                  <ArrowUpwardIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  aria-label="move down"
+                                  onClick={(e) => { e.stopPropagation(); moveImage(asset._id!, idx, idx + 1); }}
+                                  disabled={idx === (imagesByAsset[asset._id!] || []).length - 1}
+                                  sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+                                >
+                                  <ArrowDownwardIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            }
                           >
-                            <ListItemText primary={img.fileName} />
-                          </ListItemButton>
+                            <ListItemText
+                              primary={
+                                <MuiLink href={img.url} target="_blank" underline="hover">{`${idx + 1}. ${img.fileName}`}</MuiLink>
+                              }
+                            />
+                          </ListItem>
                         ))}
                       </List>
                     </Collapse>

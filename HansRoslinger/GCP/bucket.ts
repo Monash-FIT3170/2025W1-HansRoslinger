@@ -25,6 +25,6 @@ export async function uploadImageToBucket(assetId: string, file: File): Promise<
     public: true,
   });
 
-  // Return the public URL
-  return `https://storage.googleapis.com/${GCP_BUCKET_NAME}/${destination}`;
+  // Return the authenticated URL
+  return `https://storage.cloud.google.com/${GCP_BUCKET_NAME}/${destination}`;
 }

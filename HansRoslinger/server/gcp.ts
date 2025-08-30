@@ -34,12 +34,16 @@ Meteor.methods({
       resumable: false,
     });
 
-    const url = `https://storage.googleapis.com/${GCP_BUCKET_NAME}/${destination}`;
-    // Insert image document into MongoDB
+    const url = `https://storage.cloud.google.com/${GCP_BUCKET_NAME}/${destination}`;
+    // Determine next order for this asset's images
+    const existingCount = await ImageCollection.find({ assetId: data.assetId }).countAsync?.();
+    const order = typeof existingCount === 'number' ? existingCount : ImageCollection.find({ assetId: data.assetId }).count();
+    // Insert image document into MongoDB with order
     await ImageCollection.insertAsync({
       fileName: data.fileName,
       url,
       assetId: data.assetId,
+      order,
     });
     return url;
   },

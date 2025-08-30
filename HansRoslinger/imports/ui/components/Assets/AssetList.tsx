@@ -4,8 +4,7 @@ import * as MuiIconsRaw from "@mui/icons-material";
 const MuiIcons: Record<string, React.ElementType> = MuiIconsRaw as Record<string, React.ElementType>;
 import DeleteIcon from '@mui/icons-material/Delete';
 import AssetFilesModal from './AssetFilesModal';
-import { useTracker } from 'meteor/react-meteor-data';
-import { ImageCollection, ImageDoc } from '../../../api/database/images/images';
+import AssetReorderModal from './AssetReorderModal';
 import { deleteAssetAndFiles } from '../../handlers/assets/useDeleteAsset';
 
 export interface AssetListItem {
@@ -18,10 +17,11 @@ export interface AssetListItem {
 export default function AssetList({ assets }: { assets: AssetListItem[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalFiles, setModalFiles] = useState<{ fileName: string; url: string }[]>([]);
   const [modalAssetName, setModalAssetName] = useState('');
-  // Get all images once, filter as needed
-  const allImages = useTracker(() => ImageCollection.find({}).fetch(), []);
+  const [modalAssetId, setModalAssetId] = useState('');
+  const [reorderOpen, setReorderOpen] = useState(false);
+  const [reorderAssetId, setReorderAssetId] = useState<string>('');
+  const [reorderAssetName, setReorderAssetName] = useState<string>('');
 
   const handleDelete = async (assetId: string) => {
     if (window.confirm('Delete this asset and all its files?')) {
@@ -30,8 +30,7 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
   };
 
   const handleOpenModal = (asset: AssetListItem) => {
-    const files = allImages.filter((img: ImageDoc) => img.assetId === asset._id).map((img: ImageDoc) => ({ fileName: img.fileName, url: img.url }));
-    setModalFiles(files);
+    setModalAssetId(asset._id);
     setModalAssetName(asset.name);
     setModalOpen(true);
   };
@@ -61,10 +60,14 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
               onClick={() => handleOpenModal(asset)}
               sx={{ cursor: 'pointer' }}
             />
+            <IconButton edge="end" aria-label="reorder" onClick={() => { setReorderAssetId(asset._id); setReorderAssetName(asset.name); setReorderOpen(true); }} sx={{ ml: 1 }}>
+              <MuiIcons.Reorder />
+            </IconButton>
           </ListItem>
         ))}
       </List>
-      <AssetFilesModal isOpen={modalOpen} onClose={() => setModalOpen(false)} files={modalFiles} assetName={modalAssetName} />
+  <AssetFilesModal isOpen={modalOpen} onClose={() => setModalOpen(false)} assetId={modalAssetId} assetName={modalAssetName} />
+  <AssetReorderModal isOpen={reorderOpen} onClose={() => setReorderOpen(false)} assetId={reorderAssetId} assetName={reorderAssetName} />
     </Box>
   );
 }

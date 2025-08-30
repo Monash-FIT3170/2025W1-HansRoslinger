@@ -113,7 +113,7 @@ const GestureDetector = (
                 const landmarks = detectedGestures.landmarks[index];
                 const handedness = detectedGestures.handedness[index][0]
                   .categoryName as Handedness;
-                let gestureID: GestureType;
+                let gestureID: GestureType = GestureType.UNIDENTIFIED;
                 let confidence: number;
 
                 if (isPointing(landmarks)) {
@@ -195,7 +195,7 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
   const thumbTip = landmarks[4];
   const thumbPip = landmarks[6];
 
-  const dist = (p1: any, p2: any) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
   const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
   const areOthersCurled =
     dist(wrist, middleTip) < dist(wrist, middlePip) &&
@@ -219,7 +219,7 @@ function isTwoFingerPointing(landmarks: NormalizedLandmark[]): boolean {
   const thumbTip = landmarks[4];
   const thumbPip = landmarks[6];
 
-  const dist = (p1: any, p2: any) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
   const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
   const isMiddleExtended = dist(wrist, middleTip) > dist(wrist, middlePip);
   const areOthersCurled =

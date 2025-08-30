@@ -1,4 +1,7 @@
 import { updateDataset } from "/imports/api/database/dataset/dataset";
+import { WebApp } from 'meteor/webapp';
+import fetch from 'node-fetch';
+
 // Meteor method to update a dataset
 Meteor.methods({
   async 'datasets.update'(datasetId: string, updates: any) {

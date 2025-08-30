@@ -39,4 +39,3 @@ const Toolbar: React.FC<ToolbarProps> = ({ title, actions, className }) => (
 );
 
 export default Toolbar;
-

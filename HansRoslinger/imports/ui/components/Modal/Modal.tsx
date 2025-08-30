@@ -4,8 +4,8 @@ import { Box, IconButton } from "@mui/material";
 export default function Modal({
   isOpen,
   onClose,
-  children, 
-  maxwidth
+  children,
+  maxwidth,
 }: {
   isOpen: boolean;
   onClose: () => void;

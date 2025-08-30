@@ -30,31 +30,27 @@ export async function updateUserSettings(
   email: string,
   settings: GestureSettings,
 ): Promise<number> {
-  return await UserCollection.updateAsync(
-    { email },
-    { $set: { settings } }
-  );
+  return await UserCollection.updateAsync({ email }, { $set: { settings } });
 }
 
-export async function getUserSettings(
-  email: string,
-): Promise<GestureSettings> {
+export async function getUserSettings(email: string): Promise<GestureSettings> {
   const user = await UserCollection.findOneAsync(
     { email },
-    { projection: { settings: 1, _id: 0 } }
+    { projection: { settings: 1, _id: 0 } },
   );
-  return user?.settings as GestureSettings | {
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  };
+  return user?.settings as
+    | GestureSettings
+    | {
+        [GestureType.THUMB_UP]: FunctionType.UNUSED;
+        [GestureType.THUMB_DOWN]: FunctionType.UNUSED;
+        [GestureType.POINTING_UP]: FunctionType.SELECT;
+        [GestureType.CLOSED_FIST]: FunctionType.CLEAR;
+        [GestureType.I_LOVE_YOU]: FunctionType.UNUSED;
+        [GestureType.UNIDENTIFIED]: FunctionType.UNUSED;
+        [GestureType.OPEN_PALM]: FunctionType.FILTER;
+        [GestureType.VICTORY]: FunctionType.ZOOM;
+      };
 }
-
 
 export async function updateUser(
   email: string,

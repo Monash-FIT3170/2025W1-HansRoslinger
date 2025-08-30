@@ -12,7 +12,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
 } from "@mui/material";
 
 export const Login: React.FC = () => {
@@ -44,7 +44,7 @@ export const Login: React.FC = () => {
         error && typeof error === "object" && "message" in error
           ? (error as { message?: string }).message ||
               "An error occurred during login."
-          : "An error occurred during login."
+          : "An error occurred during login.",
       );
     }
   };
@@ -70,7 +70,7 @@ export const Login: React.FC = () => {
         error && typeof error === "object" && "message" in error
           ? (error as { message?: string }).message ||
               "An error occurred during registration."
-          : "An error occurred during registration."
+          : "An error occurred during registration.",
       );
     }
   };

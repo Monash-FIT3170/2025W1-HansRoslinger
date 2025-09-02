@@ -1,4 +1,4 @@
-import { Gesture, gestureToScreenPosition } from "./gesture";
+import { Gesture, gestureToScreenPosition, GestureType } from "./gesture";
 
 // We store the starting separations so we can compute ratios per frame
 let initialDx = 0;
@@ -16,7 +16,6 @@ function getHandsXY(latestGesture: Gesture): {
   try {
     const leftHand = latestGesture.doubleGestureLandmarks[0];
     const rightHand = latestGesture.doubleGestureLandmarks[1];
-    
     
     const l = leftHand[8];
     const r = rightHand[8];
@@ -40,6 +39,15 @@ function getHandsXY(latestGesture: Gesture): {
  * - Emits chart:togglezoom centered at the midpoint between hands
  */
 export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
+  if (latestGesture.gestureID === GestureType.CLOSED_FIST) {
+    console.log("ending zoom")
+    window.dispatchEvent(
+    new CustomEvent("chart:togglezoom", {
+      detail: { x: 0, y: 0 },
+    }),
+  );
+  }
+
   const hands = getHandsXY(latestGesture);
 
   if (!hands.left || !hands.right) {

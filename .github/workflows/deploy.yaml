@@ -8,6 +8,12 @@ on:
         required: false
         default: ''
 
+env:
+  REGION: us-central1
+  GAR_REGION: australia-southeast1
+  BUCKET_NAME: hansroslinger-assets-us
+  IMAGE: "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+
 jobs:
   deploy:
     name: Build & Deploy to Cloud Run
@@ -29,22 +35,19 @@ jobs:
           install_components: "gcloud"
 
       - name: Configure Docker to use gcloud as credential helper
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+        run: gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev
 
       - name: Build and push Docker image
         run: |
-          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
           docker build -t $IMAGE .
           docker push $IMAGE
-        env:
-          IMAGE: "us-central1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image us-central1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
             --platform managed \
-            --region ${{ secrets.REGION }} \
+            --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --port=${{ secrets.PORT }} \
-            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }}
+            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }},LOCATION=${{ env.REGION }},BUCKET_NAME=${{ env.BUCKET_NAME }}

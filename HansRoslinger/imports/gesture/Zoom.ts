@@ -16,15 +16,18 @@ function getHandsXY(latestGesture: Gesture): {
   try {
     const leftHand = latestGesture.doubleGestureLandmarks[0];
     const rightHand = latestGesture.doubleGestureLandmarks[1];
+    
+    
+    const l = leftHand[8];
+    const r = rightHand[8];
 
-    // Prefer 8 (index fingertip); if missing, try 9 to match your previous code
-    const l = leftHand[8] ?? leftHand[9];
-    const r = rightHand[8] ?? rightHand[9];
+    const leftHandToScreen = gestureToScreenPosition(l.x, l.y)
+    const rightHandToScreen = gestureToScreenPosition(r.x, r.y)
 
     if (!l || !r) return { left: null, right: null };
     return {
-      left: { x: l.x, y: l.y },
-      right: { x: r.x, y: r.y },
+      left: { x: leftHandToScreen.screenX, y: leftHandToScreen.screenY },
+      right: { x: rightHandToScreen.screenX, y: rightHandToScreen.screenY },
     };
   } catch {
     return { left: null, right: null };
@@ -40,8 +43,6 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   const hands = getHandsXY(latestGesture);
 
   if (!hands.left || !hands.right) {
-    // If we can't read both hands (e.g., closed fist terminates), just toggle zoom off safely
-    window.dispatchEvent(new CustomEvent("chart:togglezoom"));
     return;
   }
 
@@ -82,50 +83,20 @@ export const processZoom = (
   const currentDx = Math.abs(hands.right.x - hands.left.x);
   const currentDy = Math.abs(hands.right.y - hands.left.y);
 
-  // Ratios vs the saved starting separations
-  const ratioX = currentDx / initialDx;
-  const ratioY = currentDy / initialDy;
+  const xDiff = currentDx - initialDx;
+  const yDiff = currentDy - initialDy;
 
-  // Helper
-  const clamp = (v: number, lo: number, hi: number) =>
-    Math.max(lo, Math.min(hi, v));
+  const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+  const normalizedX = Math.min(Math.abs(xDiff) / maxDistanceX, 1);
+  const deltaX = xDiff >= 0 ? normalizedX * 0.5 : -normalizedX * 0.5;
 
-  // --- NEW: vertical-dominant detection
-  // If vertical separation change dominates horizontal by >30%, treat as "global zoom" mode
-  const VERTICAL_DOMINANCE_FACTOR = 1.3;
-  const verticalDominant = ratioY > ratioX * VERTICAL_DOMINANCE_FACTOR;
+  const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+  const normalizedY = Math.min(Math.abs(yDiff) / maxDistanceY, 1);
 
-  // Hand ordering (in MediaPipe, smaller y is higher on the screen)
-  const isRightAboveLeft = hands.right.y < hands.left.y;
+  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
+  const scaleY = Math.min((1 - normalizedY * 0.9) + 0.1, 1);
 
-  if (verticalDominant) {
-    // --- NEW: Global (uniform) zoom based on vertical expansion/contraction
-    // Pulling apart increases ratioY (>1). Direction is decided by hand ordering:
-    // - Right above & left below => interpret as "zoom OUT" -> invert factor
-    // - Right below & left above => "zoom IN" -> use factor as-is
-    let uniform = clamp(ratioY, 0.5, 2.0);
-    if (isRightAboveLeft) {
-      // Zoom OUT when right hand is above
-      uniform = 1 / uniform;
-    }
-
-    window.dispatchEvent(
-      new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
-        detail: { scaleX: uniform, scaleY: uniform },
-      })
-    );
-    return; // Do not also run the axis-specific path this frame
-  }
-
-  // --- Existing behavior (axis-specific zoom):
-  // Scale X from vertical change; Scale Y from horizontal change
-  let scaleX = ratioY; // "more/less bars" behavior 
-  let scaleY = ratioX;
-
-  // Original clamps (tweak if desired)
-  scaleX = clamp(scaleX, 1, 1.8);
-  scaleY = clamp(scaleY, 0.1, 1.5);
-
+  // console.log(`Zoom ratios: X: ${scaleX}, Y: ${scaleY}`);
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
       detail: { scaleX, scaleY },

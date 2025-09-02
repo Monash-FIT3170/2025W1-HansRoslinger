@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
 import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-// Import 'IDtoEnum' to map gesture names to the correct number ID
-import { GestureType, Handedness, Gesture } from "../gesture/gesture";
+import { GestureType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
@@ -105,34 +104,37 @@ const GestureDetector = (
                 detectedGestures.gestures.length
               );
 
-              for (
-                let index = 0;
-                index < detectedGestures.gestures.length;
-                index++
-              ) {
+              for (let index = 0; index < detectedGestures.gestures.length; index++) {
                 const landmarks = detectedGestures.landmarks[index];
-                const handedness = detectedGestures.handedness[index][0]
-                  .categoryName as Handedness;
-                let gestureID: GestureType = GestureType.UNIDENTIFIED;
-                let confidence: number = 0;
+                const handedness = detectedGestures.handedness[index][0].categoryName as Handedness;
 
-                if (isPointing(landmarks)) {
-                  gestureID = GestureType.POINTING_UP;
-                  confidence = 1.0;
-                } else if (isTwoFingerPointing(landmarks)) {
-                  if (handedness === Handedness.LEFT) {
-                    gestureID = GestureType.TWO_FINGER_POINTING_LEFT;
-                  } else {
-                    gestureID = GestureType.TWO_FINGER_POINTING_RIGHT;
-                  }
-                } else if (isPinchSign(landmarks)) {
+                // Start with actual gesture
+                const detected = detectedGestures.gestures[index][0];
+                let gestureID: GestureType = IDtoEnum[detected.categoryName] ?? GestureType.UNIDENTIFIED;
+                let confidence: number = detected.score;
+
+                // Only check custom gestures if actual gesture is UNIDENTIFIED
+                if (gestureID === GestureType.UNIDENTIFIED) {
+                  if (isPinchSign(landmarks)) {
                     gestureID = GestureType.PINCH;
                     confidence = 1.0;
+                  } else if (isTwoFingerPointing(landmarks)) {
+                    gestureID =
+                      handedness === Handedness.LEFT
+                        ? GestureType.TWO_FINGER_POINTING_LEFT
+                        : GestureType.TWO_FINGER_POINTING_RIGHT;
+                    confidence = 1.0;
+                  } else if (isPointing(landmarks)) {
+                    gestureID = GestureType.POINTING_UP;
+                    confidence = 1.0;
+                  }
                 }
+
+              
 
                 // This is to assign the determined gesture
                 gestures[index] = {
-                  gestureID: gestureID ?? GestureType.UNIDENTIFIED,
+                  gestureID: gestureID,
                   handedness,
                   timestamp: new Date(),
                   confidence,
@@ -198,9 +200,7 @@ const GestureDetector = (
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
         // Confirm that the correct gesture ID number is being sent
-        console.log(
-          `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`
-        );
+        console.log(`[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`);
         HandleGesture(currentGestures[index]);
       }
     }
@@ -267,7 +267,7 @@ function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
   const isLeftPinch = leftGesture.gestureID === GestureType.PINCH;
   const isRightPinch = rightGesture.gestureID === GestureType.PINCH;
 
-  console.log(`double pinch check: left ${isLeftPinch}, right ${isRightPinch}`);
+  // console.log(`double pinch check: left ${isLeftPinch}, right ${isRightPinch}`);
   return isLeftPinch && isRightPinch;
 }
 
@@ -276,7 +276,6 @@ function isPinchSign(landmarks: NormalizedLandmark[]) {
 
   const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
-  const middleTip = landmarks[12];
 
   // For implementation of pinching
   // Distance between thumb and index tip
@@ -285,15 +284,8 @@ function isPinchSign(landmarks: NormalizedLandmark[]) {
     thumbTip.y - indexTip.y
   );
 
-  // Distance between thumb and index tip
-  const thumbMiddleDistance = Math.hypot(
-    thumbTip.x - middleTip.x,
-    thumbTip.y - middleTip.y
-  );
-
   // Consider it "PINCH" if thumb + index are touching, and other fingers are up
-  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
-  const isThumbMiddleClose = thumbMiddleDistance < 0.05; // Tune this if needed
+  const isThumbIndexClose = thumbIndexDistance < 0.2; // Tune this if needed
 
-  return isThumbIndexClose; //&& isThumbMiddleClose;
+  return isThumbIndexClose;
 }

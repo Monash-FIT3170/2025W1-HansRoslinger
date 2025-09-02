@@ -12,9 +12,7 @@ export const select = (_: Gesture, latestGesture: Gesture): void => {
     pointerLandmark.z,
   );
 
-  console.log(
-    `Pointing Up Gesture detected! Screen Position: ${screenPosition.screenX}, ${screenPosition.screenY}`,
-  );
+  // console.log(`Pointing Up Gesture detected! Screen Position: ${screenPosition.screenX}, ${screenPosition.screenY}`,);
 
   // Dispatch custom chart event with screen position
   const gestureEvent = new CustomEvent("chart:highlight", {

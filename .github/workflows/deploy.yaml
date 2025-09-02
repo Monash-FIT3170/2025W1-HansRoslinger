@@ -12,12 +12,13 @@ env:
   REGION: us-central1
   GAR_REGION: australia-southeast1
   BUCKET_NAME: hansroslinger-assets-us
-  IMAGE: "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
 jobs:
   deploy:
     name: Build & Deploy to Cloud Run
     runs-on: ubuntu-latest
+    env:
+      IMAGE: "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
     steps:
       - name: Checkout code

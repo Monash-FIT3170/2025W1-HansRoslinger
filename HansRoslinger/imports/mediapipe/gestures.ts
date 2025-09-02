@@ -117,7 +117,7 @@ const GestureDetector = (
                 let confidence: number;
 
                 if (isPointing(landmarks)) {
-                  // gestureID = GestureType.POINTING_UP;
+                  gestureID = GestureType.POINTING_UP;
                   confidence = 1.0;
                 } else if (isTwoFingerPointing(landmarks)) {
                   if (handedness === Handedness.LEFT) {
@@ -200,9 +200,9 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
   const areOthersCurled =
     dist(wrist, middleTip) < dist(wrist, middlePip) &&
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
-    dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
-  const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
-  const isPointing = isIndexExtended && areOthersCurled && thumbExtended;
+    dist(wrist, pinkyTip) < dist(wrist, pinkyPip) &&
+    dist(wrist, thumbTip) < dist(wrist, thumbPip)
+  const isPointing = isIndexExtended && areOthersCurled;
   return isPointing;
 }
 

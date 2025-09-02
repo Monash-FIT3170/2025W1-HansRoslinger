@@ -99,10 +99,10 @@ export const Header: React.FC<HeaderProps> = ({
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
-          backgroundColor: grayscale ? "cyan.400" : "grey.700",
-          color: grayscale ? "black" : "white",
+          backgroundColor: showAssets ? "cyan.400" : "grey.700",
+          color: showAssets ? "black" : "white",
           "&:hover": {
-            backgroundColor: grayscale ? "cyan.300" : "grey.600",
+            backgroundColor: showAssets ? "cyan.300" : "grey.600",
           },
         }}
         onClick={() => setShowAssets((s) => !s)}

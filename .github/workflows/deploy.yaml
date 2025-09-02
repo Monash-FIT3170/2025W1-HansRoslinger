@@ -15,7 +15,6 @@ jobs:
     env:
       REGION: us-central1
       GAR_REGION: australia-southeast1
-      BUCKET_NAME: hansroslinger-assets-us
 
     steps:
       - name: Checkout code
@@ -49,4 +48,4 @@ jobs:
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --port=${{ secrets.PORT }} \
-            --set-env-vars "MONGO_URL=${{ secrets.MONGO_URL }},LOCATION=${{ env.REGION }},BUCKET_NAME=${{ env.BUCKET_NAME }}" 
+            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }} 

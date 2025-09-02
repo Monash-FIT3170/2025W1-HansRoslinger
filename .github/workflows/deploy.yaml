@@ -8,17 +8,14 @@ on:
         required: false
         default: ''
 
-env:
-  REGION: us-central1
-  GAR_REGION: australia-southeast1
-  BUCKET_NAME: hansroslinger-assets-us
-
 jobs:
   deploy:
     name: Build & Deploy to Cloud Run
     runs-on: ubuntu-latest
     env:
-      IMAGE: "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+      REGION: us-central1
+      GAR_REGION: australia-southeast1
+      BUCKET_NAME: hansroslinger-assets-us
 
     steps:
       - name: Checkout code
@@ -40,13 +37,14 @@ jobs:
 
       - name: Build and push Docker image
         run: |
+          IMAGE="${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
           docker build -t $IMAGE .
           docker push $IMAGE
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }} \
+            --image "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \

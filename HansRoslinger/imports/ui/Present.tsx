@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useTracker } from 'meteor/react-meteor-data';
-import { Meteor } from 'meteor/meteor';
+import { useTracker } from "meteor/react-meteor-data";
+import { Meteor } from "meteor/meteor";
 import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
@@ -33,11 +33,7 @@ export const Present: React.FC = () => {
 
   // State for chart features
   const [showLineChart, setShowLineChart] = useState(false);
-  const {
-    imageScale,
-    isZoomEnabled,
-    zoomStartPosition,
-  } = useImageAssetZoom();
+  const { imageScale, isZoomEnabled, zoomStartPosition } = useImageAssetZoom();
 
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("presentationId") ?? "";
@@ -48,30 +44,40 @@ export const Present: React.FC = () => {
   const userId = getUserIDCookie();
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
   const assets = useTracker(() => {
-    Meteor.subscribe('assets');
-    if (!userId) return [] as Array<{ _id: string; name: string; icon?: string }>;
+    Meteor.subscribe("assets");
+    if (!userId)
+      return [] as Array<{ _id: string; name: string; icon?: string }>;
     return AssetCollection.find({ userId }, { sort: { name: 1 } }).fetch();
   }, [userId]);
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
   const currentAssetId = assets[currentAssetIndex]?._id ?? selectedAssetId;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const assetImages = useTracker(() => {
-    Meteor.subscribe('images');
-    if (!currentAssetId) return [] as Array<{ _id: string; url: string; fileName: string; assetId: string; order?: number }>;
+    Meteor.subscribe("images");
+    if (!currentAssetId)
+      return [] as Array<{
+        _id: string;
+        url: string;
+        fileName: string;
+        assetId: string;
+        order?: number;
+      }>;
     return ImageCollection.find(
       { assetId: currentAssetId },
-      { sort: { order: 1, fileName: 1 } }
+      { sort: { order: 1, fileName: 1 } },
     ).fetch();
   }, [currentAssetId]);
   const currentAssetImage = assetImages[currentImageIndex] ?? null;
   // Preload current, next, and previous images for smooth navigation
   useImagePreload(
     assetImages.length
-      ? [
+      ? ([
           assetImages[currentImageIndex]?.url,
           assetImages[(currentImageIndex + 1) % assetImages.length]?.url,
-          assetImages[(currentImageIndex - 1 + assetImages.length) % assetImages.length]?.url,
-        ].filter(Boolean) as string[]
+          assetImages[
+            (currentImageIndex - 1 + assetImages.length) % assetImages.length
+          ]?.url,
+        ].filter(Boolean) as string[])
       : [],
   );
 
@@ -102,7 +108,8 @@ export const Present: React.FC = () => {
     };
 
     window.addEventListener("chart:switch", handleSwitchChartOrImage);
-    return () => window.removeEventListener("chart:switch", handleSwitchChartOrImage);
+    return () =>
+      window.removeEventListener("chart:switch", handleSwitchChartOrImage);
   }, [showAssets, assetImages.length, assets.length]);
 
   // Initialize chart type
@@ -119,7 +126,7 @@ export const Present: React.FC = () => {
       if (!projectId) return;
       const pres = await getPresentationById(projectId);
       if (active) {
-        const p = pres as (typeof pres) & { assetId?: string };
+        const p = pres as typeof pres & { assetId?: string };
         const id = (p?.assetID ?? p?.assetId) || "";
         setSelectedAssetId(id || "");
         // If assets are loaded, position index to the selected asset
@@ -129,13 +136,17 @@ export const Present: React.FC = () => {
         }
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [projectId, assets.length]);
 
   // When assets list changes and there's a selectedAssetId, sync index
   useEffect(() => {
     if (!selectedAssetId) return;
-  const idx = assets.findIndex((a: { _id: string }) => a._id === selectedAssetId);
+    const idx = assets.findIndex(
+      (a: { _id: string }) => a._id === selectedAssetId,
+    );
     if (idx >= 0) setCurrentAssetIndex(idx);
   }, [selectedAssetId, assets.length]);
 
@@ -152,14 +163,15 @@ export const Present: React.FC = () => {
     const onNextData = () => {
       if (!showAssets) return;
       if (assetImages.length <= 1) return; // nothing to go back to
-      setCurrentImageIndex((prev) => (prev - 1 + assetImages.length) % assetImages.length);
+      setCurrentImageIndex(
+        (prev) => (prev - 1 + assetImages.length) % assetImages.length,
+      );
     };
-    window.addEventListener('chart:next-data', onNextData);
-    return () => window.removeEventListener('chart:next-data', onNextData);
+    window.addEventListener("chart:next-data", onNextData);
+    return () => window.removeEventListener("chart:next-data", onNextData);
   }, [showAssets, assetImages.length]);
 
   // Zoom effect handled in hook; we simply render the scale when assets are visible
-
 
   // Handler for GS button, now passed to Header
   const toggleGrayscale = () => setGrayscale((b) => !b);
@@ -239,7 +251,7 @@ export const Present: React.FC = () => {
         <ImageSegmentation grayscale={() => determineGrayscale()} />
       </Box>
 
-  {showAssets && isZoomEnabled && zoomStartPosition && (
+      {showAssets && isZoomEnabled && zoomStartPosition && (
         <Box
           position="absolute"
           width={16}
@@ -308,18 +320,18 @@ export const Present: React.FC = () => {
             <img
               key={currentAssetImage._id ?? currentAssetImage.url}
               src={currentAssetImage.url}
-              alt={currentAssetImage.fileName || 'asset'}
+              alt={currentAssetImage.fileName || "asset"}
               style={{
-                maxWidth: '95%',
-                maxHeight: '95%',
-                objectFit: 'contain',
-                transformOrigin: 'bottom center',
+                maxWidth: "95%",
+                maxHeight: "95%",
+                objectFit: "contain",
+                transformOrigin: "bottom center",
                 transform: `scale(${imageScale.scale})`,
-                transition: 'transform 80ms linear',
+                transition: "transform 80ms linear",
               }}
             />
           ) : (
-            <span style={{ color: '#fff' }}>No image for this asset.</span>
+            <span style={{ color: "#fff" }}>No image for this asset.</span>
           )}
         </Box>
       )}

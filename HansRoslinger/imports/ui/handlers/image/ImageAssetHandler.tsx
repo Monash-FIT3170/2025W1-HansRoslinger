@@ -22,7 +22,11 @@ export function useImageAssetZoom(): UseImageAssetZoomReturn {
   // Accepts existing chart gesture payload: { scaleX, scaleY }
   const handleZoomGesture = (e: Event) => {
     if (!isZoomEnabled) return;
-    const ce = e as CustomEvent<{ scaleX?: number; scaleY?: number; scale?: number }>;
+    const ce = e as CustomEvent<{
+      scaleX?: number;
+      scaleY?: number;
+      scale?: number;
+    }>;
     const raw = ce.detail?.scale ?? ce.detail?.scaleX ?? 1;
     const next = Math.max(0.2, Number.isFinite(raw) ? (raw as number) : 1);
     setImageScale({ scale: next });
@@ -52,7 +56,10 @@ export function useImageAssetZoom(): UseImageAssetZoomReturn {
       setIsZoomEnabled((prev) => {
         const next = !prev;
         if (next && customEvent.detail) {
-          setZoomStartPosition({ x: customEvent.detail.x, y: customEvent.detail.y });
+          setZoomStartPosition({
+            x: customEvent.detail.x,
+            y: customEvent.detail.y,
+          });
         } else {
           setZoomStartPosition({ x: 0, y: 0 });
         }
@@ -61,7 +68,8 @@ export function useImageAssetZoom(): UseImageAssetZoomReturn {
     };
 
     window.addEventListener("chart:togglezoom", handleToggleZoom);
-    return () => window.removeEventListener("chart:togglezoom", handleToggleZoom);
+    return () =>
+      window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
   return {

@@ -49,4 +49,6 @@ jobs:
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --port=${{ secrets.PORT }} \
-            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }},LOCATION=${{ env.REGION }},BUCKET_NAME=${{ env.BUCKET_NAME }}
+            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }}
+            --set-env-vars LOCATION=${{ env.REGION }}
+            --set-env-vars BUCKET_NAME=${{ env.BUCKET_NAME }}

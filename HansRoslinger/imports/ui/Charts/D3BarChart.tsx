@@ -56,8 +56,12 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     });
 
     setHoverLabel(hovered);
-    if (hoverClearTimeout.current) window.clearTimeout(hoverClearTimeout.current);
-    hoverClearTimeout.current = window.setTimeout(() => setHoverLabel(null), 120);
+    if (hoverClearTimeout.current)
+      window.clearTimeout(hoverClearTimeout.current);
+    hoverClearTimeout.current = window.setTimeout(
+      () => setHoverLabel(null),
+      120,
+    );
   };
 
   // Permanent highlight: set the bar under the finger as selected (no toggle)
@@ -76,7 +80,12 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     let targetLabel: string | null = null;
     bars.each(function (d) {
       const bbox = this.getBoundingClientRect();
-      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+      if (
+        x >= bbox.left &&
+        x <= bbox.right &&
+        y >= bbox.top &&
+        y <= bbox.bottom
+      ) {
         targetLabel = d.label;
       }
     });
@@ -243,8 +252,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
         highlightedBars.has(d.label)
           ? SELECT_COLOUR
           : hoverLabel === d.label
-          ? SELECT_COLOUR
-          : DEFAULT_COLOUR,
+            ? SELECT_COLOUR
+            : DEFAULT_COLOUR,
       )
       .style("opacity", BAR_OPACITY);
 
@@ -280,7 +289,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     renderChart();
     window.addEventListener("resize", renderChart);
     window.addEventListener("chart:hover", handleHover as EventListener);
-    window.addEventListener("chart:highlight", handleHighlight as EventListener);
+    window.addEventListener(
+      "chart:highlight",
+      handleHighlight as EventListener,
+    );
     window.addEventListener("chart:clear", handleClear as EventListener);
     window.addEventListener("chart:filter", handleFilter as EventListener);
     window.addEventListener("chart:zoom", handleZoom as EventListener);
@@ -289,7 +301,10 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       window.removeEventListener("resize", renderChart);
       window.removeEventListener("chart:clear", handleClear as EventListener);
       window.removeEventListener("chart:hover", handleHover as EventListener);
-      window.removeEventListener("chart:highlight", handleHighlight as EventListener);
+      window.removeEventListener(
+        "chart:highlight",
+        handleHighlight as EventListener,
+      );
       window.removeEventListener("chart:filter", handleFilter as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
@@ -304,4 +319,3 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
 
   return <div ref={chartRef} className="w-full h-full" />;
 };
-

@@ -58,7 +58,7 @@ export const EnumToFunc: Record<FunctionType, any> = {
 enum Handedness {
   LEFT = "Left",
   RIGHT = "Right",
-  BOTH = "Both"
+  BOTH = "Both",
 }
 
 type Gesture = {
@@ -66,7 +66,7 @@ type Gesture = {
   timestamp: Date;
   handedness: Handedness;
   confidence: number; // 0-1
-  singleGestureLandmarks: { x: number; y: number; z?: number }[]
+  singleGestureLandmarks: { x: number; y: number; z?: number }[];
   doubleGestureLandmarks: { x: number; y: number; z?: number }[][];
 };
 
@@ -124,14 +124,20 @@ const handleGestureToFunc = (
     // console.log(`functionType: ${functionType}`);
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
-      console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,);
+      console.log(
+        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
+      );
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
       // This log confirms a gesture is being correctly ignored
-      console.log(`[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,);
+      console.log(
+        `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
+      );
     } else {
       // This warning will now only appear for truly unhandled gestures
-      console.warn(`[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,);
+      console.warn(
+        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
+      );
     }
   }
 };

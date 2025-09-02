@@ -1,4 +1,9 @@
-import { Gesture, Handedness, handleGestureToFunc, GestureType } from "./gesture";
+import {
+  Gesture,
+  Handedness,
+  handleGestureToFunc,
+  GestureType,
+} from "./gesture";
 import { useRef } from "react";
 
 let isZoomEnabled = false;

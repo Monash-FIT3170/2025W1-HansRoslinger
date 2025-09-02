@@ -16,12 +16,12 @@ function getHandsXY(latestGesture: Gesture): {
   try {
     const leftHand = latestGesture.doubleGestureLandmarks[0];
     const rightHand = latestGesture.doubleGestureLandmarks[1];
-    
+
     const l = leftHand[8];
     const r = rightHand[8];
 
-    const leftHandToScreen = gestureToScreenPosition(l.x, l.y)
-    const rightHandToScreen = gestureToScreenPosition(r.x, r.y)
+    const leftHandToScreen = gestureToScreenPosition(l.x, l.y);
+    const rightHandToScreen = gestureToScreenPosition(r.x, r.y);
 
     if (!l || !r) return { left: null, right: null };
     return {
@@ -40,12 +40,12 @@ function getHandsXY(latestGesture: Gesture): {
  */
 export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   if (latestGesture.gestureID === GestureType.CLOSED_FIST) {
-    console.log("ending zoom")
+    console.log("ending zoom");
     window.dispatchEvent(
-    new CustomEvent("chart:togglezoom", {
-      detail: { x: 0, y: 0 },
-    }),
-  );
+      new CustomEvent("chart:togglezoom", {
+        detail: { x: 0, y: 0 },
+      }),
+    );
   }
 
   const hands = getHandsXY(latestGesture);
@@ -83,7 +83,7 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
 
 export const processZoom = (
   _zoomStartPosition: { x: number; y: number },
-  latestGesture: Gesture
+  latestGesture: Gesture,
 ): void => {
   const hands = getHandsXY(latestGesture);
   if (!hands.left || !hands.right) return;
@@ -102,13 +102,12 @@ export const processZoom = (
   const normalizedY = Math.min(Math.abs(yDiff) / maxDistanceY, 1);
 
   const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
-  const scaleY = Math.min((1 - normalizedY * 0.9) + 0.1, 1);
+  const scaleY = Math.min(1 - normalizedY * 0.9 + 0.1, 1);
 
   // console.log(`Zoom ratios: X: ${scaleX}, Y: ${scaleY}`);
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
       detail: { scaleX, scaleY },
-    })
+    }),
   );
 };
-

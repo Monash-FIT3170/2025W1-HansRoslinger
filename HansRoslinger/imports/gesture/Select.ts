@@ -15,8 +15,14 @@ function isStable(a: { x: number; y: number }, b: { x: number; y: number }) {
 }
 
 export const select = (_: Gesture, latestGesture: Gesture): void => {
-  if (!latestGesture.singleGestureLandmarks || latestGesture.singleGestureLandmarks.length < 9) {
-    console.warn("[select] Not enough landmarks to select (need at least 9)", latestGesture.singleGestureLandmarks);
+  if (
+    !latestGesture.singleGestureLandmarks ||
+    latestGesture.singleGestureLandmarks.length < 9
+  ) {
+    console.warn(
+      "[select] Not enough landmarks to select (need at least 9)",
+      latestGesture.singleGestureLandmarks,
+    );
     return;
   }
   const pointerLandmark = latestGesture.singleGestureLandmarks[8];
@@ -31,9 +37,7 @@ export const select = (_: Gesture, latestGesture: Gesture): void => {
   const pos = { x: screenPosition.screenX, y: screenPosition.screenY };
 
   // Always emit a transient hover event for "piano key" highlight
-  window.dispatchEvent(
-    new CustomEvent("chart:hover", { detail: pos })
-  );
+  window.dispatchEvent(new CustomEvent("chart:hover", { detail: pos }));
 
   // Dwell logic for permanent highlight
   const now = Date.now();
@@ -46,10 +50,11 @@ export const select = (_: Gesture, latestGesture: Gesture): void => {
   }
 
   // Finger is stable; check if dwell time exceeded and not yet sent
-  if (!sentPermanentForThisHover && now - hoverStartAt >= HOVER_SELECT_DELAY_MS) {
-    window.dispatchEvent(
-      new CustomEvent("chart:highlight", { detail: pos })
-    );
+  if (
+    !sentPermanentForThisHover &&
+    now - hoverStartAt >= HOVER_SELECT_DELAY_MS
+  ) {
+    window.dispatchEvent(new CustomEvent("chart:highlight", { detail: pos }));
     sentPermanentForThisHover = true;
   }
 };

@@ -72,8 +72,12 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     // for hover, just set hoverLabel if within radius, and clear soon after if not
     if (closest && minDist <= 40) {
       setHoverLabel(closest.d.label);
-      if (hoverClearTimeout.current) window.clearTimeout(hoverClearTimeout.current);
-      hoverClearTimeout.current = window.setTimeout(() => setHoverLabel(null), 120);
+      if (hoverClearTimeout.current)
+        window.clearTimeout(hoverClearTimeout.current);
+      hoverClearTimeout.current = window.setTimeout(
+        () => setHoverLabel(null),
+        120,
+      );
     } else {
       setHoverLabel(null);
     }
@@ -280,13 +284,13 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
         highlightedDots.has(d.label)
           ? SELECT_COLOUR
           : hoverLabel === d.label
-          ? SELECT_COLOUR
-          : DEFAULT_COLOUR,
+            ? SELECT_COLOUR
+            : DEFAULT_COLOUR,
       )
       .on("mouseover", function () {
         d3.select(this).attr("fill", SELECT_COLOUR);
       })
-  .on("mouseout", function (_evt, d) {
+      .on("mouseout", function (_evt, d) {
         d3.select(this).attr(
           "fill",
           highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
@@ -315,7 +319,10 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     renderChart();
     window.addEventListener("resize", () => renderChart());
     window.addEventListener("chart:hover", handleHover as EventListener);
-    window.addEventListener("chart:highlight", handleHighlight as EventListener);
+    window.addEventListener(
+      "chart:highlight",
+      handleHighlight as EventListener,
+    );
     window.addEventListener("chart:clear", handleClear as EventListener);
     window.addEventListener("chart:zoom", handleZoom as EventListener);
     window.addEventListener("chart:filter", handleFilter as EventListener);
@@ -323,7 +330,10 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     return () => {
       window.removeEventListener("resize", () => renderChart());
       window.removeEventListener("chart:hover", handleHover as EventListener);
-      window.removeEventListener("chart:highlight", handleHighlight as EventListener);
+      window.removeEventListener(
+        "chart:highlight",
+        handleHighlight as EventListener,
+      );
       window.removeEventListener("chart:clear", handleClear as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
       window.removeEventListener("chart:filter", handleFilter as EventListener);

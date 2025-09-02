@@ -5,9 +5,6 @@ import { GestureType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
 import { GestureHandler } from "../gesture/GestureHandler";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
-// Debug flag for optional console output
-const DEBUG_LOGS = false;
-
 /*
 Sample result from gestureRecognizer.recognizeForVideo(video, performance.now()) where one hand is detected
   "gestures":[[{"score":0.5793021321296692,"index":-1,"categoryName":"Open_Palm","displayName":""}]],
@@ -141,7 +138,7 @@ const GestureDetector = (
               setCurrentGestures(gestures);
             }
           } catch (e) {
-            if (DEBUG_LOGS) console.warn("recognizeForVideo error", e);
+            console.warn("recognizeForVideo error", e);
           }
         }
         rafIdRef.current = requestAnimationFrame(loop);
@@ -190,12 +187,8 @@ const GestureDetector = (
     // this code will only run if a two-handed gesture was not detected
     for (let index = 0; index < currentGestures.length; index++) {
       if (currentGestures[index]) {
-        if (DEBUG_LOGS) {
           // Confirm that the correct gesture ID number is being sent
-          console.log(
-            `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`
-          );
-        }
+          console.log(`[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`);
         HandleGesture(currentGestures[index]);
       }
     }

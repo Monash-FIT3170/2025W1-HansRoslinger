@@ -143,7 +143,7 @@ export const Home: React.FC = () => {
         minHeight: "100vh",
         p: 4,
         gap: 4,
-        backgroundColor: "#F5F5F5",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       <Typography variant="h4" fontWeight="bold" color="text.primary">

@@ -246,7 +246,7 @@ export default function AllPresentations() {
         alignItems: "center",
         justifyContent: "flex-start",
         minHeight: "100vh",
-        backgroundColor: "#F5F5F5",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       {/* Toolbar */}

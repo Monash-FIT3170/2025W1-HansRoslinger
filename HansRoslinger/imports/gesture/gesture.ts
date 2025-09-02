@@ -69,19 +69,20 @@ let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
 if (typeof window !== "undefined") {
-// Watch for the "chart:zoom" event and toggle the boolean
-window.addEventListener("chart:togglezoom", (event: Event) => {
-  const customEvent = event as CustomEvent<{ x: number; y: number }>;
-  isZoomEnabled = !isZoomEnabled;
-  if (isZoomEnabled && customEvent.detail) {
-    const { x, y } = customEvent.detail;
-    zoomStartPosition = { x: x, y: y };
-    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-  } else {
-    zoomStartPosition = null;
-    console.log(`Zoom disabled.`);
-  }
-})};
+  // Watch for the "chart:zoom" event and toggle the boolean
+  window.addEventListener("chart:togglezoom", (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    isZoomEnabled = !isZoomEnabled;
+    if (isZoomEnabled && customEvent.detail) {
+      const { x, y } = customEvent.detail;
+      zoomStartPosition = { x: x, y: y };
+      console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+    } else {
+      zoomStartPosition = null;
+      console.log(`Zoom disabled.`);
+    }
+  });
+}
 
 const defaultMapping = {
   [GestureType.THUMB_UP]: FunctionType.UNUSED,

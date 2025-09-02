@@ -16,7 +16,13 @@ import {
 } from "@mui/material";
 
 export const Login: React.FC = () => {
-  type FloatingQuote = { idx: number; x: number; y: number; speed: number; key: string };
+  type FloatingQuote = {
+    idx: number;
+    x: number;
+    y: number;
+    speed: number;
+    key: string;
+  };
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -62,8 +68,14 @@ export const Login: React.FC = () => {
 
   const quotes = [
     { text: "This deserves at least a HD!", author: "- Adrian K" },
-    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C" },
-    { text: "Presentations are literally in the palm of my hands!", author: "- Alan T." },
+    {
+      text: "Who is Hans Roslinger and why does he look like Sean Lock?",
+      author: "- Max C",
+    },
+    {
+      text: "Presentations are literally in the palm of my hands!",
+      author: "- Alan T.",
+    },
     { text: "My boss thinks I'm a genius now.", author: "- Grace H." },
     { text: "So modern, so easy!", author: "- Linus T." },
     { text: "I wish I had this years ago.", author: "- Donald K." },
@@ -99,7 +111,7 @@ export const Login: React.FC = () => {
             if (newX > 110) return null;
             return { ...q, x: newX };
           })
-          .filter((q): q is FloatingQuote => q !== null)
+          .filter((q): q is FloatingQuote => q !== null),
       );
     }, 30);
     return () => clearInterval(interval);
@@ -110,7 +122,8 @@ export const Login: React.FC = () => {
       sx={{
         minHeight: "100vh",
         width: "100vw",
-        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -132,12 +145,19 @@ export const Login: React.FC = () => {
             zIndex: 0,
           }}
         >
-          {quotes[fq.idx].text} <span style={{ fontWeight: 300 }}>{quotes[fq.idx].author}</span>
+          {quotes[fq.idx].text}{" "}
+          <span style={{ fontWeight: 300 }}>{quotes[fq.idx].author}</span>
         </Box>
       ))}
 
       {/* Logo first */}
-  <Box width="100%" textAlign="center" pt={4} mb={0.4} sx={{ position: "relative", zIndex: 1 }}>
+      <Box
+        width="100%"
+        textAlign="center"
+        pt={4}
+        mb={0.4}
+        sx={{ position: "relative", zIndex: 1 }}
+      >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
             src="/images/logo.jpg"
@@ -152,14 +172,22 @@ export const Login: React.FC = () => {
         <Typography
           variant="h1"
           fontWeight="bold"
-          sx={{ fontSize: { xs: 40, sm: 56, md: 64 }, letterSpacing: 1, color: "#1e293b" }}
+          sx={{
+            fontSize: { xs: 40, sm: 56, md: 64 },
+            letterSpacing: 1,
+            color: "#1e293b",
+          }}
         >
           HansRoslinger
         </Typography>
         <Typography
           variant="subtitle1"
           color="text.secondary"
-          sx={{ fontSize: { xs: 16, sm: 20, md: 24 }, mt: 1, fontStyle: "italic" }}
+          sx={{
+            fontSize: { xs: 16, sm: 20, md: 24 },
+            mt: 1,
+            fontStyle: "italic",
+          }}
         >
           the modern solution for the same old graph
         </Typography>

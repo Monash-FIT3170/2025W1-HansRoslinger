@@ -110,7 +110,14 @@ const Settings: React.FC = () => {
   };
 
   return (
-  <Box sx={{ p: 2, minHeight: "100vh", background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)" }}>
+    <Box
+      sx={{
+        p: 2,
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+      }}
+    >
       <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>

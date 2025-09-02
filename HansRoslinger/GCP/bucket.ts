@@ -1,8 +1,8 @@
 // GCP bucket upload logic
 // Constants for GCP project and bucket
 export const GCP_PROJECT_ID = "hansroslinger-468011";
-export const GCP_BUCKET_NAME = "hansroslinger-assets";
-export const GCP_BUCKET_REGION = "australia-southeast1";
+export const GCP_BUCKET_NAME = process.env.BUCKET_NAME ||"hansroslinger-assets";
+export const GCP_BUCKET_REGION = process.env.LOCATION || "australia-southeast1";
 
 // You will need to install @google-cloud/storage and authenticate with a service account
 import { Storage } from '@google-cloud/storage';

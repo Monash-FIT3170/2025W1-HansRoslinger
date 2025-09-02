@@ -47,4 +47,4 @@ jobs:
             --region ${{ secrets.REGION }} \
             --allow-unauthenticated \
             --port=${{ secrets.PORT }} \
-            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }}
+            --set-env-vars MONGO_URL=${{ secrets.MONGO_URL }},LOCATION=us-central1,BUCKET_NAME="hansroslinger-assets-us"

@@ -23,6 +23,12 @@ export const WebcamComponent: React.FC<WebcamProps> = ({
         className="w-full h-full object-cover"
         style={{ transform: "scaleX(-1)" }} // Flip vertically
         ref={webcamRef}
+        videoConstraints={{
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 60, max: 120 },
+          facingMode: "user",
+        }}
       />
     </div>
   );

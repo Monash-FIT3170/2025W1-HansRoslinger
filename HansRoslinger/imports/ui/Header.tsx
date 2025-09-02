@@ -10,6 +10,8 @@ interface HeaderProps {
   onToggleGrayscale: () => void;
   onToggleChart: () => void;
   onToggleGestureDetectionStatus: () => void;
+  showAssets: boolean;
+  setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGrayscale,
   onToggleChart,
   onToggleGestureDetectionStatus,
+  showAssets,
+  setShowAssets,
 }) => (
   <>
     {/* Gesture Detection */}
@@ -83,6 +87,27 @@ export const Header: React.FC<HeaderProps> = ({
       }}
     >
       GS
+    </Button>
+
+    {/* Show Assets (SA) */}
+    <Button
+      variant="contained"
+      size="small"
+      sx={{
+        width: 40,
+        height: 40,
+        minWidth: 0,
+        fontSize: "0.75rem",
+        fontWeight: "medium",
+        backgroundColor: showAssets ? "cyan.400" : "grey.700",
+        color: showAssets ? "black" : "white",
+        "&:hover": {
+          backgroundColor: showAssets ? "cyan.300" : "grey.600",
+        },
+      }}
+      onClick={() => setShowAssets((s) => !s)}
+    >
+      SA
     </Button>
 
     {/* Chart Toggle */}

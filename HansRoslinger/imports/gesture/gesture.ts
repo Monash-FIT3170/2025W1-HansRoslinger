@@ -14,6 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
+  PINCH, // Team 3 double hand gesture
+  DOUBLE_PINCH,
   TWO_FINGER_POINTING_LEFT,
   TWO_FINGER_POINTING_RIGHT,
 }
@@ -37,6 +39,8 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+  Pinch: GestureType.PINCH,
+  Double_Pinch: GestureType.DOUBLE_PINCH,
   Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
   Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
 };
@@ -54,6 +58,7 @@ export const EnumToFunc: Record<FunctionType, any> = {
 enum Handedness {
   LEFT = "Left",
   RIGHT = "Right",
+  BOTH = "Both",
 }
 
 type Gesture = {
@@ -61,7 +66,8 @@ type Gesture = {
   timestamp: Date;
   handedness: Handedness;
   confidence: number; // 0-1
-  landmarks: { x: number; y: number; z?: number }[];
+  singleGestureLandmarks: { x: number; y: number; z?: number }[];
+  doubleGestureLandmarks: { x: number; y: number; z?: number }[][];
 };
 
 // Define a boolean to track the zoom state
@@ -76,10 +82,10 @@ if (typeof window !== "undefined") {
     if (isZoomEnabled && customEvent.detail) {
       const { x, y } = customEvent.detail;
       zoomStartPosition = { x: x, y: y };
-      console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+      // console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
     } else {
       zoomStartPosition = null;
-      console.log(`Zoom disabled.`);
+      // console.log(`Zoom disabled.`);
     }
   });
 }
@@ -92,7 +98,7 @@ const defaultMapping = {
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
-  [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
   [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
   [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
@@ -103,18 +109,19 @@ const handleGestureToFunc = (
   latestGesture: Gesture,
 ): void => {
   const label = INPUT;
-
   if (isZoomEnabled) {
-    // if gesture action is CLEAR, we want to end zoom
-    if (defaultMapping[label] === FunctionType.CLEAR) {
+    // if gesture is closed fist, we want to end zoom
+    if (label === GestureType.CLOSED_FIST) {
       zoom(initialGesture, latestGesture);
-    } else {
+    } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
     const functionType = defaultMapping[label];
     const handler = EnumToFunc[functionType];
 
+    // console.log(`label: ${label}`);
+    // console.log(`functionType: ${functionType}`);
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
       console.log(

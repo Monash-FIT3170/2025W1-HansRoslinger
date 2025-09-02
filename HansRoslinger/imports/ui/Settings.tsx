@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,18 +7,28 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
+import { Button, Box } from "@mui/material";
 
 import { GestureType, FunctionType } from "../gesture/gesture";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  setSettingsCookie,
+  getSettingsCookie,
+  getAuthCookie,
+} from "../cookies/cookies";
+import {
+  getUserSettings,
+  updateUserSettings,
+} from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
   [GestureType.THUMB_DOWN]: "Thumb Down",
   [GestureType.POINTING_UP]: "Pointing Up",
   [GestureType.CLOSED_FIST]: "Closed Fist",
-  [GestureType.I_LOVE_YOU]: "I Love You",
+  [GestureType.I_LOVE_YOU]: "Heart",
   [GestureType.UNIDENTIFIED]: "Unidentified",
   [GestureType.OPEN_PALM]: "Open Palm",
   [GestureType.VICTORY]: "Victory",
@@ -64,6 +74,22 @@ const Settings: React.FC = () => {
     [GestureType.VICTORY]: FunctionType.ZOOM,
   });
 
+  useEffect(() => {
+    const userId = getAuthCookie()?.userId;
+    if (!userId) return;
+
+    async function loadSettings() {
+      if (userId != null) {
+        const settings = await getUserSettings(userId);
+        if (settings) {
+          setState(settings);
+        }
+      }
+    }
+
+    loadSettings();
+  }, []);
+
   const handleChange = (key: GestureType, value: FunctionType) => {
     setState((prev) => ({
       ...prev,
@@ -71,14 +97,33 @@ const Settings: React.FC = () => {
     }));
   };
 
+  const handleSave = () => {
+    const cookie = getAuthCookie();
+    if (cookie != null && cookie.userId != null) {
+      updateUserSettings(cookie.userId, state);
+    }
+  };
+
+  const navigate = useNavigate();
+  const handleReturn = () => {
+    navigate("/");
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <FormControl>
+    <Box
+      sx={{
+        p: 2,
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+      }}
+    >
+      <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Gesture</TableCell>
-              <TableCell>Function</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Gesture</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Function</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -89,7 +134,9 @@ const Settings: React.FC = () => {
                 <TableCell>{GestureToLabel[gesture]}</TableCell>
                 <TableCell>
                   <Select
-                    value={state[gesture]}
+                    fullWidth
+                    size="small"
+                    value={state[gesture] ?? ""}
                     onChange={(e) => handleChange(gesture, e.target.value)}
                   >
                     {Functions.map((option) => (
@@ -103,8 +150,27 @@ const Settings: React.FC = () => {
             ))}
           </TableBody>
         </Table>
-      </FormControl>
-    </TableContainer>
+      </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 5 }}>
+        <Button
+          variant="outlined"
+          onClick={handleReturn}
+          sx={{ borderRadius: 2, px: 3 }}
+        >
+          Return
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSave}
+          sx={{ borderRadius: 2, px: 3 }}
+        >
+          Save
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

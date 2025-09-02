@@ -26,15 +26,17 @@ HansRoslinger makes use of the React library in combination with Material UI (MU
 More information can be found about React [here](https://react.dev/).
 More information can be found about Material UI [here](https://mui.com/).
 
+Each webpage is split into it's own React file in the [UI directory](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/44657d55f1336b433a2eb149f717eb1472976520/HansRoslinger/imports/ui), with additional handling logic and components contained within subdirectorys in the same location.
+
 ## Backend Stack
 
 All of the backend logic written for HansRoslinger is contained within the Meteor application in the form of TypeScript. TypeScript provides the benefit of strong in-time type hinting, which has improved troubleshooting as we developed this software.
 
 More Information can be found about typescript [here](https://www.typescriptlang.org/).
 
-## Database
+### MongoDB Database
 
-### In Code
+#### In Code
 
 All persistent data for HansRoslinger (excluding user authentication information such as JWT which is stored in cookies) is stored in a NoSQL MongoDB database.
 
@@ -44,7 +46,7 @@ They are then published on start up of the server component of Meteor, [example]
 
 And subsribed to directly in the client side backend logic in order to upload and retrieve documents from, [example](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/1f1a180703a791b4bee73e65a5fc6f0f034dd272/HansRoslinger/imports/ui/App.tsx#L10-L12)
 
-### MongoDB Atlas
+#### MongoDB Atlas
 
 MongoDB Atlas is used to host our database online, With the free tier allowing us to store 512MB worth of documents
 
@@ -56,23 +58,29 @@ In order to connect to MongoDB Atlas we make use of a connection URL which speci
 
 You can look into how this MongoDB Atlas database is connected to meteor through this guide [here](https://docs.meteor.com/api/collections.html#mongo_url).
 
+### Google Cloud Bucket
+
+All images uploaded by the user to HansRoslinger is stored in a google cloud bucket. Buckets allows for cheap and robust uploading of images, witih links to the files being stored as documents in the MongoDB Database.
+
+The buckets are available [here](https://console.cloud.google.com/storage/browser?referrer=search&invt=Ab6sAg&project=hansroslinger-468011&prefix=&forceOnBucketsSortingFiltering=true&bucketType=live)
+
 ## Github/CICD
 
-We utilise Github in to track developmnet, as well as to store documentation and run CICD workflows
+We utilise Github in to track developmnet, as well as to store documentation and run CICD workflows.
 
-Documentation is found in this directory
+Documentation is found in this [directory](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/tree/main/Documentation)
 
-CICD Workflows are found under .github and involve the following
+CICD Workflows are found under [.github](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/tree/main/.github) and involve the following
 
-- eslint which validates syntax for TypeScript and React (.tsx) files
-- prettier which provides auto-linting when a PR is merged to main
-- deploy which deploys the Meteor application to CloudRun, more information is available in the #Deployment section
+- [eslint ](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/eslint.yaml)which validates syntax for TypeScript and React (.tsx) files
+- [prettier ](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/prettier.yaml)which provides auto-linting when a PR is merged to main
+- [deploy ](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/deploy.yaml)which deploys the Meteor application to CloudRun, more information is available in the #Deployment section
 
-We also have configured a pull request template in order to standardise the process of creating a pull request
+We also have configured a [pull request template](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md) in order to standardise the process of creating a pull request
 
 ## Deployment
 
-Our application is deployed using Google Cloud Services, with the following steps being followed in order to deploy the application.
+Our application is deployed using Google Cloud Services in the form of a Cloud Run using request based billing. This reduces cost as you only pay for the time to fufill each request, and not the continuous deployment of the application., with the following steps being followed in order to deploy the application.
 
 1. A DockerFile specifies the instructions to build the application into a container
 2. A github workflow has been created which can be manually triggered (however this can be automated if needed) to deploy to GCP.
@@ -87,14 +95,22 @@ If deployed successfully the HansRoslinger application should be accessible via 
 
 `https://hans-roslinger-961228355326.australia-southeast1.run.app/`
 
+Information about [CloudRun](https://cloud.google.com/run?utm_source=PMAX&utm_medium=PMAX&utm_campaign=17100102-GCP-DR-APAC-ROA-en-PMAX-Prospecting-Display-SMB-GCP-ROA-Cloud_Run_EN&utm_content=c--x--9071432-17821954699&utm_term&gclsrc=aw.ds&&https://ad.doubleclick.net/ddm/trackclk/N5295.276639.GOOGLEADWORDS/B26943865.344329733;dc_trk_aid=535895606;dc_trk_cid%3D163098484;dc_lat%3D;dc_rdid%3D;tag_for_child_directed_treatment%3D;tfua%3D;ltd%3D&gad_source=1&gad_campaignid=17820972903&gclid=CjwKCAjwq9rFBhAIEiwAGVAZPzh1QFUIBTXTJNXZ324pYswHNPOGV5jsSKVZKfENyVf_EN-bdCPqLxoCKsIQAvD_BwE&hl=en)
+Information about [request-based billing](https://cloud.google.com/run/docs/configuring/billing-settings)
 
 ### Routing to Unique Domain Name
-UPDATE
-assuming don't use same service provider (namecheap we're using)
-1. setup name servers in name cheap to point to google domain services
-2. authenticate that you own the said domain in google domain services
-3. update records in domain specification in google (once oyu authenticate in google you can control in google). You can then point to cloudrun
-  - setup A and AAAA DNS record
+
+The HansRoslinger team has purchased the domain `hansroslinger.website` from [namecheap.com](https://www.namecheap.com/)
+
+Because we are primarily hosting our services in Google Cloud, and this provider differs from where we had purchased the domain from, we have to perform some additional steps in order to set up routing between our domain name and our Cloud Run deployment
+
+1. [setup name servers in name cheap to point to google domain services](https://www.namecheap.com/support/knowledgebase/article.aspx/9434/10/using-default-nameservers-vs-hosting-nameservers/)
+2. authenticate that you own the said domain in [google domain services
+   ](https://cloud.google.com/identity/docs/verify-domain)- Once you have authenticated that you own the domain, you are able to control all future routing from Google Domain Services
+3. Update domain specifications in google so that the domain points to the Cloud Run service
+4. You will then need to set up A and AAAA DNS Records to point to your Cloud Run Service. While a Cloud Run is deployed to a region, this can have multiple zones, so you may need to configure multiple A and AAAA DNS Records (4 in this case)
+
+Once this has been configured, google will automatically generate a SSL/TLS certificate to encrypt your domain, and shortly after you should be able to access your Cloud Run from your website.
 
 # Installation Guides
 
@@ -105,9 +121,29 @@ Follow these steps in order to set up the required software for HansRoslinger
 3. [Install MongoSH](https://www.mongodb.com/docs/mongodb-shell/install/) in order to perform local development with MongoDB
 4. [Install Gcloud CLI](https://cloud.google.com/sdk/docs/install) in order to perform testing with GCP
 
+Once all of these steps have been followed to completion, you should be able to run the following commands to run HansRoslinger
+
+```
+# This will start hansroslinger
+cd HansRoslinger
+meteor
+
+# in another terminal, you can access the local MongoDB Database using the following
+cd HansRoslinger
+meteor mongo
+
+# in another terminal, you can access information about the data stored on gcloud with the following command
+gcloud --help
+# or you access it via the Google Cloud Console
+https://console.cloud.google.com/welcome?invt=Ab6sAg&project=hansroslinger-468011
+
+```
+
 # Troubleshooting
 
-The following are a list of common issues that we encountered while developing HansRoslinger.
+While meteor is a comprehensive full stack framework, we have experienced countless issues with long build times, package issues, and modules not being found.
+
+The following is a list of common issues that we encountered while developing HansRoslinger and how we fixed them.
 
 ## Incorrect Node Version
 

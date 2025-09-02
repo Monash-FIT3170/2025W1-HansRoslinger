@@ -10,8 +10,9 @@ on:
 
 env:
   REGION: us-central1
+  GAR_REGION: australia-southeast1
   BUCKET_NAME: hansroslinger-assets-us
-  IMAGE: "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+  IMAGE: "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
 
 jobs:
   deploy:
@@ -34,7 +35,7 @@ jobs:
           install_components: "gcloud"
 
       - name: Configure Docker to use gcloud as credential helper
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev
 
       - name: Build and push Docker image
         run: |

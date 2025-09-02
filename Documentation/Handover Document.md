@@ -89,8 +89,12 @@ If deployed successfully the HansRoslinger application should be accessible via 
 
 
 ### Routing to Unique Domain Name
-
-TODO
+UPDATE
+assuming don't use same service provider (namecheap we're using)
+1. setup name servers in name cheap to point to google domain services
+2. authenticate that you own the said domain in google domain services
+3. update records in domain specification in google (once oyu authenticate in google you can control in google). You can then point to cloudrun
+  - setup A and AAAA DNS record
 
 # Installation Guides
 

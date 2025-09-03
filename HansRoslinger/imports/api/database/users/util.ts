@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+
 export type ValidationResult = { valid: boolean; message?: string };
 
 // Password validation constants
@@ -48,7 +50,13 @@ export function validatePassword(password: string): ValidationResult {
   return { valid: true };
 }
 
-export function hashPassword(password: string): string {
-  return password;
-  //   return crypto.createHash("sha256").update(password).digest("hex");
+export async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 10;
+  const hash = await bcrypt.hash(password, saltRounds);
+  return hash;
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const match = await bcrypt.compare(password, hash);
+  return match; 
 }

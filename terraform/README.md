@@ -4,7 +4,7 @@
 cd terraform
 terraform workspace select np
 terraform plan -var-file="tfvars/np.tfvars"
-terraform apply
+terraform apply -var-file="tfvars/np.tfvars"
 ```
 
 Make sure to verify the plan matches what you expect
@@ -15,5 +15,5 @@ Make sure to verify the plan matches what you expect
 cd terraform
 terraform workspace select prod
 terraform plan -var-file="tfvars/prod.tfvars"
-terraform apply
+terraform apply -var-file="tfvars/prod.tfvars"
 ```

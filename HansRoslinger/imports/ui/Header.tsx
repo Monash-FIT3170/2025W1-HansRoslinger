@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   backgroundRemoval: boolean;
@@ -25,8 +26,27 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGestureDetectionStatus,
   showAssets,
   setShowAssets,
-}) => (
+}) => {
+  const navigate = useNavigate();
+  return (
   <>
+    {/* Back to All Presentations */}
+    <Button
+      variant="contained"
+      onClick={() => navigate("/allpresentations")}
+      sx={{
+  width: 40,
+  height: 40,
+  minWidth: 0,
+  fontSize: "0.75rem",
+  fontWeight: "medium",
+  backgroundColor: "grey.700",
+  color: "white",
+  "&:hover": { backgroundColor: "grey.600" },
+      }}
+    >
+      Back
+    </Button>
     {/* Gesture Detection */}
     <Button
       variant="contained"
@@ -130,4 +150,5 @@ export const Header: React.FC<HeaderProps> = ({
       {showLineChart ? "Bar" : "Line"}
     </Button>
   </>
-);
+  );
+};

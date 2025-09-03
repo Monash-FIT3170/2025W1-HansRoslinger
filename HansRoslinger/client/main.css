@@ -1,3 +1,12 @@
+body.zoom-active-outline::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  border: 4px solid #00bcd4;
+  box-sizing: border-box;
+  z-index: 9999;
+}
 @import "tailwindcss";
 body {
   height: 100vh;

@@ -4,7 +4,6 @@ import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
-import { getSettingsCookie } from "../cookies/cookies";
 
 enum GestureType {
   CLOSED_FIST,
@@ -85,9 +84,9 @@ const handleGestureToFunc = (
   INPUT: GestureType,
   initialGesture: Gesture,
   latestGesture: Gesture,
+  mapping: Record<GestureType, FunctionType>
 ): void => {
   const label: GestureType = IDtoEnum[INPUT];
-  var mapping: Record<GestureType, FunctionType> = getSettingsCookie();
   if (isZoomEnabled) {
     // if gesture is closed fist, we want to end zoom
     if (mapping[label] === FunctionType.ZOOM) {

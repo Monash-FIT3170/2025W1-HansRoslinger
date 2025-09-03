@@ -12,6 +12,9 @@ import { ChartType, defaultDataset } from "../api/database/dataset/dataset";
 
 // MUI imports
 import { Box, Button } from "@mui/material";
+import { getUserById, getUserSettings } from "../api/database/users/users";
+import { getUserIDCookie } from "../cookies/cookies";
+import { FunctionType, GestureType } from "../gesture/gesture";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -118,7 +121,44 @@ export const Present: React.FC = () => {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 50,
-      };
+    };
+
+  const loadSettings = async(): Promise<Record<GestureType, FunctionType>> => {
+    var settings = {
+    [GestureType.THUMB_UP]: FunctionType.UNUSED,
+    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+    [GestureType.POINTING_UP]: FunctionType.SELECT,
+    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+    [GestureType.OPEN_PALM]: FunctionType.FILTER,
+    [GestureType.VICTORY]: FunctionType.ZOOM,
+  };
+    const userID = getUserIDCookie()
+    if (userID) {
+      const user = await getUserById(userID)
+      if (user) {
+        settings = await getUserSettings(user.email);
+      }
+    } 
+    return settings;
+  };
+
+  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>({
+    [GestureType.THUMB_UP]: FunctionType.UNUSED,
+    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+    [GestureType.POINTING_UP]: FunctionType.SELECT,
+    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+    [GestureType.OPEN_PALM]: FunctionType.FILTER,
+    [GestureType.VICTORY]: FunctionType.ZOOM,
+  });
+
+  useEffect(() => {
+    loadSettings().then(setGestureSettings);
+  }, []);
+
 
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">
@@ -141,6 +181,7 @@ export const Present: React.FC = () => {
         <WebcamComponent
           gestureDetectionStatus={gestureDetectionStatus}
           grayscale={grayscale}
+          settings={gestureSettings}
         />
       </Box>
 

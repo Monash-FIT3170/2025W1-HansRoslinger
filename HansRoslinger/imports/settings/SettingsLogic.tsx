@@ -4,7 +4,6 @@ import {
   GestureType,
   FunctionType,
   EnumToFunc,
-  defaultMapping,
 } from "imports/gesture/gesture";
 import { setCookie, getCookie } from "imports/settings/cookies";
 
@@ -13,7 +12,16 @@ type GestureFunctionMapping = Record<GestureType, FunctionType>;
 
 export const useGestureSettings = () => {
   const [mappings, setMappings] =
-    useState<GestureFunctionMapping>(defaultMapping);
+    useState<GestureFunctionMapping>({
+          [GestureType.THUMB_UP]: FunctionType.UNUSED,
+          [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+          [GestureType.POINTING_UP]: FunctionType.SELECT,
+          [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+          [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+          [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+          [GestureType.OPEN_PALM]: FunctionType.FILTER,
+          [GestureType.VICTORY]: FunctionType.ZOOM,
+          });
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from cookie on mount
@@ -23,7 +31,16 @@ export const useGestureSettings = () => {
         const saved = await getCookie("gestureSettings");
         if (saved) {
           const parsed = JSON.parse(saved.data);
-          const loadedMappings = { ...defaultMapping };
+          const loadedMappings = { ...{
+                [GestureType.THUMB_UP]: FunctionType.UNUSED,
+                [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+                [GestureType.POINTING_UP]: FunctionType.SELECT,
+                [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
+                [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+                [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+                [GestureType.OPEN_PALM]: FunctionType.FILTER,
+                [GestureType.VICTORY]: FunctionType.ZOOM,
+                } };
 
           // Convert string keys back to enums
           Object.entries(parsed).forEach(([gestureKey, functionKey]) => {

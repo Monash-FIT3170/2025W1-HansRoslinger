@@ -207,7 +207,6 @@ export const Present: React.FC = () => {
       }
     } 
 
-    console.log('Loaded gesture settings:', JSON.stringify(gestureSettings));
     return settings;
   };
 

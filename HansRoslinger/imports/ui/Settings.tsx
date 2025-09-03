@@ -106,7 +106,7 @@ const Settings: React.FC = () => {
 
   const navigate = useNavigate();
   const handleReturn = () => {
-    navigate("/");
+    navigate("/home");
   };
 
   return (

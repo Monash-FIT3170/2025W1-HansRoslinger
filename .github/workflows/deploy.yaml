@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGION: us-central1
-      GAR_REGION: australia-southeast1
+      ARTIFACT_REGISTRY_REPO: cloud-run-repo-us
 
     steps:
       - name: Checkout code
@@ -32,18 +32,18 @@ jobs:
           install_components: "gcloud"
 
       - name: Configure Docker to use gcloud as credential helper
-        run: gcloud auth configure-docker ${{ env.GAR_REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
       - name: Build and push Docker image
         run: |
-          IMAGE="${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}"
           docker build -t $IMAGE .
           docker push $IMAGE
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image "${{ env.GAR_REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}" \
+            --image "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ secrets.CLOUD_RUN_SERVICE }}:${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \

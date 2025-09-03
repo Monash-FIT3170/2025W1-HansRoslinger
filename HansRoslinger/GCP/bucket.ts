@@ -2,7 +2,7 @@
 // Constants for GCP project and bucket
 export const GCP_PROJECT_ID = "hansroslinger-468011";
 export const GCP_BUCKET_NAME =
-  process.env.BUCKET_NAME || "hansroslinger-assets";
+  process.env.BUCKET_NAME || "hansroslinger-assets-au";
 export const GCP_BUCKET_REGION = process.env.LOCATION || "australia-southeast1";
 
 // You will need to install @google-cloud/storage and authenticate with a service account

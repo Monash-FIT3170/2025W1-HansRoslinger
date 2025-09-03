@@ -1,5 +1,5 @@
 project_id      = "hansroslinger-468011"
-region          = "us-east1"
+region          = "us-central1"
 repository_name = "cloud-run-repo-us"
 bucket_name     = "hansroslinger-assets-us"
-bucket_location = "us-east1"
+bucket_location = "us-central1"

@@ -10,10 +10,12 @@ enum GestureType {
   I_LOVE_YOU,
   UNIDENTIFIED,
   OPEN_PALM,
-  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched
+  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched (now also identifies any pointing)
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
+  TWO_FINGER_POINTING_LEFT,
+  TWO_FINGER_POINTING_RIGHT,
 }
 
 enum FunctionType {
@@ -35,6 +37,8 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+  Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
+  Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
 };
 
 export const EnumToFunc: Record<FunctionType, any> = {
@@ -65,20 +69,33 @@ let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
 if (typeof window !== "undefined") {
-// Watch for the "chart:zoom" event and toggle the boolean
-window.addEventListener("chart:togglezoom", (event: Event) => {
-  const customEvent = event as CustomEvent<{ x: number; y: number }>;
-  isZoomEnabled = !isZoomEnabled;
-  if (isZoomEnabled && customEvent.detail) {
-    const { x, y } = customEvent.detail;
-    zoomStartPosition = { x: x, y: y };
-    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-  } else {
-    zoomStartPosition = null;
-    console.log(`Zoom disabled.`);
-  }
-})};
+  // Watch for the "chart:zoom" event and toggle the boolean
+  window.addEventListener("chart:togglezoom", (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    isZoomEnabled = !isZoomEnabled;
+    if (isZoomEnabled && customEvent.detail) {
+      const { x, y } = customEvent.detail;
+      zoomStartPosition = { x: x, y: y };
+      console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+    } else {
+      zoomStartPosition = null;
+      console.log(`Zoom disabled.`);
+    }
+  });
+}
 
+const defaultMapping = {
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.POINTING_UP]: FunctionType.SELECT,
+  [GestureType.CLOSED_FIST]: FunctionType.FILTER,
+  [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+  [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+  [GestureType.OPEN_PALM]: FunctionType.CLEAR,
+  [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
+};
 
 const handleGestureToFunc = (
   INPUT: GestureType,
@@ -88,18 +105,32 @@ const handleGestureToFunc = (
 ): void => {
   const label: GestureType = IDtoEnum[INPUT];
   if (isZoomEnabled) {
-    // if gesture is closed fist, we want to end zoom
-    if (mapping[label] === FunctionType.ZOOM) {
+    // if gesture action is CLEAR, we want to end zoom
+    if (mapping[label] === FunctionType.CLEAR) {
       zoom(initialGesture, latestGesture);
     } else {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const handler = EnumToFunc[mapping[label]];
-    if (handler) {
+    const functionType = mapping[label];
+    const handler = EnumToFunc[functionType];
+
+    if (handler && functionType !== FunctionType.UNUSED) {
+      // This log helps confirm the correct handler is being called
+      console.log(
+        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
+      );
       handler(initialGesture, latestGesture);
+    } else if (functionType === FunctionType.UNUSED) {
+      // This log confirms a gesture is being correctly ignored
+      console.log(
+        `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
+      );
     } else {
-      console.warn(`No handler found for gesture: ${INPUT}`);
+      // This warning will now only appear for truly unhandled gestures
+      console.warn(
+        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
+      );
     }
   }
 };

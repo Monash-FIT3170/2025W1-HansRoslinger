@@ -5,6 +5,7 @@ export interface Presentation {
   name: string;
   createdAt: Date;
   userID: string;
+  assetID: string;
 }
 
 export const PresentationCollection = new Mongo.Collection<Presentation>(

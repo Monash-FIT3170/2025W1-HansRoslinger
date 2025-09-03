@@ -84,7 +84,6 @@ const Settings: React.FC = () => {
         }
         
       }
-      
     }
 
     loadSettings();
@@ -105,16 +104,15 @@ const Settings: React.FC = () => {
     } else {
       alert("Not logged in")
     }
-    
-  }
+  };
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleReturn = () => {
     navigate("/");
-  }
+  };
 
   return (
-     <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }}>
       <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
@@ -124,36 +122,46 @@ const Settings: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Gestures.filter((gesture) => gesture !== GestureType.UNIDENTIFIED)
-              .map((gesture) => (
-                <TableRow key={gesture}>
-                  <TableCell>{GestureToLabel[gesture]}</TableCell>
-                  <TableCell>
-                    <Select
-                      fullWidth
-                      size="small"
-                      value={state[gesture] ?? ""}
-                      onChange={(e) => handleChange(gesture, e.target.value)}
-                    >
-                      {Functions.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {FunctionToLabel[option]}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </TableCell>
-                </TableRow>
-              ))}
+            {Gestures.filter(
+              (gesture) => gesture !== GestureType.UNIDENTIFIED,
+            ).map((gesture) => (
+              <TableRow key={gesture}>
+                <TableCell>{GestureToLabel[gesture]}</TableCell>
+                <TableCell>
+                  <Select
+                    fullWidth
+                    size="small"
+                    value={state[gesture] ?? ""}
+                    onChange={(e) => handleChange(gesture, e.target.value)}
+                  >
+                    {Functions.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {FunctionToLabel[option]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
-      
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 5}}>
-        <Button variant="outlined" onClick={handleReturn} sx={{ borderRadius: 2, px: 3 }}>
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 5 }}>
+        <Button
+          variant="outlined"
+          onClick={handleReturn}
+          sx={{ borderRadius: 2, px: 3 }}
+        >
           Return
         </Button>
 
-        <Button variant="contained" color="primary" onClick={handleSave} sx={{ borderRadius: 2, px: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSave}
+          sx={{ borderRadius: 2, px: 3 }}
+        >
           Save
         </Button>
       </Box>

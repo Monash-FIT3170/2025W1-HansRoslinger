@@ -1,3 +1,5 @@
-project_id = "hansroslinger-468011"
-region     = "australia-southeast1"
-repository_name = "cloud-run-repo"
+project_id      = "hansroslinger-468011"
+region          = "us-central1"
+repository_name = "cloud-run-repo-us"
+bucket_name     = "hansroslinger-assets-us"
+bucket_location = "us-central1"

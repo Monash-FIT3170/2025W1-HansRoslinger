@@ -84,10 +84,10 @@ if (typeof window !== "undefined") {
       const { x, y } = customEvent.detail;
       zoomStartPosition = { x: x, y: y };
       // console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-  document?.body?.classList.add("zoom-active-outline");
+      document?.body?.classList.add("zoom-active-outline");
     } else {
       zoomStartPosition = null;
-  document?.body?.classList.remove("zoom-active-outline");
+      document?.body?.classList.remove("zoom-active-outline");
     }
   });
 }

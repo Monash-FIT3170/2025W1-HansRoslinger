@@ -74,5 +74,5 @@ export async function correctLogin(
 ): Promise<boolean> {
   const user = await getUserByEmail(email);
   if (!user) return false;
-  return verifyPassword(password, user.password)
+  return verifyPassword(password, user.password);
 }

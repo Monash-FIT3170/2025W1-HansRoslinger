@@ -8,6 +8,7 @@ window.addEventListener("chart:togglezoom", () => {
 });
 
 export const useGestureHandler = (mapping: Record<GestureType, FunctionType>) => {
+  console.log("Mapping: " + JSON.stringify(mapping))
   const GESTURE_TIME_TO_ACTIVATE = 500; // in ms
   const activeGestures = useRef<Record<Handedness, Gesture | null>>({
     [Handedness.LEFT]: null,

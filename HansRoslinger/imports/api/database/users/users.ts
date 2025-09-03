@@ -1,15 +1,14 @@
 import { hashPassword } from "./util";
 import { Mongo } from "meteor/mongo";
-import { GestureType, FunctionType } from "/imports/gesture/gesture";
+import { GestureType, FunctionType, defaultMapping } from "/imports/gesture/gesture";
 
-export type GestureSettings = Record<GestureType, FunctionType>;
 
 export interface User {
   _id: string;
   email: string;
   password: string;
   createdAt: Date;
-  settings: GestureSettings;
+  settings: Record<GestureType, FunctionType>;
 }
 
 export const UserCollection = new Mongo.Collection<User>("users");
@@ -33,7 +32,7 @@ export async function getUserById(_id: any): Promise<User | undefined> {
 
 export async function updateUserSettings(
   _id: string,
-  settings: GestureSettings,
+  settings: Record<GestureType, FunctionType>,
 ): Promise<number> {
   return await UserCollection.updateAsync(
       _id,
@@ -41,23 +40,33 @@ export async function updateUserSettings(
     );
 }
 
-export async function getUserSettings(email: string): Promise<GestureSettings> {
+export async function getUserSettings(email: string): Promise<Record<GestureType, FunctionType>> {
   const user = await UserCollection.findOneAsync(
     { email },
     { projection: { settings: 1, _id: 0 } },
   );
-  return user?.settings as
-    | GestureSettings
-    | {
-        [GestureType.THUMB_UP]: FunctionType.UNUSED;
-        [GestureType.THUMB_DOWN]: FunctionType.UNUSED;
-        [GestureType.POINTING_UP]: FunctionType.SELECT;
-        [GestureType.CLOSED_FIST]: FunctionType.CLEAR;
-        [GestureType.I_LOVE_YOU]: FunctionType.UNUSED;
-        [GestureType.UNIDENTIFIED]: FunctionType.UNUSED;
-        [GestureType.OPEN_PALM]: FunctionType.FILTER;
-        [GestureType.VICTORY]: FunctionType.ZOOM;
-      };
+
+  if (user) {
+    const result = {} as Record<GestureType, FunctionType>;
+
+    Object.entries(user.settings).forEach(([key, value]) => {
+      const gestureKey = Number(key) as GestureType;
+      const functionValue = value as FunctionType;
+      result[gestureKey] = functionValue;
+    });
+
+    Object.values(GestureType)
+      .filter(v => typeof v === 'number')
+      .forEach((g: number) => {
+        if (result[g as GestureType] === undefined) {
+          result[g as GestureType] = FunctionType.UNUSED;
+        }
+    });
+    
+    return result
+  } else {
+    return defaultMapping
+  }
 }
 
 export async function updateUser(

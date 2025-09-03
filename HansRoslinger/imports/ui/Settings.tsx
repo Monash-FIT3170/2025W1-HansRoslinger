@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { Button, Box } from "@mui/material";
 
-import { GestureType, FunctionType } from "../gesture/gesture";
+import { GestureType, FunctionType, defaultMapping } from "../gesture/gesture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { getAuthCookie } from "../cookies/cookies";
@@ -25,6 +25,8 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.UNIDENTIFIED]: "Unidentified",
   [GestureType.OPEN_PALM]: "Open Palm",
   [GestureType.VICTORY]: "Victory",
+  [GestureType.TWO_FINGER_POINTING_LEFT]: "Two Fingers Pointing Left",
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: "Two Fingers Pointing Right",
 };
 
 const FunctionToLabel: Record<FunctionType, string> = {
@@ -45,6 +47,8 @@ const Gestures = [
   GestureType.THUMB_DOWN,
   GestureType.THUMB_UP,
   GestureType.VICTORY,
+  GestureType.TWO_FINGER_POINTING_LEFT,
+  GestureType.TWO_FINGER_POINTING_RIGHT,
 ];
 
 const Functions = [
@@ -56,16 +60,7 @@ const Functions = [
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] = useState<Record<GestureType, FunctionType>>({
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  });
+  const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     const userId = getAuthCookie()?.userId;

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
-import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
-import { GestureType, FunctionType, Handedness, Gesture } from "../gesture/gesture";
+import { GestureRecognizer, FilesetResolver, NormalizedLandmark } from "@mediapipe/tasks-vision";
+import { GestureType, FunctionType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
 import { useGestureHandler } from "../gesture/GestureHandler";
 
 
@@ -159,7 +159,7 @@ export const gestureDetector = (
   }, [currentGestures]);
 };
 
-export default GestureDetector;
+export default gestureDetector;
 
 // Import types from @mediapipe/tasks-vision for GestureRecognizerResult
 

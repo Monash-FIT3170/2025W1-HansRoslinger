@@ -17,12 +17,9 @@ import { getUserIDCookie } from "../cookies/cookies";
 import { getPresentationById } from "../api/database/presentations/presentations";
 import { useImageAssetZoom } from "./handlers/image/ImageAssetHandler";
 import { useImagePreload } from "./handlers/image/useImagePreload";
-
-// MUI imports
 import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
-import { getUserIDCookie } from "../cookies/cookies";
-import { FunctionType, GestureType } from "../gesture/gesture";
+import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -201,16 +198,7 @@ export const Present: React.FC = () => {
     };
 
   const loadSettings = async(): Promise<Record<GestureType, FunctionType>> => {
-    var settings = {
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  };
+    var settings = defaultMapping;
     const userID = getUserIDCookie()
     if (userID) {
       const user = await getUserById(userID)
@@ -218,19 +206,12 @@ export const Present: React.FC = () => {
         settings = await getUserSettings(user.email);
       }
     } 
+
+    console.log('Loaded gesture settings:', JSON.stringify(gestureSettings));
     return settings;
   };
 
-  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>({
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  });
+  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     loadSettings().then(setGestureSettings);

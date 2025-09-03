@@ -68,7 +68,11 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   const midX = (leftScreen.screenX + rightScreen.screenX) / 2;
   const midY = (leftScreen.screenY + rightScreen.screenY) / 2;
 
-  window.dispatchEvent(gestureEvent);
+  window.dispatchEvent(
+    new CustomEvent("chart:togglezoom", {
+      detail: { x: midX, y: midY },
+    }),
+  );
 };
 
 export const processZoom = (

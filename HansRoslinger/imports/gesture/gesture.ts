@@ -4,6 +4,7 @@ import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
+import { click } from "./Click";
 
 enum GestureType {
   CLOSED_FIST,
@@ -28,6 +29,7 @@ enum FunctionType {
   ZOOM,
   SWITCH_CHART,
   SWITCH_DATA,
+  CLICK,
 }
 
 export const IDtoEnum: Record<string, GestureType> = {
@@ -54,6 +56,7 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.ZOOM]: zoom as GestureHandlerFn,
   [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
   [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
+  [FunctionType.CLICK]: click as GestureHandlerFn,
 };
 
 enum Handedness {
@@ -101,7 +104,7 @@ const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
   [GestureType.THUMB_UP]: FunctionType.UNUSED,
   [GestureType.VICTORY]: FunctionType.UNUSED,
-  [GestureType.PINCH]: FunctionType.UNUSED,
+  [GestureType.PINCH]: FunctionType.CLICK,
   [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
   [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
   [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,

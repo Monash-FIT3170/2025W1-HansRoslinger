@@ -9,7 +9,6 @@ interface HeaderProps {
   onToggleBackgroundRemoval: () => void;
   onToggleGrayscale: () => void;
   onToggleChart: () => void;
-  onToggleGestureDetectionStatus: () => void;
   showAssets: boolean;
   setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
@@ -21,7 +20,6 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleBackgroundRemoval,
   onToggleGrayscale,
   onToggleChart,
-  onToggleGestureDetectionStatus,
   showAssets,
   setShowAssets,
 }) => {
@@ -44,26 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
         }}
       >
         Back
-      </Button>
-      {/* Gesture Detection */}
-      <Button
-        variant="contained"
-        onClick={onToggleGestureDetectionStatus}
-        id="toggle-gesture-detection"
-        sx={{
-          width: 40,
-          height: 40,
-          minWidth: 0,
-          fontSize: "0.75rem",
-          fontWeight: "medium",
-          backgroundColor: gestureDetectionStatus ? "cyan.400" : "grey.700",
-          color: gestureDetectionStatus ? "black" : "white",
-          "&:hover": {
-            backgroundColor: gestureDetectionStatus ? "cyan.300" : "grey.600",
-          },
-        }}
-      >
-        GD
       </Button>
 
       {/* Background Removal */}

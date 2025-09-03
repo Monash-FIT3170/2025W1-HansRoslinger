@@ -179,7 +179,7 @@ export const Present: React.FC = () => {
   const toolbarStyles = showHeader
     ? {
         position: "absolute" as const,
-        top: 16,
+        height: 520,
         right: 16,
         bottom: 16,
         width: 64,
@@ -191,7 +191,7 @@ export const Present: React.FC = () => {
         alignItems: "center",
         justifyContent: "flex-end",
         paddingY: 2,
-        gap: 8,
+        gap: 6,
         zIndex: 50,
       }
     : {
@@ -335,6 +335,29 @@ export const Present: React.FC = () => {
           )}
         </Box>
       )}
+
+      {/* Background Removal */}
+      <Button
+        variant="contained"
+        onClick={() => {setGestureDetectionStatus(!gestureDetectionStatus)}}
+        id="gesture-detection-toggle"
+        sx={{
+          position:"absolute",
+          top: 40,
+          right: 40,
+          width: 120,
+          height: 120,
+          fontSize: "1rem",
+          fontWeight: "bold",
+          backgroundColor: !gestureDetectionStatus ? "cyan.400" : "grey.700",
+          color: !gestureDetectionStatus ? "black" : "white",
+          "&:hover": {
+            backgroundColor: !gestureDetectionStatus ? "cyan.300" : "grey.600",
+          },
+        }}
+      >
+        {gestureDetectionStatus ? "Disable Gestures" : "Enable Gestures"}
+      </Button>
 
       {/* Toolbar */}
       <Box sx={toolbarStyles}>

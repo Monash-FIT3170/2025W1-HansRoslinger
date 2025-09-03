@@ -13,8 +13,8 @@ import { Button, Box } from "@mui/material";
 import { GestureType, FunctionType } from "../gesture/gesture";
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { setSettingsCookie, getSettingsCookie, getAuthCookie } from "../cookies/cookies";
-import { getUserSettings, updateUserSettings } from "../api/database/users/users";
+import { getAuthCookie } from "../cookies/cookies";
+import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -73,10 +73,16 @@ const Settings: React.FC = () => {
 
     async function loadSettings() {
       if (userId != null) {
-        const settings = await getUserSettings(userId);
-        if (settings) {
-          setState(settings);
+        const user = await getUserById(userId);
+        
+        if (user != null) {
+          const email = user.email;
+          const settings = await getUserSettings(email);
+          if (settings) {
+            setState(settings);
+          }
         }
+        
       }
       
     }
@@ -91,10 +97,13 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async() => {
     const cookie = getAuthCookie();
     if ((cookie != null) && (cookie.userId != null)) {
-      updateUserSettings(cookie.userId, state);
+      const res = await updateUserSettings(cookie.userId, state);
+      console.log("Saved:" + "\n" + res + "\n" + cookie.userId + "\n" +  JSON.stringify(state))
+    } else {
+      alert("Not logged in")
     }
     
   }

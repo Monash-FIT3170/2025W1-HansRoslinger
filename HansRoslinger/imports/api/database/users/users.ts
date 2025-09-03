@@ -5,6 +5,7 @@ import { GestureType, FunctionType } from "/imports/gesture/gesture";
 export type GestureSettings = Record<GestureType, FunctionType>;
 
 export interface User {
+  _id: string;
   email: string;
   password: string;
   createdAt: Date;
@@ -26,14 +27,18 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
   return await UserCollection.findOneAsync({ email });
 }
 
+export async function getUserById(_id: any): Promise<User | undefined> {
+  return await UserCollection.findOneAsync({ _id });
+}
+
 export async function updateUserSettings(
-  email: string,
+  _id: string,
   settings: GestureSettings,
 ): Promise<number> {
   return await UserCollection.updateAsync(
-    { email },
-    { $set: { settings } }
-  );
+      _id,
+      { $set: { settings } }
+    );
 }
 
 export async function getUserSettings(

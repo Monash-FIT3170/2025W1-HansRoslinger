@@ -1,19 +1,87 @@
 # Purpose of this Document
 
-Blah Blah
+The purpose of this document is to provide a comprehensive overview of the HansRoslinger application, allowing any future owners/contributors to understand the frontend and backend stack, as well as technologies we are utilising as well as how we are utilising them.
+
+This document also contains further information on the installations required to begin working on HanRoslinger, basic application structuring, and common issues we've come across while developing this application, and how to troubleshoot them.
+
+---
 
 # Table of Contents
 
-- What is HansRoslinger?
-- Technology Stack
-  - Frontend Stack
-  - Backend Stack
-- Installation Guides
-- Troubleshooting
+- [What is HansRoslinger?](#what-is-hansroslinger)
+- [Installation Guides](#installation-guides)
+- [Technology Stack](#technology-stack)
+  - [Frontend Stack](#frontend-stack)
+  - [Backend Stack](#backend-stack)
+    - [MongoDB Database](#mongodb-database)
+      - [In Code](#in-code)
+      - [MongoDB Atlas](#mongodb-atlas)
+    - [Google Cloud Bucket](#google-cloud-bucket)
+  - [Github/CICD](#githubcicd)
+- [How to Deployment to Production](#how-to-deployment-to-production)
+  - [Routing to Unique Domain Name](#routing-to-unique-domain-name)
+- [Troubleshooting](#troubleshooting)
+  - [Incorrect Node Version](#incorrect-node-version)
+  - [Module not found error](#module-not-found-error)
+  - [Meteor stuck on `Extracting meteor-tool@1.4.0-1`](#meteor-stuck-on-extracting-meteor-tool140-1)
+
+---
 
 # What is HansRoslinger?
 
 HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
+
+The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
+
+---
+
+
+
+# Repository Structure
+
+- **Documentation/** — Project docs (CI/CD, tutorials, troubleshooting) and supporting images.
+- **HansRoslinger/** — Meteor + React application source (client, server, shared imports, public assets, GCP helpers, tests).
+- **terraform/** — Infrastructure as code for GCP (root configs, reusable module, per-env tfvars, state files).
+
+## HansRoslinger/ Structure
+
+- **client/** — React/Meteor client entry and global HTML/CSS; bootstraps the UI.
+- **server/** — Meteor server startup, methods, publications, and integrations.
+- **imports/** — Shared app code: UI components/pages, handlers, gestures, and data layer.
+- **public/** — Static assets served as-is (e.g., images/icons).
+- **GCP/** — Google Cloud helpers/config (e.g., bucket utilities).
+- **tests/** — App tests and helpers.
+
+---
+
+# Installation Guides
+
+Follow these steps in order to set up the required software for HansRoslinger
+
+1. Install Meteor using the [following step](https://docs.meteor.com/about/install.html)
+2. CD Into HansRoslinger directory and run `meteor npm install` to install all dependencies
+3. [Install MongoSH](https://www.mongodb.com/docs/mongodb-shell/install/) in order to perform local development with MongoDB
+4. [Install Gcloud CLI](https://cloud.google.com/sdk/docs/install) in order to perform testing with GCP
+
+Once all of these steps have been followed to completion, you should be able to run the following commands to run HansRoslinger
+
+```
+# This will start hansroslinger
+cd HansRoslinger
+meteor
+
+# in another terminal, you can access the local MongoDB Database using the following
+cd HansRoslinger
+meteor mongo
+
+# in another terminal, you can access information about the data stored on gcloud with the following command
+gcloud --help
+# or you access it via the Google Cloud Console
+https://console.cloud.google.com/welcome?invt=Ab6sAg&project=hansroslinger-468011
+
+```
+
+---
 
 # Technology Stack
 
@@ -78,7 +146,9 @@ CICD Workflows are found under [.github](https://github.com/Monash-FIT3170/2025W
 
 We also have configured a [pull request template](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md) in order to standardise the process of creating a pull request
 
-## Deployment
+---
+
+# How to Deployment to Production
 
 Our application is deployed using Google Cloud Services in the form of a Cloud Run using request based billing. This reduces cost as you only pay for the time to fufill each request, and not the continuous deployment of the application., with the following steps being followed in order to deploy the application.
 
@@ -112,32 +182,7 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 
 Once this has been configured, google will automatically generate a SSL/TLS certificate to encrypt your domain, and shortly after you should be able to access your Cloud Run from your website.
 
-# Installation Guides
-
-Follow these steps in order to set up the required software for HansRoslinger
-
-1. Install Meteor using the [following step](https://docs.meteor.com/about/install.html)
-2. CD Into HansRoslinger directory and run `meteor npm install` to install all dependencies
-3. [Install MongoSH](https://www.mongodb.com/docs/mongodb-shell/install/) in order to perform local development with MongoDB
-4. [Install Gcloud CLI](https://cloud.google.com/sdk/docs/install) in order to perform testing with GCP
-
-Once all of these steps have been followed to completion, you should be able to run the following commands to run HansRoslinger
-
-```
-# This will start hansroslinger
-cd HansRoslinger
-meteor
-
-# in another terminal, you can access the local MongoDB Database using the following
-cd HansRoslinger
-meteor mongo
-
-# in another terminal, you can access information about the data stored on gcloud with the following command
-gcloud --help
-# or you access it via the Google Cloud Console
-https://console.cloud.google.com/welcome?invt=Ab6sAg&project=hansroslinger-468011
-
-```
+---
 
 # Troubleshooting
 

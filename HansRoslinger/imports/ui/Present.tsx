@@ -347,6 +347,8 @@ export const Present: React.FC = () => {
           right: 40,
           width: 120,
           height: 120,
+          borderRadius: 10,
+          opacity: 0.8,
           fontSize: "1rem",
           fontWeight: "bold",
           backgroundColor: !gestureDetectionStatus ? "cyan.400" : "grey.700",

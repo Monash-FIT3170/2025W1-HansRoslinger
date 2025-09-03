@@ -336,7 +336,7 @@ export const Present: React.FC = () => {
         </Box>
       )}
 
-      {/* Background Removal */}
+      {/* Gesture Detection Toggle Button */}
       <Button
         variant="contained"
         onClick={() => {setGestureDetectionStatus(!gestureDetectionStatus)}}

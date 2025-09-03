@@ -18,8 +18,7 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     pointerLandmark.z,
   );
 
-  console.log(`Pinch Gesture detected! Screen Position: ${screenPosition.screenX}, ${screenPosition.screenY}`,);
-
+  // ADD IDs of other clickable (pinchable) elements here
   const clickableElementIDs = ["gesture-detection-toggle"]
 
   for (const clickableElementID of clickableElementIDs) {

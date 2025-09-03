@@ -169,6 +169,7 @@ const GestureDetector = (
       (g) => g?.handedness === Handedness.RIGHT,
     );
     if (!gestureDetectionStatus) {
+      // Only check for pinching as user may click gesture detection toggle button to turn it back on
       for (let index = 0; index < currentGestures.length; index++) {
         if (currentGestures[index] && currentGestures[index].gestureID == GestureType.PINCH) {
           // Confirm that the correct gesture ID number is being sent

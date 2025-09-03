@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Toolbar from "./components/Toolbar/Toolbar";
 import Modal from "./components/Modal/Modal";
+import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
 import { useAuthGuard } from "../handlers/auth/authHook";
+import { useAssetsWithImageCount } from "./handlers/assets/useAssets";
 import {
   doesPresentationExist,
   createPresentation,
@@ -17,6 +19,29 @@ import {
   deleteDataset,
   ChartType,
 } from "../api/database/dataset/dataset";
+
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Typography,
+  TextField,
+  CardActionArea,
+  Card,
+  CardContent,
+  Stack,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import { Asset } from "../api/database/assets/assets";
 
 export default function AllPresentations() {
   // State for dataset summary modal
@@ -45,7 +70,6 @@ export default function AllPresentations() {
     setShowDatasetSummary(false);
     setSummaryDataset(null);
   }
-
   // Navigate to Present page with dataset ID
   function handlePresentDataset(presentation: Presentation) {
     navigate(`/present?presentationId=${presentation._id}`);
@@ -58,6 +82,9 @@ export default function AllPresentations() {
   const [selectedPresentation, setSelectedPresentation] =
     useState<Presentation | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [selectedAssetId, setSelectedAssetId] = useState<string>("");
+  // Get all assets for dropdown (only those owned by the user)
+  const assets: Asset[] = useAssetsWithImageCount();
 
   // Dataset modal state
   const [showDatasetModal, setShowDatasetModal] = useState(false);
@@ -107,6 +134,7 @@ export default function AllPresentations() {
       name: presentationName,
       userID: userId,
       createdAt: new Date(),
+      assetID: "",
     });
     clearModel();
     loadPresentations();
@@ -130,11 +158,16 @@ export default function AllPresentations() {
   // Open modal and load datasets for the selected presentation
   async function openPresentationModal(presentation: Presentation) {
     setSelectedPresentation(presentation);
+    // Prefer the canonical field assetID, but fall back to legacy assetId if present
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const legacy = (presentation as any).assetId as string | undefined;
+    setSelectedAssetId(presentation.assetID || legacy || "");
     await loadDatasets(presentation._id!);
   }
 
   function closePresentationModal() {
     setSelectedPresentation(null);
+    setSelectedAssetId("");
   }
 
   // --- Dataset Modal Logic ---
@@ -206,135 +239,243 @@ export default function AllPresentations() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+      }}
+    >
       {/* Toolbar */}
       <Toolbar
         title="Presentations"
         actions={
-          <>
-            <button
-              className="bg-white text-cyan-700 font-semibold px-4 py-2 rounded shadow hover:bg-cyan-100 transition-colors"
-              onClick={showModel}
-            >
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained" onClick={showModel}>
               Create Presentation
-            </button>
-            <button
-              className="bg-cyan-700 text-white font-semibold px-4 py-2 rounded shadow hover:bg-cyan-800 transition-colors"
-              onClick={handleHome}
-            >
+            </Button>
+            <Button variant="contained" onClick={handleHome}>
               Home
-            </button>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition-colors"
-              onClick={handleLogout}
-            >
+            </Button>
+            <Button variant="contained" onClick={handleLogout}>
               Logout
-            </button>
-          </>
+            </Button>
+          </Stack>
         }
       />
       {/* Create Presentation Modal */}
-      <Modal isOpen={showModal} onClose={clearModel} widthClass="w-96">
-        <h3 className="text-xl font-semibold mb-4">
-          Enter the name of your new presentation
-        </h3>
-        <input
-          className="border p-2 w-full mb-4"
-          placeholder="Presentation Name"
-          value={presentationName}
-          onChange={(e) => setPresentationName(e.target.value)}
-        />
-        {message && (
-          <div className="text-red-500 mb-2 text-center">{message}</div>
-        )}
-        <button
-          className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors w-full"
-          onClick={handleCreate}
-          disabled={!presentationName.trim()}
-        >
-          Create
-        </button>
+      <Modal isOpen={showModal} onClose={clearModel} maxwidth={"550px"}>
+        <Stack spacing={2}>
+          <Typography variant="h5">
+            Enter the name of your new presentation
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TextField
+              label="Presentation Name"
+              value={presentationName}
+              onChange={(e) => setPresentationName(e.target.value)}
+            />
+            {message && <Alert severity="info">{message}</Alert>}
+            <Button
+              variant="contained"
+              onClick={handleCreate}
+              disabled={!presentationName.trim()}
+            >
+              Create
+            </Button>
+          </Stack>
+        </Stack>
       </Modal>
       {/* Presentation Tiles */}
-      <div className="flex flex-col items-center justify-center flex-1 w-full">
-        <h1 className="text-3xl font-bold mb-8">All Presentations</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-5xl px-4">
+      <Box
+        sx={{
+          width: 1,
+          px: 8,
+          py: 4,
+        }}
+      >
+        <Typography
+          variant="h2"
+          sx={{
+            mb: 3,
+            textAlign: "center",
+          }}
+        >
+          All Presentations
+        </Typography>
+        <Grid container spacing={9} sx={{ width: 1 }}>
           {presentations.map((presentation) => (
-            <div
-              key={presentation._id}
-              className="cursor-pointer bg-cyan-100 border border-cyan-300 rounded-lg shadow-md p-6 flex flex-col items-center justify-center hover:bg-cyan-200 transition-colors"
-              onClick={async () => await openPresentationModal(presentation)}
-            >
-              <div className="text-xl font-semibold mb-2 text-center text-cyan-900">
-                {presentation.name}
-              </div>
-              <div className="text-gray-600 text-sm text-center">
-                Added:{" "}
-                {presentation.createdAt
-                  ? new Date(presentation.createdAt).toLocaleDateString()
-                  : ""}
-              </div>
-            </div>
+            <Grid size={4} key={presentation._id}>
+              <Card>
+                <CardActionArea
+                  key={presentation._id}
+                  onClick={async () =>
+                    await openPresentationModal(presentation)
+                  }
+                  sx={{ height: "100%", display: "flex", p: 5 }}
+                >
+                  <CardContent
+                    sx={{
+                      textAlign: "center",
+                      p: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Typography variant="h3" sx={{ fontWeight: 800 }}>
+                      {presentation.name}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary">
+                      Added:{" "}
+                      {presentation.createdAt
+                        ? new Date(presentation.createdAt).toLocaleDateString()
+                        : ""}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
           ))}
-        </div>
-      </div>
+        </Grid>
+      </Box>
       {/* Presentation Details Modal */}
       <Modal
         isOpen={!!selectedPresentation}
         onClose={closePresentationModal}
-        widthClass="w-[60rem] max-w-full"
+        maxwidth={"60vw"}
       >
         {selectedPresentation && (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
+            <Box sx={{ textAlign: "center", mb: 2 }}>
+              <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                 {selectedPresentation.name}
-              </h2>
-              <div className="flex gap-3">
-                <button
-                  className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors"
-                  onClick={openDatasetModal}
-                >
-                  Add Dataset
-                </button>
-                <button
-                  className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePresentDataset(selectedPresentation);
-                  }}
-                >
-                  Present
-                </button>
-              </div>
-            </div>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Added:{" "}
+                {selectedPresentation.createdAt
+                  ? new Date(
+                      selectedPresentation.createdAt,
+                    ).toLocaleDateString()
+                  : ""}
+              </Typography>
+            </Box>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Select
+                value={selectedAssetId}
+                onChange={async (e) => {
+                  const assetId = e.target.value;
+                  setSelectedAssetId(assetId);
+                  if (selectedPresentation && selectedPresentation._id) {
+                    // Update the presentation's assetID (canonical field)
+                    await Meteor.callAsync(
+                      "presentations.update",
+                      selectedPresentation._id,
+                      { assetID: assetId },
+                    );
+                    // Update all datasets for this presentation to set assetId
+                    if (datasets && datasets.length > 0) {
+                      for (const dataset of datasets) {
+                        if (dataset._id) {
+                          await Meteor.callAsync(
+                            "datasets.update",
+                            dataset._id,
+                            { assetId },
+                          );
+                        }
+                      }
+                    }
+                  }
+                }}
+                displayEmpty
+                sx={{ minWidth: 180 }}
+                renderValue={(selected) => {
+                  if (!selected) return "Select Asset";
+                  const found = assets.find((a) => a._id === selected);
+                  return found ? found.name : "Select Asset";
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {assets.map((asset) => (
+                  <MenuItem value={asset._id} key={asset._id}>
+                    {asset.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button variant="contained" onClick={openDatasetModal}>
+                Add Dataset
+              </Button>
+              <Button
+                variant="contained"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePresentDataset(selectedPresentation);
+                }}
+              >
+                Present
+              </Button>
+            </Stack>
             {/* DATASET TILES */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                mt: 2,
+              }}
+            >
               {datasets && datasets.length > 0 ? (
                 datasets.map((dataset: Dataset, idx: number) => (
-                  <div
-                    key={dataset._id || idx}
-                    className="bg-cyan-50 border border-cyan-200 rounded-lg shadow p-4 flex flex-col items-center cursor-pointer hover:bg-cyan-100 transition-colors"
-                    onClick={() => handleShowDatasetSummary(dataset)}
-                  >
-                    <div className="text-lg font-semibold mb-1 text-cyan-900 text-center w-full">
-                      {dataset.title}
-                    </div>
-                    <div className="text-gray-600 text-sm mb-1">
-                      {dataset.data ? dataset.data.length : 0} data point
-                      {dataset.data && dataset.data.length !== 1 ? "s" : ""}
-                    </div>
-                    <div className="text-gray-700 text-xs mb-2">
-                      Chart: {dataset.preferredChartType}
-                    </div>
-                  </div>
+                  <Grid size={6} key={dataset._id || idx}>
+                    <Card>
+                      <CardActionArea
+                        onClick={() => handleShowDatasetSummary(dataset)}
+                        sx={{ p: 2 }}
+                      >
+                        <Box sx={{ textAlign: "center" }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {dataset.title}
+                          </Typography>
+                          <Typography variant="subtitle2">
+                            {dataset.preferredChartType === ChartType.BAR
+                              ? "Bar chart"
+                              : "Line chart"}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {dataset.data ? dataset.data.length : 0} data point
+                            {dataset.data && dataset.data.length !== 1
+                              ? "s"
+                              : ""}
+                          </Typography>
+                        </Box>
+                      </CardActionArea>
+                    </Card>
+                  </Grid>
                 ))
               ) : (
-                <div className="col-span-2 text-center text-gray-500">
-                  No datasets yet.
-                </div>
+                <Grid size={12}>
+                  <Typography variant="h5">No datasets yet.</Typography>
+                </Grid>
               )}
-            </div>
+            </Grid>
           </>
         )}
       </Modal>
@@ -342,97 +483,104 @@ export default function AllPresentations() {
       <Modal
         isOpen={showDatasetSummary && !!summaryDataset}
         onClose={handleCloseDatasetSummary}
-        widthClass="w-[28rem] max-w-full"
+        maxwidth={"50vw"}
       >
         {summaryDataset && (
-          <>
-            <h3 className="text-xl font-semibold mb-4">Dataset Summary</h3>
-            <div className="mb-2">
-              <span className="font-bold">Title:</span> {summaryDataset.title}
-            </div>
-            <div className="mb-2">
-              <span className="font-bold">Chart Type:</span>{" "}
-              {summaryDataset.preferredChartType}
-            </div>
-            <div className="mb-2">
-              <span className="font-bold">Number of Data Points:</span>{" "}
-              {summaryDataset.data ? summaryDataset.data.length : 0}
-            </div>
-            <div className="mb-2">
+          <Stack spacing={2}>
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+                Dataset Summary
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                {summaryDataset.title}
+              </Typography>
+              <Typography variant="subtitle2">
+                {summaryDataset.preferredChartType === ChartType.BAR
+                  ? "Bar chart"
+                  : "Line chart"}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {summaryDataset.data ? summaryDataset.data.length : 0} data
+                point
+                {summaryDataset.data && summaryDataset.data.length !== 1
+                  ? "s"
+                  : ""}
+              </Typography>
+            </Box>
+            <Typography variant="h5">
               <span className="font-bold">Sample Data:</span>
-            </div>
-            <div className="bg-gray-100 rounded p-2 text-xs max-h-40 overflow-auto mb-4">
+            </Typography>
+            <Stack>
               {summaryDataset.data && summaryDataset.data.length > 0 ? (
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className="text-left pr-2">Label</th>
-                      <th className="text-left">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {summaryDataset.data.slice(0, 10).map((dp, i) => (
-                      <tr key={i}>
-                        <td className="pr-2">{dp.label}</td>
-                        <td>{dp.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    maxHeight: "40vh",
+                    overflow: "auto",
+                  }}
+                >
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left">Label</TableCell>
+                        <TableCell align="left">Value</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {summaryDataset.data.slice(0, 10).map((dp, i) => (
+                        <TableRow key={i}>
+                          <TableCell>{dp.label}</TableCell>
+                          <TableCell>{dp.value}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               ) : (
-                <div>No data points.</div>
+                <Typography variant="h5">No data points.</Typography>
               )}
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                onClick={handleDeleteDataset}
-              >
-                Delete
-              </button>
-            </div>
-          </>
+            </Stack>
+            <Button onClick={handleDeleteDataset}>Delete</Button>
+          </Stack>
         )}
       </Modal>
       {/* Add Dataset Modal */}
       <Modal
         isOpen={showDatasetModal}
         onClose={closeDatasetModal}
-        widthClass="w-[32rem] max-w-full"
+        maxwidth={"40vw"}
       >
-        <h3 className="text-xl font-semibold mb-4">Add Dataset</h3>
-        <input
-          className="border p-2 w-full mb-4"
-          placeholder="Dataset Title"
-          value={datasetTitle}
-          onChange={(e) => setDatasetTitle(e.target.value)}
-        />
-        <select
-          className="border p-2 w-full mb-4"
-          value={datasetChartType}
-          onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
-        >
-          <option value={ChartType.BAR}>Bar</option>
-          <option value={ChartType.LINE}>Line</option>
-        </select>
-        <textarea
-          className="border p-2 w-full mb-4"
-          placeholder={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`}
-          value={datasetCSV}
-          onChange={(e) => setDatasetCSV(e.target.value)}
-          rows={6}
-        />
-        {datasetMessage && (
-          <div className="text-red-500 mb-2 text-center">{datasetMessage}</div>
-        )}
-        <button
-          className="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600 transition-colors w-full"
-          onClick={handleCreateDataset}
-          disabled={!datasetTitle.trim() || !datasetCSV.trim()}
-        >
-          Create Dataset
-        </button>
+        <Stack spacing={2}>
+          <Typography variant="h3">Add Dataset</Typography>
+          <TextField
+            label="Dataset Title"
+            variant="outlined"
+            value={datasetTitle}
+            onChange={(e) => setDatasetTitle(e.target.value)}
+          />
+          <Select
+            value={datasetChartType}
+            onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
+          >
+            <MenuItem value={ChartType.BAR}>Bar</MenuItem>
+            <MenuItem value={ChartType.LINE}>Line</MenuItem>
+          </Select>
+          <TextField
+            label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`}
+            value={datasetCSV}
+            onChange={(e) => setDatasetCSV(e.target.value)}
+            multiline
+            maxRows={6}
+          />
+          {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
+          <Button
+            onClick={handleCreateDataset}
+            disabled={!datasetTitle.trim() || !datasetCSV.trim()}
+          >
+            Create Dataset
+          </Button>
+        </Stack>
       </Modal>
-    </div>
+    </Box>
   );
 }

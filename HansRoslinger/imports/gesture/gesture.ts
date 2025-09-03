@@ -14,6 +14,8 @@ enum GestureType {
   THUMB_DOWN,
   THUMB_UP,
   VICTORY, // This is the peace sign
+  PINCH, // Team 3 double hand gesture
+  DOUBLE_PINCH,
   TWO_FINGER_POINTING_LEFT,
   TWO_FINGER_POINTING_RIGHT,
 }
@@ -37,23 +39,27 @@ export const IDtoEnum: Record<string, GestureType> = {
   Unidentified: GestureType.UNIDENTIFIED,
   Open_Palm: GestureType.OPEN_PALM,
   Victory: GestureType.VICTORY,
+  Pinch: GestureType.PINCH,
+  Double_Pinch: GestureType.DOUBLE_PINCH,
   Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
   Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
 };
 
-export const EnumToFunc: Record<FunctionType, any> = {
-  [FunctionType.UNUSED]: console.log,
-  [FunctionType.SELECT]: select,
-  [FunctionType.FILTER]: filter,
-  [FunctionType.CLEAR]: clear,
-  [FunctionType.ZOOM]: zoom,
-  [FunctionType.SWITCH_CHART]: processSwitchChartType,
-  [FunctionType.SWITCH_DATA]: processSwitchDataset,
+type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
+export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
+  [FunctionType.UNUSED]: (() => {}) as GestureHandlerFn,
+  [FunctionType.SELECT]: select as GestureHandlerFn,
+  [FunctionType.FILTER]: filter as GestureHandlerFn,
+  [FunctionType.CLEAR]: clear as GestureHandlerFn,
+  [FunctionType.ZOOM]: zoom as GestureHandlerFn,
+  [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
+  [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
 };
 
 enum Handedness {
   LEFT = "Left",
   RIGHT = "Right",
+  BOTH = "Both",
 }
 
 type Gesture = {
@@ -61,36 +67,42 @@ type Gesture = {
   timestamp: Date;
   handedness: Handedness;
   confidence: number; // 0-1
-  landmarks: { x: number; y: number; z?: number }[];
+  singleGestureLandmarks: { x: number; y: number; z?: number }[];
+  doubleGestureLandmarks: { x: number; y: number; z?: number }[][];
 };
 
 // Define a boolean to track the zoom state
 let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
-// Watch for the "chart:zoom" event and toggle the boolean
-window.addEventListener("chart:togglezoom", (event: Event) => {
-  const customEvent = event as CustomEvent<{ x: number; y: number }>;
-  isZoomEnabled = !isZoomEnabled;
-  if (isZoomEnabled && customEvent.detail) {
-    const { x, y } = customEvent.detail;
-    zoomStartPosition = { x: x, y: y };
-    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-  } else {
-    zoomStartPosition = null;
-    console.log(`Zoom disabled.`);
-  }
-});
+if (typeof window !== "undefined") {
+  // Watch for the "chart:zoom" event and toggle the boolean
+  window.addEventListener("chart:togglezoom", (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    isZoomEnabled = !isZoomEnabled;
+    if (isZoomEnabled && customEvent.detail) {
+      const { x, y } = customEvent.detail;
+      zoomStartPosition = { x: x, y: y };
+      // console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+      document?.body?.classList.add("zoom-active-outline");
+    } else {
+      zoomStartPosition = null;
+      document?.body?.classList.remove("zoom-active-outline");
+    }
+  });
+}
 
-const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.UNUSED,
-  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-  [GestureType.POINTING_UP]: FunctionType.SELECT,
+const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
-  [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.POINTING_UP]: FunctionType.SELECT,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.VICTORY]: FunctionType.UNUSED,
+  [GestureType.PINCH]: FunctionType.UNUSED,
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
   [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
   [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
@@ -101,18 +113,19 @@ const handleGestureToFunc = (
   latestGesture: Gesture,
 ): void => {
   const label = INPUT;
-
   if (isZoomEnabled) {
-    // if gesture action is CLEAR, we want to end zoom
-    if (defaultMapping[label] === FunctionType.CLEAR) {
+    // if gesture is closed fist, we want to end zoom
+    if (label === GestureType.CLOSED_FIST) {
       zoom(initialGesture, latestGesture);
-    } else {
+    } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
     const functionType = defaultMapping[label];
     const handler = EnumToFunc[functionType];
 
+    // console.log(`label: ${label}`);
+    // console.log(`functionType: ${functionType}`);
     if (handler && functionType !== FunctionType.UNUSED) {
       // This log helps confirm the correct handler is being called
       console.log(
@@ -138,7 +151,6 @@ export {
   GestureType,
   FunctionType,
   Handedness,
-  defaultMapping,
   handleGestureToFunc,
   isZoomEnabled,
 };

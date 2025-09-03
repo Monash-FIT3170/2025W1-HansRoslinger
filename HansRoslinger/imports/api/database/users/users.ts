@@ -1,4 +1,4 @@
-import { hashPassword, verifyPassword } from "./util";
+import { verifyPassword } from "./util";
 import { Mongo } from "meteor/mongo";
 import { GestureType, FunctionType } from "/imports/gesture/gesture";
 

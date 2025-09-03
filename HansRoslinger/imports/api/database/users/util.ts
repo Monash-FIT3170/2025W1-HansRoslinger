@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export type ValidationResult = { valid: boolean; message?: string };
 
@@ -50,13 +50,13 @@ export function validatePassword(password: string): ValidationResult {
   return { valid: true };
 }
 
-export async function hashPassword(password: string): string {
+export async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
   const hash = await bcrypt.hash(password, saltRounds);
   return hash;
 }
 
-async function verifyPassword(password, hash) {
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   const match = await bcrypt.compare(password, hash);
   return match; 
-};
+}

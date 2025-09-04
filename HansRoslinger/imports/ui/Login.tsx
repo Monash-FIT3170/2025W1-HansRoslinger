@@ -68,16 +68,34 @@ export const Login: React.FC = () => {
 
   const quotes = [
     { text: "This deserves at least a HD!", author: "- Adrian K" },
-    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C" },
-    { text: "This is the greatest thing I've ever seen!", author: "- Jiale H." },
+    {
+      text: "Who is Hans Roslinger and why does he look like Sean Lock?",
+      author: "- Max C",
+    },
+    {
+      text: "This is the greatest thing I've ever seen!",
+      author: "- Jiale H.",
+    },
     { text: "The future of presenting is here.", author: "- Mayank B." },
-    { text: "Presentations are finally right at my fingertips.", author: "- Ranusha L." },
+    {
+      text: "Presentations are finally right at my fingertips.",
+      author: "- Ranusha L.",
+    },
     { text: "Every gesture feels like a thought.", author: "- Shehara H." },
     { text: "So many datasets, so many possibilities!", author: "- Nathan M." },
-    { text: "It's like zoom and powerpoint combined!", author: "- Harkirat S." },
+    {
+      text: "It's like zoom and powerpoint combined!",
+      author: "- Harkirat S.",
+    },
     { text: "So beautiful I might cry", author: "- Tejeshvi S." },
-    { text: "You're telling me this was built by undergraduates? Amazing!", author: "- Connor M." },
-    { text: "Customisable gestures are a dream come true!", author: "- Liam C." },
+    {
+      text: "You're telling me this was built by undergraduates? Amazing!",
+      author: "- Connor M.",
+    },
+    {
+      text: "Customisable gestures are a dream come true!",
+      author: "- Liam C.",
+    },
     { text: "I love using the zoom! It's so intuitive!", author: "- Bhanu W." },
     { text: "Awesome!", author: "- Agamjot S." },
   ];

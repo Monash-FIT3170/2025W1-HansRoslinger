@@ -339,10 +339,12 @@ export const Present: React.FC = () => {
       {/* Gesture Detection Toggle Button */}
       <Button
         variant="contained"
-        onClick={() => {setGestureDetectionStatus(!gestureDetectionStatus)}}
+        onClick={() => {
+          setGestureDetectionStatus(!gestureDetectionStatus);
+        }}
         id="gesture-detection-toggle"
         sx={{
-          position:"absolute",
+          position: "absolute",
           top: 40,
           right: 40,
           width: 120,

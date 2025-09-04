@@ -171,48 +171,54 @@ const GestureDetector = (
     if (!gestureDetectionStatus) {
       // Only check for pinching as user may click gesture detection toggle button to turn it back on
       for (let index = 0; index < currentGestures.length; index++) {
-        if (currentGestures[index] && currentGestures[index].gestureID == GestureType.PINCH) {
+        if (
+          currentGestures[index] &&
+          currentGestures[index].gestureID == GestureType.PINCH
+        ) {
           // Confirm that the correct gesture ID number is being sent
           console.log(
             `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`,
           );
           HandleGesture(currentGestures[index]);
         }
-    }
+      }
     } else {
-    let twoHandedGesture: Gesture | undefined;
-    if (leftGesture && rightGesture) {
-      if (isDoublePinchSign(leftGesture, rightGesture)) {
-        twoHandedGesture = {
-          gestureID: GestureType.DOUBLE_PINCH,
-          handedness: Handedness.BOTH,
-          timestamp: new Date(),
-          confidence: Math.min(leftGesture.confidence, rightGesture.confidence),
-          singleGestureLandmarks: [],
-          doubleGestureLandmarks: [
-            leftGesture.singleGestureLandmarks,
-            rightGesture.singleGestureLandmarks,
-          ],
-        };
+      let twoHandedGesture: Gesture | undefined;
+      if (leftGesture && rightGesture) {
+        if (isDoublePinchSign(leftGesture, rightGesture)) {
+          twoHandedGesture = {
+            gestureID: GestureType.DOUBLE_PINCH,
+            handedness: Handedness.BOTH,
+            timestamp: new Date(),
+            confidence: Math.min(
+              leftGesture.confidence,
+              rightGesture.confidence,
+            ),
+            singleGestureLandmarks: [],
+            doubleGestureLandmarks: [
+              leftGesture.singleGestureLandmarks,
+              rightGesture.singleGestureLandmarks,
+            ],
+          };
+        }
+        //here you can add an else if to add other two handed gestures
+        if (twoHandedGesture) {
+          HandleGesture(twoHandedGesture);
+          return;
+        }
       }
-      //here you can add an else if to add other two handed gestures
-      if (twoHandedGesture) {
-        HandleGesture(twoHandedGesture);
-        return;
-      }
-    }
 
-    // this code will only run if a two-handed gesture was not detected
-    for (let index = 0; index < currentGestures.length; index++) {
-      if (currentGestures[index]) {
-        // Confirm that the correct gesture ID number is being sent
-        console.log(
-          `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`,
-        );
-        HandleGesture(currentGestures[index]);
+      // this code will only run if a two-handed gesture was not detected
+      for (let index = 0; index < currentGestures.length; index++) {
+        if (currentGestures[index]) {
+          // Confirm that the correct gesture ID number is being sent
+          console.log(
+            `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`,
+          );
+          HandleGesture(currentGestures[index]);
+        }
       }
     }
-  }
   }, [currentGestures]);
 };
 

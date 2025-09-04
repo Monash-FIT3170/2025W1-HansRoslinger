@@ -74,6 +74,7 @@ const Functions = [
 const Settings: React.FC = () => {
   const [state, setState] =
     useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = getAuthCookie()?.userId;

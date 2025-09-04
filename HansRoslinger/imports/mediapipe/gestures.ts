@@ -13,7 +13,6 @@ import {
   IDtoEnum,
 } from "../gesture/gesture";
 import GestureHandler from "../gesture/GestureHandler";
-import { truncate } from "fs";
 
 export const gestureDetector = (
   videoRef: MutableRefObject<Webcam | null>,

@@ -124,7 +124,7 @@ const Settings: React.FC = () => {
           "\n" +
           cookie.userId +
           "\n" +
-          JSON.stringify(state),
+          JSON.stringify(state),  
       );
     } else {
       alert("Not logged in");

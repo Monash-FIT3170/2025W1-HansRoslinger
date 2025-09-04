@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../handlers/auth/authHandlers";
 import { setAuthCookie } from "../cookies/cookies";
@@ -68,28 +68,31 @@ export const Login: React.FC = () => {
 
   const quotes = [
     { text: "This deserves at least a HD!", author: "- Adrian K" },
-    {
-      text: "Who is Hans Roslinger and why does he look like Sean Lock?",
-      author: "- Max C",
-    },
-    {
-      text: "Presentations are literally in the palm of my hands!",
-      author: "- Alan T.",
-    },
-    { text: "My boss thinks I'm a genius now.", author: "- Grace H." },
-    { text: "So modern, so easy!", author: "- Linus T." },
-    { text: "I wish I had this years ago.", author: "- Donald K." },
-    { text: "The best thing since sliced bread.", author: "- Tim B.L." },
+    { text: "Who is Hans Roslinger and why does he look like Sean Lock?", author: "- Max C" },
+    { text: "This is the greatest thing I've ever seen!", author: "- Jiale H." },
+    { text: "The future of presenting is here.", author: "- Mayank B." },
+    { text: "Presentations are finally right at my fingertips.", author: "- Ranusha L." },
+    { text: "Every gesture feels like a thought.", author: "- Shehara H." },
+    { text: "So many datasets, so many possibilities!", author: "- Nathan M." },
+    { text: "It's like zoom and powerpoint combined!", author: "- Harkirat S." },
+    { text: "So beautiful I might cry", author: "- Tejeshvi S." },
+    { text: "You're telling me this was built by undergraduates? Amazing!", author: "- Connor M." },
+    { text: "Customisable gestures are a dream come true!", author: "- Liam C." },
+    { text: "I love using the zoom! It's so intuitive!", author: "- Bhanu W." },
+    { text: "Awesome!", author: "- Agamjot S." },
   ];
 
   const [floatingQuotes, setFloatingQuotes] = useState<FloatingQuote[]>([]);
+  const nextQuoteRef = useRef<number>(0);
 
   useEffect(() => {
     const addQuote = () => {
+      const idx = nextQuoteRef.current % quotes.length;
+      nextQuoteRef.current = (nextQuoteRef.current + 1) % quotes.length;
       setFloatingQuotes((prev) => [
         ...prev,
         {
-          idx: Math.floor(Math.random() * quotes.length),
+          idx,
           x: -40,
           y: 300 + Math.random() * (window.innerHeight - 320),
           speed: 0.075 + Math.random() * 0.05,
@@ -98,7 +101,7 @@ export const Login: React.FC = () => {
       ]);
     };
     addQuote();
-    const interval = setInterval(addQuote, 10000);
+    const interval = setInterval(addQuote, 7000);
     return () => clearInterval(interval);
   }, []);
 

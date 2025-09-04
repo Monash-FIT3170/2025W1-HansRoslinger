@@ -91,7 +91,7 @@ export default function AllPresentations() {
   const [datasetCSV, setDatasetCSV] = useState("");
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetChartType, setDatasetChartType] = useState<ChartType>(
-    ChartType.BAR
+    ChartType.BAR,
   );
   const [datasetMessage, setDatasetMessage] = useState<string | null>(null);
 
@@ -246,7 +246,8 @@ export default function AllPresentations() {
         alignItems: "center",
         justifyContent: "flex-start",
         minHeight: "100vh",
-        backgroundColor: "#F5F5F5",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       {/* Toolbar */}
@@ -366,7 +367,7 @@ export default function AllPresentations() {
                 Added:{" "}
                 {selectedPresentation.createdAt
                   ? new Date(
-                      selectedPresentation.createdAt
+                      selectedPresentation.createdAt,
                     ).toLocaleDateString()
                   : ""}
               </Typography>
@@ -387,7 +388,7 @@ export default function AllPresentations() {
                     await Meteor.callAsync(
                       "presentations.update",
                       selectedPresentation._id,
-                      { assetID: assetId }
+                      { assetID: assetId },
                     );
                     // Update all datasets for this presentation to set assetId
                     if (datasets && datasets.length > 0) {
@@ -396,7 +397,7 @@ export default function AllPresentations() {
                           await Meteor.callAsync(
                             "datasets.update",
                             dataset._id,
-                            { assetId }
+                            { assetId },
                           );
                         }
                       }

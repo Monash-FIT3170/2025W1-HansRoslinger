@@ -1,4 +1,4 @@
-import { hashPassword } from "./util";
+import { verifyPassword } from "./util";
 import { Mongo } from "meteor/mongo";
 import { GestureType, FunctionType, defaultMapping } from "/imports/gesture/gesture";
 
@@ -91,6 +91,5 @@ export async function correctLogin(
 ): Promise<boolean> {
   const user = await getUserByEmail(email);
   if (!user) return false;
-  const hashed = hashPassword(password);
-  return user.password === hashed;
+  return verifyPassword(password, user.password);
 }

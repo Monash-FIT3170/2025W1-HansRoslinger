@@ -6,13 +6,11 @@ variable "project_id" {
 variable "region" {
   description = "The GCP region"
   type        = string
-  default     = "australia-southeast1"
 }
 
 variable "repository_name" {
-  description = "The name of the Artifact Registry repository"
+  description = "The Artifact Registry repository name"
   type        = string
-  default     = "my-artifact-repo"
 }
 
 variable "bucket_name" {
@@ -21,7 +19,6 @@ variable "bucket_name" {
 }
 
 variable "bucket_location" {
-  description = "The location for the GCS bucket (defaults to region if not set)"
+  description = "Location for the GCS bucket"
   type        = string
-  default     = null
 }

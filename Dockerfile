@@ -29,6 +29,9 @@ FROM node:20
 # Set environment variables
 ENV PORT=3000
 ENV ROOT_URL=http://127.0.0.1
+ENV LOCATION=us-central1
+ENV BUCKET_NAME=hansroslinger-assets-us
+
 # ENV MONGO_URL=mongodb://user:pass@mongo:27017/dbname
 
 # Create app directory in the runtime container

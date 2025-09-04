@@ -1,15 +1,14 @@
 import React from "react";
 import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   backgroundRemoval: boolean;
   grayscale: boolean;
   showLineChart: boolean;
-  gestureDetectionStatus: boolean;
   onToggleBackgroundRemoval: () => void;
   onToggleGrayscale: () => void;
   onToggleChart: () => void;
-  onToggleGestureDetectionStatus: () => void;
   showAssets: boolean;
   setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
@@ -18,34 +17,31 @@ export const Header: React.FC<HeaderProps> = ({
   backgroundRemoval,
   grayscale,
   showLineChart,
-  gestureDetectionStatus,
   onToggleBackgroundRemoval,
   onToggleGrayscale,
   onToggleChart,
-  onToggleGestureDetectionStatus,
   showAssets,
   setShowAssets,
-}) => (
+}) => {
+  const navigate = useNavigate();
+  return (
     <>
-      {/* Gesture Detection */}
+      {/* Back to All Presentations */}
       <Button
         variant="contained"
-        onClick={onToggleGestureDetectionStatus}
-        id="toggle-gesture-detection"
+        onClick={() => navigate("/allpresentations")}
         sx={{
           width: 40,
           height: 40,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
-          backgroundColor: gestureDetectionStatus ? "cyan.400" : "grey.700",
-          color: gestureDetectionStatus ? "black" : "white",
-          "&:hover": {
-            backgroundColor: gestureDetectionStatus ? "cyan.300" : "grey.600",
-          },
+          backgroundColor: "grey.700",
+          color: "white",
+          "&:hover": { backgroundColor: "grey.600" },
         }}
       >
-        GD
+        Back
       </Button>
 
       {/* Background Removal */}
@@ -131,3 +127,4 @@ export const Header: React.FC<HeaderProps> = ({
       </Button>
     </>
   );
+};

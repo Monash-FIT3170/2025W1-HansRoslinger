@@ -1,21 +1,21 @@
 import { updateDataset } from "/imports/api/database/dataset/dataset";
-import { WebApp } from 'meteor/webapp';
-import fetch from 'node-fetch';
+import { WebApp } from "meteor/webapp";
+import fetch from "node-fetch";
 
 // Meteor method to update a dataset
 Meteor.methods({
-  async 'datasets.update'(datasetId: string, updates: any) {
+  async "datasets.update"(datasetId: string, updates: any) {
     return await updateDataset(datasetId, updates);
   },
 });
 import { updatePresentation } from "/imports/api/database/presentations/presentations";
 // Meteor method to update a presentation
 Meteor.methods({
-  async 'presentations.update'(presentationId: string, updates: any) {
+  async "presentations.update"(presentationId: string, updates: any) {
     return await updatePresentation(presentationId, updates);
   },
 });
-import './gcp';
+import "./gcp";
 import { Meteor } from "meteor/meteor";
 import { UserCollection } from "/imports/api/database/users/users";
 import { PresentationCollection } from "/imports/api/database/presentations/presentations";
@@ -33,11 +33,10 @@ Meteor.startup(async () => {
   Meteor.publish("datasets", function () {
     return DatasetCollection.find();
   });
-  Meteor.publish('images', function () {
+  Meteor.publish("images", function () {
     return ImageCollection.find();
   });
-  Meteor.publish('assets', function () {
+  Meteor.publish("assets", function () {
     return AssetCollection.find();
   });
-  
 });

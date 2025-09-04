@@ -25,6 +25,8 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.UNIDENTIFIED]: "Unidentified",
   [GestureType.OPEN_PALM]: "Open Palm",
   [GestureType.VICTORY]: "Victory",
+  [GestureType.PINCH]: "Pinch",
+  [GestureType.DOUBLE_PINCH]: "Double Pinch",
   [GestureType.TWO_FINGER_POINTING_LEFT]: "Two Fingers Pointing Left",
   [GestureType.TWO_FINGER_POINTING_RIGHT]: "Two Fingers Pointing Right",
 };
@@ -33,7 +35,8 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SELECT]: "Select",
   [FunctionType.CLEAR]: "Clear",
   [FunctionType.FILTER]: "Filter",
-  [FunctionType.ZOOM]: "Zoom",
+  [FunctionType.CLICK]: "Click",
+  // [FunctionType.ZOOM]: "Zoom",
   [FunctionType.SWITCH_CHART]: "Switch Chart",
   [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
@@ -47,6 +50,8 @@ const Gestures = [
   GestureType.THUMB_DOWN,
   GestureType.THUMB_UP,
   GestureType.VICTORY,
+  GestureType.PINCH,
+  // GestureType.DOUBLE_PINCH,
   GestureType.TWO_FINGER_POINTING_LEFT,
   GestureType.TWO_FINGER_POINTING_RIGHT,
 ];
@@ -57,6 +62,9 @@ const Functions = [
   FunctionType.FILTER,
   FunctionType.CLEAR,
   FunctionType.ZOOM,
+  FunctionType.CLICK,
+  FunctionType.SWITCH_CHART,
+  FunctionType.SWITCH_DATA
 ];
 
 const Settings: React.FC = () => {
@@ -103,11 +111,18 @@ const Settings: React.FC = () => {
 
   const navigate = useNavigate();
   const handleReturn = () => {
-    navigate("/");
+    navigate("/home");
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box
+      sx={{
+        p: 2,
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+      }}
+    >
       <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>

@@ -149,7 +149,9 @@ const Settings: React.FC = () => {
           Settings
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Here you can configure the mapping from a gesture to a specific action within HansRoslinger. If you would like to disable a gesture, set it to &quot;None&quot;.
+          Here you can configure the mapping from a gesture to a specific action
+          within HansRoslinger. If you would like to disable a gesture, set it
+          to &quot;None&quot;.
         </Typography>
       </Box>
 
@@ -177,7 +179,9 @@ const Settings: React.FC = () => {
                     fullWidth
                     size="small"
                     value={state[gesture] ?? FunctionType.UNUSED}
-                    onChange={(e) => handleChange(gesture, e.target.value as FunctionType)}
+                    onChange={(e) =>
+                      handleChange(gesture, e.target.value as FunctionType)
+                    }
                   >
                     {Functions.map((option) => (
                       <MenuItem key={option} value={option}>
@@ -192,11 +196,11 @@ const Settings: React.FC = () => {
         </Table>
       </TableContainer>
 
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 5 }}>
         <Button
           variant="outlined"
           onClick={handleReturn}
-      sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
+          sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
         >
           Return
         </Button>
@@ -205,7 +209,7 @@ const Settings: React.FC = () => {
           variant="contained"
           color="primary"
           onClick={handleSave}
-      sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
+          sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
         >
           Save
         </Button>

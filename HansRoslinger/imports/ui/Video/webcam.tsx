@@ -1,19 +1,22 @@
 import React, { useRef } from "react"; // Import React
 import Webcam from "react-webcam";
-import GestureDetector from "/imports/mediapipe/gestures";
+import { gestureDetector } from "/imports/mediapipe/gestures";
+import { GestureType, FunctionType } from "/imports/gesture/gesture";
 
 interface WebcamProps {
   grayscale: boolean;
   gestureDetectionStatus: boolean;
+  settings: Record<GestureType, FunctionType>
 }
 
 export const WebcamComponent: React.FC<WebcamProps> = ({
   grayscale,
   gestureDetectionStatus,
+  settings
 }) => {
   const webcamRef = useRef<Webcam | null>(null);
 
-  GestureDetector(webcamRef, gestureDetectionStatus);
+  gestureDetector(webcamRef, gestureDetectionStatus, settings);
 
   return (
     <div

@@ -95,6 +95,10 @@ if (typeof window !== "undefined") {
   });
 }
 
+const constantMapping: Record<GestureType, FunctionType> = {
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
+};
+
 const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
@@ -114,34 +118,41 @@ const handleGestureToFunc = (
   INPUT: GestureType,
   initialGesture: Gesture,
   latestGesture: Gesture,
+  mapping: Record<GestureType, FunctionType>
 ): void => {
   const label = INPUT;
   if (isZoomEnabled) {
+    console.log(mapping[label], FunctionType.FILTER);
     // if gesture is closed fist, we want to end zoom
-    if (label === GestureType.CLOSED_FIST) {
+    if (mapping[label] === FunctionType.FILTER) {
       zoom(initialGesture, latestGesture);
     } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
   } else {
-    const functionType = defaultMapping[label];
+    const functionType = mapping[label];
     const handler = EnumToFunc[functionType];
 
     // console.log(`label: ${label}`);
     // console.log(`functionType: ${functionType}`);
     if (handler && functionType !== FunctionType.UNUSED) {
-      // This log helps confirm the correct handler is being called
       console.log(
         `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
       );
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
-      // This log confirms a gesture is being correctly ignored
+      const defaultFunction = constantMapping[label];
+      const defaultHandler = EnumToFunc[defaultFunction];
+      if (defaultHandler && defaultFunction !== FunctionType.UNUSED) {
+        console.log(
+          `[GestureHandler] Calling default function '${FunctionType[defaultFunction]}' for gesture '${GestureType[label]}'`,
+        );
+        defaultHandler(initialGesture, latestGesture);
+      }
       console.log(
         `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
       );
     } else {
-      // This warning will now only appear for truly unhandled gestures
       console.warn(
         `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
       );
@@ -156,6 +167,7 @@ export {
   Handedness,
   handleGestureToFunc,
   isZoomEnabled,
+  defaultMapping
 };
 
 export const gestureToScreenPosition = (

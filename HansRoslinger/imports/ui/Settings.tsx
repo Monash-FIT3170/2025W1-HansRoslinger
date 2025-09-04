@@ -10,18 +10,11 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { Button, Box } from "@mui/material";
 
-import { GestureType, FunctionType } from "../gesture/gesture";
+import { GestureType, FunctionType, defaultMapping } from "../gesture/gesture";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  setSettingsCookie,
-  getSettingsCookie,
-  getAuthCookie,
-} from "../cookies/cookies";
-import {
-  getUserSettings,
-  updateUserSettings,
-} from "../api/database/users/users";
+import { useNavigate } from 'react-router-dom';
+import { getAuthCookie } from "../cookies/cookies";
+import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -32,13 +25,18 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.UNIDENTIFIED]: "Unidentified",
   [GestureType.OPEN_PALM]: "Open Palm",
   [GestureType.VICTORY]: "Victory",
+  [GestureType.PINCH]: "Pinch",
+  [GestureType.DOUBLE_PINCH]: "Double Pinch",
+  [GestureType.TWO_FINGER_POINTING_LEFT]: "Two Fingers Pointing Left",
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: "Two Fingers Pointing Right",
 };
 
 const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SELECT]: "Select",
   [FunctionType.CLEAR]: "Clear",
   [FunctionType.FILTER]: "Filter",
-  [FunctionType.ZOOM]: "Zoom",
+  [FunctionType.CLICK]: "Click",
+  // [FunctionType.ZOOM]: "Zoom",
   [FunctionType.SWITCH_CHART]: "Switch Chart",
   [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
@@ -52,6 +50,10 @@ const Gestures = [
   GestureType.THUMB_DOWN,
   GestureType.THUMB_UP,
   GestureType.VICTORY,
+  GestureType.PINCH,
+  // GestureType.DOUBLE_PINCH,
+  GestureType.TWO_FINGER_POINTING_LEFT,
+  GestureType.TWO_FINGER_POINTING_RIGHT,
 ];
 
 const Functions = [
@@ -60,19 +62,13 @@ const Functions = [
   FunctionType.FILTER,
   FunctionType.CLEAR,
   FunctionType.ZOOM,
+  FunctionType.CLICK,
+  FunctionType.SWITCH_CHART,
+  FunctionType.SWITCH_DATA
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] = useState<Record<GestureType, FunctionType>>({
-    [GestureType.THUMB_UP]: FunctionType.UNUSED,
-    [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
-    [GestureType.POINTING_UP]: FunctionType.SELECT,
-    [GestureType.CLOSED_FIST]: FunctionType.CLEAR,
-    [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
-    [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
-    [GestureType.OPEN_PALM]: FunctionType.FILTER,
-    [GestureType.VICTORY]: FunctionType.ZOOM,
-  });
+  const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     const userId = getAuthCookie()?.userId;
@@ -80,10 +76,16 @@ const Settings: React.FC = () => {
 
     async function loadSettings() {
       if (userId != null) {
-        const settings = await getUserSettings(userId);
-        if (settings) {
-          setState(settings);
+        const user = await getUserById(userId);
+        
+        if (user != null) {
+          const email = user.email;
+          const settings = await getUserSettings(email);
+          if (settings) {
+            setState(settings);
+          }
         }
+        
       }
     }
 
@@ -97,10 +99,13 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async() => {
     const cookie = getAuthCookie();
-    if (cookie != null && cookie.userId != null) {
-      updateUserSettings(cookie.userId, state);
+    if ((cookie != null) && (cookie.userId != null)) {
+      const res = await updateUserSettings(cookie.userId, state);
+      console.log("Saved:" + "\n" + res + "\n" + cookie.userId + "\n" +  JSON.stringify(state))
+    } else {
+      alert("Not logged in")
     }
   };
 

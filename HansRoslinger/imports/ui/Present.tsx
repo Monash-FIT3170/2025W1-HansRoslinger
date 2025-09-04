@@ -17,9 +17,9 @@ import { getUserIDCookie } from "../cookies/cookies";
 import { getPresentationById } from "../api/database/presentations/presentations";
 import { useImageAssetZoom } from "./handlers/image/ImageAssetHandler";
 import { useImagePreload } from "./handlers/image/useImagePreload";
-
-// MUI imports
 import { Box, Button } from "@mui/material";
+import { getUserById, getUserSettings } from "../api/database/users/users";
+import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -207,7 +207,27 @@ export const Present: React.FC = () => {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 50,
-      };
+    };
+
+  const loadSettings = async(): Promise<Record<GestureType, FunctionType>> => {
+    var settings = defaultMapping;
+    const userID = getUserIDCookie()
+    if (userID) {
+      const user = await getUserById(userID)
+      if (user) {
+        settings = await getUserSettings(user.email);
+      }
+    } 
+
+    return settings;
+  };
+
+  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>(defaultMapping);
+
+  useEffect(() => {
+    loadSettings().then(setGestureSettings);
+  }, []);
+
 
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">
@@ -230,6 +250,7 @@ export const Present: React.FC = () => {
         <WebcamComponent
           gestureDetectionStatus={gestureDetectionStatus}
           grayscale={grayscale}
+          settings={gestureSettings}
         />
       </Box>
 

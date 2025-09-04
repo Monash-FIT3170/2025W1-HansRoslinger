@@ -207,27 +207,27 @@ export const Present: React.FC = () => {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 50,
-    };
+      };
 
-  const loadSettings = async(): Promise<Record<GestureType, FunctionType>> => {
+  const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
     var settings = defaultMapping;
-    const userID = getUserIDCookie()
+    const userID = getUserIDCookie();
     if (userID) {
-      const user = await getUserById(userID)
+      const user = await getUserById(userID);
       if (user) {
         settings = await getUserSettings(user.email);
       }
-    } 
+    }
 
     return settings;
   };
 
-  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [gestureSettings, setGestureSettings] =
+    useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     loadSettings().then(setGestureSettings);
   }, []);
-
 
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">

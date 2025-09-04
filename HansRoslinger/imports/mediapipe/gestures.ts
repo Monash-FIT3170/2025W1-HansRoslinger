@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
-import { GestureRecognizer, FilesetResolver, NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { GestureType, FunctionType, Handedness, Gesture, IDtoEnum } from "../gesture/gesture";
+import {
+  GestureRecognizer,
+  FilesetResolver,
+  NormalizedLandmark,
+} from "@mediapipe/tasks-vision";
+import {
+  GestureType,
+  FunctionType,
+  Handedness,
+  Gesture,
+  IDtoEnum,
+} from "../gesture/gesture";
 import GestureHandler from "../gesture/GestureHandler";
 import { truncate } from "fs";
-
 
 export const gestureDetector = (
   videoRef: MutableRefObject<Webcam | null>,
   gestureDetectionStatus: boolean,
-  settings: Record<GestureType, FunctionType>
+  settings: Record<GestureType, FunctionType>,
 ) => {
   const NUM_HANDS_DETECTABLE = 2;
   const MIN_HAND_DETECTION_CONFIDENCE = 0.6;
@@ -24,7 +33,7 @@ export const gestureDetector = (
   const { HandleGesture } = GestureHandler(settings);
 
   const rafIdRef = useRef<number | null>(null);
-    // Helper function
+  // Helper function
   const cleanupLoop = () => {
     if (rafIdRef.current !== null) {
       cancelAnimationFrame(rafIdRef.current);
@@ -38,7 +47,7 @@ export const gestureDetector = (
     const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
         );
 
         const gestureRecognizerInternal =
@@ -55,7 +64,10 @@ export const gestureDetector = (
 
         if (isMounted) setGestureRecognizer(gestureRecognizerInternal);
       } catch (error) {
-        console.error(`GestureRecognizer setup failed (attempt ${retryCount + 1}):`, error);
+        console.error(
+          `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
+          error,
+        );
         if (retryCount < SETUP_MAX_RETRIES) {
           setTimeout(() => setup(retryCount + 1), SETUP_RETRY_DELAY);
         }

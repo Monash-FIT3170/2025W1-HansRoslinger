@@ -13,7 +13,11 @@ import jwt from "jsonwebtoken";
 const { sign } = jwt;
 import type { User } from "../../api/database/users/users";
 import { generateJWT } from "./authToken";
-import { FunctionType, GestureType, defaultMapping } from "/imports/gesture/gesture";
+import {
+  FunctionType,
+  GestureType,
+  defaultMapping,
+} from "/imports/gesture/gesture";
 
 export const loginUser = async (email: string, password: string) => {
   if (!email || !password) {

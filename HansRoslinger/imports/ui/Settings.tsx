@@ -12,9 +12,13 @@ import { Button, Box } from "@mui/material";
 
 import { GestureType, FunctionType, defaultMapping } from "../gesture/gesture";
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { getAuthCookie } from "../cookies/cookies";
-import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
+import {
+  getUserById,
+  getUserSettings,
+  updateUserSettings,
+} from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -64,11 +68,12 @@ const Functions = [
   FunctionType.ZOOM,
   FunctionType.CLICK,
   FunctionType.SWITCH_CHART,
-  FunctionType.SWITCH_DATA
+  FunctionType.SWITCH_DATA,
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [state, setState] =
+    useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     const userId = getAuthCookie()?.userId;
@@ -77,7 +82,7 @@ const Settings: React.FC = () => {
     async function loadSettings() {
       if (userId != null) {
         const user = await getUserById(userId);
-        
+
         if (user != null) {
           const email = user.email;
           const settings = await getUserSettings(email);
@@ -85,7 +90,6 @@ const Settings: React.FC = () => {
             setState(settings);
           }
         }
-        
       }
     }
 
@@ -99,13 +103,21 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const handleSave = async() => {
+  const handleSave = async () => {
     const cookie = getAuthCookie();
-    if ((cookie != null) && (cookie.userId != null)) {
+    if (cookie != null && cookie.userId != null) {
       const res = await updateUserSettings(cookie.userId, state);
-      console.log("Saved:" + "\n" + res + "\n" + cookie.userId + "\n" +  JSON.stringify(state))
+      console.log(
+        "Saved:" +
+          "\n" +
+          res +
+          "\n" +
+          cookie.userId +
+          "\n" +
+          JSON.stringify(state),
+      );
     } else {
-      alert("Not logged in")
+      alert("Not logged in");
     }
   };
 

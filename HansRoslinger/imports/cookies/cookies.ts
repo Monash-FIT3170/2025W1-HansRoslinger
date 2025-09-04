@@ -24,4 +24,3 @@ export function clearAuthCookie() {
   Cookies.remove(AUTHTOKEN);
   Cookies.remove(USERID);
 }
-

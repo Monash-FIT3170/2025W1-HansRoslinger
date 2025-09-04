@@ -6,13 +6,13 @@ import { GestureType, FunctionType } from "/imports/gesture/gesture";
 interface WebcamProps {
   grayscale: boolean;
   gestureDetectionStatus: boolean;
-  settings: Record<GestureType, FunctionType>
+  settings: Record<GestureType, FunctionType>;
 }
 
 export const WebcamComponent: React.FC<WebcamProps> = ({
   grayscale,
   gestureDetectionStatus,
-  settings
+  settings,
 }) => {
   const webcamRef = useRef<Webcam | null>(null);
 

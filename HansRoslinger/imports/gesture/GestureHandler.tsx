@@ -1,4 +1,10 @@
-import { FunctionType, Gesture, GestureType, Handedness, handleGestureToFunc } from "./gesture";
+import {
+  FunctionType,
+  Gesture,
+  GestureType,
+  Handedness,
+  handleGestureToFunc,
+} from "./gesture";
 import { useRef } from "react";
 
 let isZoomEnabled = false;
@@ -19,8 +25,8 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
 
   const activeGestures = useRef<Record<Handedness, ActiveGestureState | null>>({
     [Handedness.LEFT]: null,
-  [Handedness.RIGHT]: null,
-  [Handedness.BOTH]: null,
+    [Handedness.RIGHT]: null,
+    [Handedness.BOTH]: null,
   });
 
   const HandleGesture = (gesture: Gesture) => {
@@ -47,7 +53,7 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
         handleGestureToFunc(gesture.gestureID, gesture, gesture, map);
         return;
       }
-  } else {
+    } else {
       // Special-case: POINTING_UP (hover/select) should ignore cooldown entirely.
       if (gesture.gestureID === GestureType.POINTING_UP) {
         handleGestureToFunc(gesture.gestureID, state.gesture, gesture, map);

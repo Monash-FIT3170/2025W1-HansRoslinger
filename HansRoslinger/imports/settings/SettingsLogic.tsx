@@ -4,7 +4,7 @@ import {
   GestureType,
   FunctionType,
   EnumToFunc,
-  defaultMapping
+  defaultMapping,
 } from "imports/gesture/gesture";
 import { setCookie, getCookie } from "imports/settings/cookies";
 

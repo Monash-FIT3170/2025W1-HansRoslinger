@@ -118,7 +118,7 @@ const handleGestureToFunc = (
   INPUT: GestureType,
   initialGesture: Gesture,
   latestGesture: Gesture,
-  mapping: Record<GestureType, FunctionType>
+  mapping: Record<GestureType, FunctionType>,
 ): void => {
   const label = INPUT;
   if (isZoomEnabled) {
@@ -167,7 +167,7 @@ export {
   Handedness,
   handleGestureToFunc,
   isZoomEnabled,
-  defaultMapping
+  defaultMapping,
 };
 
 export const gestureToScreenPosition = (

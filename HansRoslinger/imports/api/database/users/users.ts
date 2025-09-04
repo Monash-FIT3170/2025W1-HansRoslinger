@@ -1,7 +1,10 @@
 import { verifyPassword } from "./util";
 import { Mongo } from "meteor/mongo";
-import { GestureType, FunctionType, defaultMapping } from "/imports/gesture/gesture";
-
+import {
+  GestureType,
+  FunctionType,
+  defaultMapping,
+} from "/imports/gesture/gesture";
 
 export interface User {
   _id: string;
@@ -34,13 +37,12 @@ export async function updateUserSettings(
   _id: string,
   settings: Record<GestureType, FunctionType>,
 ): Promise<number> {
-  return await UserCollection.updateAsync(
-      _id,
-      { $set: { settings } }
-    );
+  return await UserCollection.updateAsync(_id, { $set: { settings } });
 }
 
-export async function getUserSettings(email: string): Promise<Record<GestureType, FunctionType>> {
+export async function getUserSettings(
+  email: string,
+): Promise<Record<GestureType, FunctionType>> {
   const user = await UserCollection.findOneAsync(
     { email },
     { projection: { settings: 1, _id: 0 } },
@@ -56,16 +58,16 @@ export async function getUserSettings(email: string): Promise<Record<GestureType
     });
 
     Object.values(GestureType)
-      .filter(v => typeof v === 'number')
+      .filter((v) => typeof v === "number")
       .forEach((g: number) => {
         if (result[g as GestureType] === undefined) {
           result[g as GestureType] = FunctionType.UNUSED;
         }
-    });
-    
-    return result
+      });
+
+    return result;
   } else {
-    return defaultMapping
+    return defaultMapping;
   }
 }
 

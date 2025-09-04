@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { Button, Box } from "@mui/material";
+import { Button, Box, Typography, Alert } from "@mui/material";
 
 import { GestureType, FunctionType, defaultMapping } from "../gesture/gesture";
 import { useState } from "react";
@@ -97,10 +97,19 @@ const Settings: React.FC = () => {
   }, []);
 
   const handleChange = (key: GestureType, value: FunctionType) => {
-    setState((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setState((prev) => {
+      const next: Record<GestureType, FunctionType> = { ...prev };
+      if (value !== FunctionType.UNUSED) {
+        // Ensure uniqueness: only one gesture can use a function at a time
+        for (const g of Gestures) {
+          if (g !== key && prev[g] === value) {
+            next[g] = FunctionType.UNUSED;
+          }
+        }
+      }
+      next[key] = value;
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -135,6 +144,20 @@ const Settings: React.FC = () => {
           "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h4" fontWeight={700} gutterBottom>
+          Settings
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Here you can configure the mapping from a gesture to a specific action within HansRoslinger. If you would like to disable a gesture, set it to &quot;None&quot;.
+        </Typography>
+      </Box>
+
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
       <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
@@ -153,8 +176,8 @@ const Settings: React.FC = () => {
                   <Select
                     fullWidth
                     size="small"
-                    value={state[gesture] ?? ""}
-                    onChange={(e) => handleChange(gesture, e.target.value)}
+                    value={state[gesture] ?? FunctionType.UNUSED}
+                    onChange={(e) => handleChange(gesture, e.target.value as FunctionType)}
                   >
                     {Functions.map((option) => (
                       <MenuItem key={option} value={option}>
@@ -169,11 +192,11 @@ const Settings: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 5 }}>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 5 }}>
         <Button
           variant="outlined"
           onClick={handleReturn}
-          sx={{ borderRadius: 2, px: 3 }}
+      sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
         >
           Return
         </Button>
@@ -182,7 +205,7 @@ const Settings: React.FC = () => {
           variant="contained"
           color="primary"
           onClick={handleSave}
-          sx={{ borderRadius: 2, px: 3 }}
+      sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
         >
           Save
         </Button>

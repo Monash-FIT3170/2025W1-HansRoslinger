@@ -83,7 +83,7 @@ const GestureDetector = (
 
   // Detect gestures
   useEffect(() => {
-    if (gestureDetectionStatus) {
+    if (true) {
       const loop = async () => {
         if (!gestureRecognizer || !videoRef?.current?.video) {
           rafIdRef.current = requestAnimationFrame(loop);
@@ -154,7 +154,7 @@ const GestureDetector = (
       cleanupLoop();
     }
     return cleanupLoop;
-  }, [gestureRecognizer, gestureDetectionStatus]);
+  }, [gestureRecognizer]);
 
   // Handle newly detected gesture
   useEffect(() => {
@@ -168,6 +168,18 @@ const GestureDetector = (
     const rightGesture = currentGestures.find(
       (g) => g?.handedness === Handedness.RIGHT,
     );
+    if (!gestureDetectionStatus) {
+      // Only check for pinching as user may click gesture detection toggle button to turn it back on
+      for (let index = 0; index < currentGestures.length; index++) {
+        if (currentGestures[index] && currentGestures[index].gestureID == GestureType.PINCH) {
+          // Confirm that the correct gesture ID number is being sent
+          console.log(
+            `[GestureDetector] Detected: ${GestureType[currentGestures[index].gestureID]} (${currentGestures[index].gestureID})`,
+          );
+          HandleGesture(currentGestures[index]);
+        }
+    }
+    } else {
     let twoHandedGesture: Gesture | undefined;
     if (leftGesture && rightGesture) {
       if (isDoublePinchSign(leftGesture, rightGesture)) {
@@ -200,6 +212,7 @@ const GestureDetector = (
         HandleGesture(currentGestures[index]);
       }
     }
+  }
   }, [currentGestures]);
 };
 

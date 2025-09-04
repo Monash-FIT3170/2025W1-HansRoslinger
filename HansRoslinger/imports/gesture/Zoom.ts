@@ -75,12 +75,6 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   );
 };
 
-/**
- * Called every frame while zoom is active.
- * - Computes current separations and sends scaleX/scaleY ratios
- */
-// ZoomChart.ts
-
 export const processZoom = (
   _zoomStartPosition: { x: number; y: number },
   latestGesture: Gesture,

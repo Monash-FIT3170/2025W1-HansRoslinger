@@ -25,7 +25,6 @@ export const GestureHandler = () => {
   const activeGestures = useRef<Record<Handedness, ActiveGestureState | null>>({
     [Handedness.LEFT]: null,
     [Handedness.RIGHT]: null,
-    [Handedness.BOTH]: null,
   });
 
   const HandleGesture = (gesture: Gesture) => {
@@ -45,6 +44,7 @@ export const GestureHandler = () => {
         return;
       }
     } else {
+      console.log("Pinch going to gesturetofunc 1")
       // Special-case: POINTING_UP (hover/select) should ignore cooldown entirely.
       if (gesture.gestureID === GestureType.POINTING_UP) {
         handleGestureToFunc(gesture.gestureID, state.gesture, gesture);

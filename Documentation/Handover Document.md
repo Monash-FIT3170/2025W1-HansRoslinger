@@ -13,6 +13,7 @@
 - [Purpose of this Document](#purpose-of-this-document)
 - [What is HansRoslinger?](#what-is-hansroslinger)
 - [Installation Guides](#installation-guides)
+- [Suggested Tutorials/Documentation](#suggested-tutorialsdocumentation)
 - [Technology Stack](#technology-stack)
   - [Frontend Stack](#frontend-stack)
   - [Backend Stack](#backend-stack)
@@ -89,6 +90,8 @@ Follow these steps in order to set up the required software for HansRoslinger
 2. CD Into HansRoslinger directory and run `meteor npm install` to install all dependencies
 3. [Install MongoSH](https://www.mongodb.com/docs/mongodb-shell/install/) in order to perform local development with MongoDB
 4. [Install Gcloud CLI](https://cloud.google.com/sdk/docs/install) in order to perform testing with GCP
+5. [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) in order to provision cloud infrastructure
+
 
 Once all of these steps have been followed to completion, you should be able to run the following commands to run HansRoslinger
 
@@ -107,6 +110,32 @@ gcloud --help
 https://console.cloud.google.com/welcome?invt=Ab6sAg&project=hansroslinger-468011
 
 ```
+
+---
+
+# Suggested Tutorials/Documentation
+
+If you are not familiar with the services above, feel free to take a look at the following documentation/tutorials to gain some familiarity with these services.
+
+**Meteor**
+- [Technical Tutorial Plan](/Documentation/Technology%20Tutorial%20Plan.md)
+- [Introduction to Meteor](https://guide.meteor.com/)
+
+**MongoSH**
+- [Introduction to MongoDB](https://www.mongodb.com/docs/manual/introduction/)
+- [Introduction to MongoDB Atlas](https://www.mongodb.com/docs/atlas/)
+
+**Google Cloud Services**
+- [Google Cloud Overview](https://cloud.google.com/docs/overview)
+- [Cloud Run Overview](https://cloud.google.com/run/docs)
+- [Artifact Registry Overview](https://cloud.google.com/artifact-registry/docs)
+- [Storage Bucket Overview](https://cloud.google.com/storage/docs)
+
+**Terraform**
+- [What is Terraform](https://developer.hashicorp.com/terraform/intro)
+- [Getting started with Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started)
+
+
 
 ---
 

@@ -31,3 +31,13 @@ This will start a server at `http://localhost:3000`
 
 [MongoDB Atlas Project](https://cloud.mongodb.com/v2#/org/68909a50a210527643b70cdd/projects)
 [Google Cloud Project](https://console.cloud.google.com/storage/overview;tab=overview?inv=1&invt=Ab4tKw&project=hansroslinger-468011)
+
+## Handover Document
+
+The Milestone 3 submission specifies that the Handover Document should be at the `root of the repository`, however because of the structure of our existing repository we have chosen to place it in our `Documentation` folder in order to align with our existing convention.
+
+Please refer to the following documents if you would like to view it
+- [Markdown Document](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.md)
+- [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.pdf)
+
+Please note that the markdown document may not render the images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with images.

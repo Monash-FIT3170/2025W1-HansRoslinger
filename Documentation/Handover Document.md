@@ -7,16 +7,10 @@
   <img src="images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
 </p>
 
-# Purpose of this Document
-
-The purpose of this document is to provide a comprehensive overview of the HansRoslinger application, allowing any future owners/contributors to understand the frontend and backend stack, as well as technologies we are utilising as well as how we are utilising them.
-
-This document also contains further information on the installations required to begin working on HanRoslinger, basic application structuring, and common issues we've come across while developing this application, and how to troubleshoot them.
-
----
 
 # Table of Contents
 
+- [Purpose of this Document](#purpose-of-this-document)
 - [What is HansRoslinger?](#what-is-hansroslinger)
 - [Installation Guides](#installation-guides)
 - [Technology Stack](#technology-stack)
@@ -33,6 +27,14 @@ This document also contains further information on the installations required to
   - [Incorrect Node Version](#incorrect-node-version)
   - [Module not found error](#module-not-found-error)
   - [Meteor stuck on `Extracting meteor-tool@1.4.0-1`](#meteor-stuck-on-extracting-meteor-tool140-1)
+
+---
+
+# Purpose of this Document
+
+The purpose of this document is to provide a comprehensive overview of the HansRoslinger application, allowing any future owners/contributors to understand the frontend and backend stack, as well as technologies we are utilising as well as how we are utilising them.
+
+This document also contains further information on the installations required to begin working on HanRoslinger, basic application structuring, and common issues we've come across while developing this application, and how to troubleshoot them.
 
 ---
 

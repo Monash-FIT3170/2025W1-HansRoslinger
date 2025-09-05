@@ -1,3 +1,12 @@
+
+
+<h1 align="center">Handover Document</h1>
+
+
+<p align="center">
+  <img src="images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
+</p>
+
 # Purpose of this Document
 
 The purpose of this document is to provide a comprehensive overview of the HansRoslinger application, allowing any future owners/contributors to understand the frontend and backend stack, as well as technologies we are utilising as well as how we are utilising them.
@@ -33,9 +42,17 @@ HansRoslinger is a gestured-based presentation tool that allows individuals to c
 
 The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
 
+<p align="center">
+  <img src="images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
+</p>
+
+HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the Cloud Run URL 
+
+`https://hans-roslinger-961228355326.us-central1.run.app`
+
+Please note that the production version is currently deployed in the us-central1 zone, this is because only US regions support domain mapping, which allowed us to use the custom URL. Doing the same with an Australia based region is possible however would incur additional costs
+
 ---
-
-
 
 # Repository Structure
 
@@ -43,14 +60,22 @@ The purpose of HansRoslinger is to make the process of presenting information as
 - **HansRoslinger/** — Meteor + React application source (client, server, shared imports, public assets, GCP helpers, tests).
 - **terraform/** — Infrastructure as code for GCP (root configs, reusable module, per-env tfvars, state files).
 
+<p align="center">
+  <img src="images/HandoverDocument/1757038225446.png" alt="alt text" width="500"/>
+</p>
+
 ## HansRoslinger/ Structure
 
 - **client/** — React/Meteor client entry and global HTML/CSS; bootstraps the UI.
 - **server/** — Meteor server startup, methods, publications, and integrations.
 - **imports/** — Shared app code: UI components/pages, handlers, gestures, and data layer.
-- **public/** — Static assets served as-is (e.g., images/icons).
+- **public/** — Static assets served as-is (e.g., images/HandoverDocumenticons).
 - **GCP/** — Google Cloud helpers/config (e.g., bucket utilities).
 - **tests/** — App tests and helpers.
+
+<p align="center">
+  <img src="images/HandoverDocument/1757038239010.png" alt="alt text" width="500"/>
+</p>
 
 ---
 
@@ -132,6 +157,8 @@ All images uploaded by the user to HansRoslinger is stored in a google cloud buc
 
 The buckets are available [here](https://console.cloud.google.com/storage/browser?referrer=search&invt=Ab6sAg&project=hansroslinger-468011&prefix=&forceOnBucketsSortingFiltering=true&bucketType=live)
 
+![1757038278174](images/HandoverDocument/1757038278174.png)
+
 ## Github/CICD
 
 We utilise Github in to track developmnet, as well as to store documentation and run CICD workflows.
@@ -145,6 +172,10 @@ CICD Workflows are found under [.github](https://github.com/Monash-FIT3170/2025W
 - [deploy ](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/deploy.yaml)which deploys the Meteor application to CloudRun, more information is available in the #Deployment section
 
 We also have configured a [pull request template](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md) in order to standardise the process of creating a pull request
+
+<p align="center">
+  <img src="images/HandoverDocument/1757038949103.png" alt="alt text" width="400"/>
+</p>
 
 ---
 
@@ -178,7 +209,27 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 2. authenticate that you own the said domain in [google domain services
    ](https://cloud.google.com/identity/docs/verify-domain)- Once you have authenticated that you own the domain, you are able to control all future routing from Google Domain Services
 3. Update domain specifications in google so that the domain points to the Cloud Run service
-4. You will then need to set up A and AAAA DNS Records to point to your Cloud Run Service. While a Cloud Run is deployed to a region, this can have multiple zones, so you may need to configure multiple A and AAAA DNS Records (4 in this case)
+4. You will then need to set up A, AAAA and TXT DNS Records to point to your Cloud Run Service. While a Cloud Run is deployed to a region, this can have multiple zones, so you may need to configure multiple A DNS Records (4 in this case)
+
+**Purpose of DNS Records**
+> **A record:** Maps our domain name to the Google Server Zone IPv4 addresses.
+> **AAAA record:** Maps our domain name to the Google Server IPv6 address.
+> **TXT record:** Stores google site verification
+
+<p align="center">
+  <img src="images/HandoverDocument/1757038674391.png" alt="alt text" width="700"/>
+</p>
+
+<p align="center"><i>A and AAAA Records</i></p>
+
+<br>
+<br>
+
+<p align="center">
+  <img src="images/HandoverDocument/1757038704021.png" alt="alt text" width="700"/>
+</p>
+<p align="center"><i>TXT Records Records</i></p>
+
 
 Once this has been configured, google will automatically generate a SSL/TLS certificate to encrypt your domain, and shortly after you should be able to access your Cloud Run from your website.
 

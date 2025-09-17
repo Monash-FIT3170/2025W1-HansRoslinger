@@ -1,4 +1,5 @@
-import { Gesture, gestureToScreenPosition, GestureType } from "./gesture";
+import { Gesture, GestureType } from "./gesture";
+import { gestureToScreenPosition } from "./util";
 
 // We store the starting separations so we can compute ratios per frame
 let initialDx = 0;
@@ -75,10 +76,7 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   );
 };
 
-export const processZoom = (
-  _zoomStartPosition: { x: number; y: number },
-  latestGesture: Gesture,
-): void => {
+export const processZoom = (_zoomStartPosition: { x: number; y: number }, latestGesture: Gesture): void => {
   const hands = getHandsXY(latestGesture);
   if (!hands.left || !hands.right) return;
 

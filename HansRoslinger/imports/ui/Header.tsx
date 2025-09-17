@@ -13,16 +13,7 @@ interface HeaderProps {
   setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  backgroundRemoval,
-  grayscale,
-  showLineChart,
-  onToggleBackgroundRemoval,
-  onToggleGrayscale,
-  onToggleChart,
-  showAssets,
-  setShowAssets,
-}) => {
+export const Header: React.FC<HeaderProps> = ({ backgroundRemoval, grayscale, showLineChart, onToggleBackgroundRemoval, onToggleGrayscale, onToggleChart, showAssets, setShowAssets }) => {
   const navigate = useNavigate();
   return (
     <>

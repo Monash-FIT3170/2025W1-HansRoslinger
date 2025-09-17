@@ -68,8 +68,7 @@ export function useImageAssetZoom(): UseImageAssetZoomReturn {
     };
 
     window.addEventListener("chart:togglezoom", handleToggleZoom);
-    return () =>
-      window.removeEventListener("chart:togglezoom", handleToggleZoom);
+    return () => window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
   return {

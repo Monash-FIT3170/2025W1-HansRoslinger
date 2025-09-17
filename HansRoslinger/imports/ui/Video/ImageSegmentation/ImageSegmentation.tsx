@@ -8,14 +8,10 @@ interface ImageSegmentationProps {
   grayscale: () => boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
-  grayscale,
-}) => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale }) => {
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
-    const canvasElement = document.getElementById(
-      "canvas",
-    ) as HTMLCanvasElement;
+    const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
     const canvasCtx = canvasElement.getContext("2d");
     // const webcamPredictions = document.getElementById("webcamPredictions");
     const demosSection: HTMLElement = document.getElementById("demos");
@@ -36,14 +32,11 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
     // ];
 
     const createImageSegmenter = async () => {
-      const audio = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm",
-      );
+      const audio = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm");
 
       imageSegmenter = await ImageSegmenter.createFromOptions(audio, {
         baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
           delegate: "GPU",
         },
         runningMode: runningMode,
@@ -59,28 +52,14 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
 
     function callbackForVideo(result: ImageSegmenterResult) {
       // Resize canvas to match video
-      if (
-        canvasElement.width !== video.videoWidth ||
-        canvasElement.height !== video.videoHeight
-      ) {
+      if (canvasElement.width !== video.videoWidth || canvasElement.height !== video.videoHeight) {
         canvasElement.width = video.videoWidth;
         canvasElement.height = video.videoHeight;
       }
 
       // Draw current video frame to canvas
-      canvasCtx.drawImage(
-        video,
-        0,
-        0,
-        canvasElement.width,
-        canvasElement.height,
-      );
-      const frame = canvasCtx.getImageData(
-        0,
-        0,
-        canvasElement.width,
-        canvasElement.height,
-      );
+      canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+      const frame = canvasCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
       const pixels = frame.data;
 
       // Get segmentation mask (values between 0 and 1)
@@ -174,9 +153,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
 
     // If webcam supported, add event listener to button.s
     if (hasGetUserMedia()) {
-      enableWebcamButton = document.getElementById(
-        "background-removal-enable",
-      ) as HTMLButtonElement;
+      enableWebcamButton = document.getElementById("background-removal-enable") as HTMLButtonElement;
       enableWebcamButton.addEventListener("click", enableCam);
     } else {
       console.warn("getUserMedia() is not supported by your browser");
@@ -186,11 +163,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
   return (
     <div className="`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`">
       <video id="webcam" autoPlay style={{ display: "none" }}></video>
-      <canvas
-        id="canvas"
-        className="w-full h-full object-cover"
-        style={{ transform: "scaleX(-1)" }}
-      ></canvas>
+      <canvas id="canvas" className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }}></canvas>
     </div>
   );
 };

@@ -1,10 +1,6 @@
 import { verifyPassword } from "./util";
 import { Mongo } from "meteor/mongo";
-import {
-  GestureType,
-  FunctionType,
-  defaultMapping,
-} from "/imports/gesture/gesture";
+import { GestureType, FunctionType, defaultMapping } from "/imports/gesture/gesture";
 
 export interface User {
   _id: string;
@@ -33,20 +29,12 @@ export async function getUserById(_id: any): Promise<User | undefined> {
   return await UserCollection.findOneAsync({ _id });
 }
 
-export async function updateUserSettings(
-  _id: string,
-  settings: Record<GestureType, FunctionType>,
-): Promise<number> {
+export async function updateUserSettings(_id: string, settings: Record<GestureType, FunctionType>): Promise<number> {
   return await UserCollection.updateAsync(_id, { $set: { settings } });
 }
 
-export async function getUserSettings(
-  email: string,
-): Promise<Record<GestureType, FunctionType>> {
-  const user = await UserCollection.findOneAsync(
-    { email },
-    { projection: { settings: 1, _id: 0 } },
-  );
+export async function getUserSettings(email: string): Promise<Record<GestureType, FunctionType>> {
+  const user = await UserCollection.findOneAsync({ email }, { projection: { settings: 1, _id: 0 } });
 
   if (user) {
     const result = {} as Record<GestureType, FunctionType>;
@@ -71,10 +59,7 @@ export async function getUserSettings(
   }
 }
 
-export async function updateUser(
-  email: string,
-  updates: Partial<User>,
-): Promise<number> {
+export async function updateUser(email: string, updates: Partial<User>): Promise<number> {
   return await UserCollection.updateAsync({ email }, { $set: updates });
 }
 
@@ -87,10 +72,7 @@ export async function doesUserExist(email: string): Promise<boolean> {
   return !!user;
 }
 
-export async function correctLogin(
-  email: string,
-  password: string,
-): Promise<boolean> {
+export async function correctLogin(email: string, password: string): Promise<boolean> {
   const user = await getUserByEmail(email);
   if (!user) return false;
   return verifyPassword(password, user.password);

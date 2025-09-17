@@ -5,20 +5,11 @@ import { Meteor } from "meteor/meteor";
 import { useNavigate } from "react-router-dom";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useAssetsWithImageCount } from "./handlers/assets/useAssets";
-import {
-  doesPresentationExist,
-  createPresentation,
-  getPresentationsByUser,
-  Presentation,
-} from "../api/database/presentations/presentations";
+import { doesPresentationExist, createPresentation, getPresentationsByUser, Presentation } from "../api/database/presentations/presentations";
 import { getDatasetsByPresentationId } from "../api/database/dataset/dataset";
 import type { Dataset } from "../api/database/dataset/dataset";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
-import {
-  createDataset,
-  deleteDataset,
-  ChartType,
-} from "../api/database/dataset/dataset";
+import { createDataset, deleteDataset, ChartType } from "../api/database/dataset/dataset";
 
 import {
   Alert,
@@ -79,8 +70,7 @@ export default function AllPresentations() {
   const [presentationName, setPresentationName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [presentations, setPresentations] = useState<Presentation[]>([]);
-  const [selectedPresentation, setSelectedPresentation] =
-    useState<Presentation | null>(null);
+  const [selectedPresentation, setSelectedPresentation] = useState<Presentation | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
   // Get all assets for dropdown (only those owned by the user)
@@ -90,9 +80,7 @@ export default function AllPresentations() {
   const [showDatasetModal, setShowDatasetModal] = useState(false);
   const [datasetCSV, setDatasetCSV] = useState("");
   const [datasetTitle, setDatasetTitle] = useState("");
-  const [datasetChartType, setDatasetChartType] = useState<ChartType>(
-    ChartType.BAR,
-  );
+  const [datasetChartType, setDatasetChartType] = useState<ChartType>(ChartType.BAR);
   const [datasetMessage, setDatasetMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -246,8 +234,7 @@ export default function AllPresentations() {
         alignItems: "center",
         justifyContent: "flex-start",
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       {/* Toolbar */}
@@ -270,9 +257,7 @@ export default function AllPresentations() {
       {/* Create Presentation Modal */}
       <Modal isOpen={showModal} onClose={clearModel} maxwidth={"550px"}>
         <Stack spacing={2}>
-          <Typography variant="h5">
-            Enter the name of your new presentation
-          </Typography>
+          <Typography variant="h5">Enter the name of your new presentation</Typography>
           <Stack
             direction="row"
             spacing={2}
@@ -281,17 +266,9 @@ export default function AllPresentations() {
               alignItems: "center",
             }}
           >
-            <TextField
-              label="Presentation Name"
-              value={presentationName}
-              onChange={(e) => setPresentationName(e.target.value)}
-            />
+            <TextField label="Presentation Name" value={presentationName} onChange={(e) => setPresentationName(e.target.value)} />
             {message && <Alert severity="info">{message}</Alert>}
-            <Button
-              variant="contained"
-              onClick={handleCreate}
-              disabled={!presentationName.trim()}
-            >
+            <Button variant="contained" onClick={handleCreate} disabled={!presentationName.trim()}>
               Create
             </Button>
           </Stack>
@@ -318,13 +295,7 @@ export default function AllPresentations() {
           {presentations.map((presentation) => (
             <Grid size={4} key={presentation._id}>
               <Card>
-                <CardActionArea
-                  key={presentation._id}
-                  onClick={async () =>
-                    await openPresentationModal(presentation)
-                  }
-                  sx={{ height: "100%", display: "flex", p: 5 }}
-                >
+                <CardActionArea key={presentation._id} onClick={async () => await openPresentationModal(presentation)} sx={{ height: "100%", display: "flex", p: 5 }}>
                   <CardContent
                     sx={{
                       textAlign: "center",
@@ -339,10 +310,7 @@ export default function AllPresentations() {
                       {presentation.name}
                     </Typography>
                     <Typography variant="h6" color="text.secondary">
-                      Added:{" "}
-                      {presentation.createdAt
-                        ? new Date(presentation.createdAt).toLocaleDateString()
-                        : ""}
+                      Added: {presentation.createdAt ? new Date(presentation.createdAt).toLocaleDateString() : ""}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -352,11 +320,7 @@ export default function AllPresentations() {
         </Grid>
       </Box>
       {/* Presentation Details Modal */}
-      <Modal
-        isOpen={!!selectedPresentation}
-        onClose={closePresentationModal}
-        maxwidth={"60vw"}
-      >
+      <Modal isOpen={!!selectedPresentation} onClose={closePresentationModal} maxwidth={"60vw"}>
         {selectedPresentation && (
           <>
             <Box sx={{ textAlign: "center", mb: 2 }}>
@@ -364,20 +328,10 @@ export default function AllPresentations() {
                 {selectedPresentation.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Added:{" "}
-                {selectedPresentation.createdAt
-                  ? new Date(
-                      selectedPresentation.createdAt,
-                    ).toLocaleDateString()
-                  : ""}
+                Added: {selectedPresentation.createdAt ? new Date(selectedPresentation.createdAt).toLocaleDateString() : ""}
               </Typography>
             </Box>
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              justifyContent="center"
-            >
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
               <Select
                 value={selectedAssetId}
                 onChange={async (e) => {
@@ -385,20 +339,14 @@ export default function AllPresentations() {
                   setSelectedAssetId(assetId);
                   if (selectedPresentation && selectedPresentation._id) {
                     // Update the presentation's assetID (canonical field)
-                    await Meteor.callAsync(
-                      "presentations.update",
-                      selectedPresentation._id,
-                      { assetID: assetId },
-                    );
+                    await Meteor.callAsync("presentations.update", selectedPresentation._id, {
+                      assetID: assetId,
+                    });
                     // Update all datasets for this presentation to set assetId
                     if (datasets && datasets.length > 0) {
                       for (const dataset of datasets) {
                         if (dataset._id) {
-                          await Meteor.callAsync(
-                            "datasets.update",
-                            dataset._id,
-                            { assetId },
-                          );
+                          await Meteor.callAsync("datasets.update", dataset._id, { assetId });
                         }
                       }
                     }
@@ -446,24 +394,15 @@ export default function AllPresentations() {
                 datasets.map((dataset: Dataset, idx: number) => (
                   <Grid size={6} key={dataset._id || idx}>
                     <Card>
-                      <CardActionArea
-                        onClick={() => handleShowDatasetSummary(dataset)}
-                        sx={{ p: 2 }}
-                      >
+                      <CardActionArea onClick={() => handleShowDatasetSummary(dataset)} sx={{ p: 2 }}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             {dataset.title}
                           </Typography>
-                          <Typography variant="subtitle2">
-                            {dataset.preferredChartType === ChartType.BAR
-                              ? "Bar chart"
-                              : "Line chart"}
-                          </Typography>
+                          <Typography variant="subtitle2">{dataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
                           <Typography variant="body2" color="text.secondary">
                             {dataset.data ? dataset.data.length : 0} data point
-                            {dataset.data && dataset.data.length !== 1
-                              ? "s"
-                              : ""}
+                            {dataset.data && dataset.data.length !== 1 ? "s" : ""}
                           </Typography>
                         </Box>
                       </CardActionArea>
@@ -480,11 +419,7 @@ export default function AllPresentations() {
         )}
       </Modal>
       {/* Dataset Summary Modal */}
-      <Modal
-        isOpen={showDatasetSummary && !!summaryDataset}
-        onClose={handleCloseDatasetSummary}
-        maxwidth={"50vw"}
-      >
+      <Modal isOpen={showDatasetSummary && !!summaryDataset} onClose={handleCloseDatasetSummary} maxwidth={"50vw"}>
         {summaryDataset && (
           <Stack spacing={2}>
             <Box sx={{ textAlign: "center" }}>
@@ -494,17 +429,10 @@ export default function AllPresentations() {
               <Typography variant="h6" color="text.secondary">
                 {summaryDataset.title}
               </Typography>
-              <Typography variant="subtitle2">
-                {summaryDataset.preferredChartType === ChartType.BAR
-                  ? "Bar chart"
-                  : "Line chart"}
-              </Typography>
+              <Typography variant="subtitle2">{summaryDataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
               <Typography variant="body2" color="text.secondary">
-                {summaryDataset.data ? summaryDataset.data.length : 0} data
-                point
-                {summaryDataset.data && summaryDataset.data.length !== 1
-                  ? "s"
-                  : ""}
+                {summaryDataset.data ? summaryDataset.data.length : 0} data point
+                {summaryDataset.data && summaryDataset.data.length !== 1 ? "s" : ""}
               </Typography>
             </Box>
             <Typography variant="h5">
@@ -545,38 +473,17 @@ export default function AllPresentations() {
         )}
       </Modal>
       {/* Add Dataset Modal */}
-      <Modal
-        isOpen={showDatasetModal}
-        onClose={closeDatasetModal}
-        maxwidth={"40vw"}
-      >
+      <Modal isOpen={showDatasetModal} onClose={closeDatasetModal} maxwidth={"40vw"}>
         <Stack spacing={2}>
           <Typography variant="h3">Add Dataset</Typography>
-          <TextField
-            label="Dataset Title"
-            variant="outlined"
-            value={datasetTitle}
-            onChange={(e) => setDatasetTitle(e.target.value)}
-          />
-          <Select
-            value={datasetChartType}
-            onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
-          >
+          <TextField label="Dataset Title" variant="outlined" value={datasetTitle} onChange={(e) => setDatasetTitle(e.target.value)} />
+          <Select value={datasetChartType} onChange={(e) => setDatasetChartType(e.target.value as ChartType)}>
             <MenuItem value={ChartType.BAR}>Bar</MenuItem>
             <MenuItem value={ChartType.LINE}>Line</MenuItem>
           </Select>
-          <TextField
-            label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`}
-            value={datasetCSV}
-            onChange={(e) => setDatasetCSV(e.target.value)}
-            multiline
-            maxRows={6}
-          />
+          <TextField label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`} value={datasetCSV} onChange={(e) => setDatasetCSV(e.target.value)} multiline maxRows={6} />
           {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
-          <Button
-            onClick={handleCreateDataset}
-            disabled={!datasetTitle.trim() || !datasetCSV.trim()}
-          >
+          <Button onClick={handleCreateDataset} disabled={!datasetTitle.trim() || !datasetCSV.trim()}>
             Create Dataset
           </Button>
         </Stack>

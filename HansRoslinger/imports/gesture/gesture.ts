@@ -1,3 +1,20 @@
+/**
+ * Purpose
+ * -------
+ * This file implements a gesture detection pipeline that connects a webcam
+ * video feed (`react-webcam`) to the MediaPipe `GestureRecognizer`. It:
+ *   • Loads and initializes the gesture recognition model with retry logic.
+ *   • Runs a requestAnimationFrame loop to analyze video frames in real time.
+ *   • Maps recognized gestures (and custom heuristics like pinch/pointing)
+ *     into the app’s `Gesture` type.
+ *   • Detects both single-hand and two-hand gestures, with custom rules
+ *     (e.g., `DOUBLE_PINCH`).
+ *   • Forwards valid gestures into the central `GestureHandler`, which maps
+ *     them to configured application functions (zoom, filter, select, etc.).
+ *
+ * In short: this file is the bridge between raw video input and the higher-
+ * level gesture-driven interactions in the app.
+ */
 import { select } from "./Select";
 import { clear } from "./Clear";
 import { filter } from "./Filter";

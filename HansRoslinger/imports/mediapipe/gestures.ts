@@ -1,3 +1,19 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Gesture Detector is React + MediaPipe Tasks Vision (Web)
+ * -----------------------------------------------------------------------------
+ * Purpose
+ * -------
+ * This module wires a `react-webcam` <video> element into MediaPipe’s
+ * `GestureRecognizer` and translates recognized hand poses into your app’s
+ * domain-specific `Gesture` objects. It centralises:
+ *   • Model setup & retry logic
+ *   • A rAF-driven video inference loop (VIDEO mode)
+ *   • One- and two-handed gesture interpretation (incl. custom heuristics)
+ *   • Delivery of gestures to a pluggable handler (`GestureHandler`)
+ *
+ * 
+ **/
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";
 import {

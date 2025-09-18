@@ -12,7 +12,7 @@
  *   • One- and two-handed gesture interpretation (incl. custom heuristics)
  *   • Delivery of gestures to a pluggable handler (`GestureHandler`)
  *
- * 
+ *
  **/
 import { useEffect, useRef, useState, MutableRefObject } from "react";
 import Webcam from "react-webcam";

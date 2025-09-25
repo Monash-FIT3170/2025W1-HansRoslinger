@@ -57,8 +57,6 @@ export const gestureDetector = (
   };
   // Setup gesture recognizer
   useEffect(() => {
-    const isMounted = true;
-
     const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
@@ -77,7 +75,7 @@ export const gestureDetector = (
             minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
           });
 
-        if (isMounted) setGestureRecognizer(gestureRecognizerInternal);
+        setGestureRecognizer(gestureRecognizerInternal);
       } catch (error) {
         console.error(
           `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
@@ -134,12 +132,15 @@ export const gestureDetector = (
               IDtoEnum[detected.categoryName] ?? GestureType.UNIDENTIFIED;
             let confidence: number = detected.score;
 
-            // Only check custom gestures if actual gesture is UNIDENTIFIED
-            if (gestureID === GestureType.UNIDENTIFIED) {
-              if (isPinchSign(landmarks)) {
+            // prefer pinching over pointing
+            if (isPinchSign(landmarks)) {
                 gestureID = GestureType.PINCH;
                 confidence = 1.0;
-              } else if (isTwoFingerPointing(landmarks)) {
+            }
+
+            // Only check custom gestures if actual gesture is UNIDENTIFIED
+            if (gestureID === GestureType.UNIDENTIFIED) {
+              if (isTwoFingerPointing(landmarks)) {
                 gestureID =
                   handedness === Handedness.LEFT
                     ? GestureType.TWO_FINGER_POINTING_LEFT

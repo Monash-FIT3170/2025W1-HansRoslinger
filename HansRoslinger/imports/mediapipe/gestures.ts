@@ -265,7 +265,7 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip) &&
     dist(wrist, thumbTip) < dist(wrist, thumbPip);
-  const isPointing = isIndexExtended && areOthersCurled;
+  const isPointing = isIndexExtended && areOthersCurled && !isPinchSign(landmarks);
   return isPointing;
 }
 
@@ -291,7 +291,7 @@ function isTwoFingerPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
   const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
   const isPointing =
-    isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended;
+    isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended && !isPinchSign(landmarks);
   return isPointing;
 }
 

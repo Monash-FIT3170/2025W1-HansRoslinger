@@ -308,18 +308,24 @@ function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
 function isPinchSign(landmarks: NormalizedLandmark[]) {
   if (!landmarks || landmarks.length < 21) return false;
 
+  const thumbBase = landmarks[2];
   const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
 
-  // For implementation of pinching
   // Distance between thumb and index tip
   const thumbIndexDistance = Math.hypot(
     thumbTip.x - indexTip.x,
     thumbTip.y - indexTip.y,
   );
+  const thumbBaseIndexDistance = Math.hypot(
+    thumbBase.x - indexTip.x,
+    thumbBase.y - indexTip.y,
+  );
 
-  // Consider it "PINCH" if thumb + index are touching, and other fingers are up
-  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+  const threshold = 0.05 // Tune this if needed
+
+  // Consider it "PINCH" if index is the near tib of thumb, and not the base of the thumb
+  const isThumbIndexClose = thumbIndexDistance < threshold && thumbIndexDistance < thumbBaseIndexDistance;
 
   return isThumbIndexClose;
 }

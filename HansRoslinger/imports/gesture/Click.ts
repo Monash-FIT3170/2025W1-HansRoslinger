@@ -11,12 +11,12 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     );
     return;
   }
-  const pointerLandmark = latestGesture.singleGestureLandmarks[8];
-  console.log(latestGesture.singleGestureLandmarks)
+  const indexTipLandmark = latestGesture.singleGestureLandmarks[8];
+  const thumbTipLandmark = latestGesture.singleGestureLandmarks[4];
   const screenPosition = gestureToScreenPosition(
-    pointerLandmark.x,
-    pointerLandmark.y,
-    pointerLandmark.z,
+    (indexTipLandmark.x + thumbTipLandmark.x) / 2,
+    (indexTipLandmark.y + thumbTipLandmark.y) / 2,
+    indexTipLandmark.z && thumbTipLandmark.z ? (indexTipLandmark.z + thumbTipLandmark.z) / 2 : undefined,
   );
 
   const target = document.elementFromPoint(screenPosition.screenX, screenPosition.screenY);

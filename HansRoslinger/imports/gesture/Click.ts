@@ -19,25 +19,33 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     indexTipLandmark.z && thumbTipLandmark.z ? (indexTipLandmark.z + thumbTipLandmark.z) / 2 : undefined,
   );
 
-  const target = document.elementFromPoint(screenPosition.screenX, screenPosition.screenY);
-  const rect = target?.getBoundingClientRect();
+  // If pinch is wished to be used like a mouse click anywhere (not restricted to specified elements), use this line:
+  // const target = document.elementFromPoint(screenPosition.screenX, screenPosition.screenY);
 
-  if (
-    target &&
-    rect &&
-    screenPosition.screenX >= rect.left &&
-    screenPosition.screenX <= rect.right &&
-    screenPosition.screenY >= rect.top &&
-    screenPosition.screenY <= rect.bottom
-  ) {
-    const clickEvent = new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      clientX: screenPosition.screenX,
-      clientY: screenPosition.screenY,
-    });
+  // ADD IDs of other clickable (pinchable) elements here
+  const clickableElementIDs = ["gesture-detection-toggle"];
 
-    target.dispatchEvent(clickEvent);
+  for (const clickableElementID of clickableElementIDs) {
+    const clickableElement = document.getElementById(clickableElementID);
+    const rect = clickableElement?.getBoundingClientRect();
+
+    if (
+      clickableElement &&
+      rect &&
+      screenPosition.screenX >= rect.left &&
+      screenPosition.screenX <= rect.right &&
+      screenPosition.screenY >= rect.top &&
+      screenPosition.screenY <= rect.bottom
+    ) {
+      const clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: screenPosition.screenX,
+        clientY: screenPosition.screenY,
+      });
+
+      clickableElement.dispatchEvent(clickEvent);
+    }
   }
 };

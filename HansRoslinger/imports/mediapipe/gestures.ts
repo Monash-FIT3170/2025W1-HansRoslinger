@@ -37,6 +37,7 @@ export const gestureDetector = (
 ) => {
   const NUM_HANDS_DETECTABLE = 2;
   const MIN_HAND_DETECTION_CONFIDENCE = 0.6;
+  const CLOSED_FIST_OVER_PINCHING = 0.8; // 0.8 = at least 80% confidence in closed fist means pinching can not be activated
   const SETUP_MAX_RETRIES = 5;
   const SETUP_RETRY_DELAY = 1000;
   const VIDEO_HAS_ENOUGH_DATA = 4;
@@ -57,8 +58,6 @@ export const gestureDetector = (
   };
   // Setup gesture recognizer
   useEffect(() => {
-    const isMounted = true;
-
     const setup = async (retryCount = 0) => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
@@ -77,7 +76,7 @@ export const gestureDetector = (
             minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
           });
 
-        if (isMounted) setGestureRecognizer(gestureRecognizerInternal);
+        setGestureRecognizer(gestureRecognizerInternal);
       } catch (error) {
         console.error(
           `GestureRecognizer setup failed (attempt ${retryCount + 1}):`,
@@ -134,12 +133,15 @@ export const gestureDetector = (
               IDtoEnum[detected.categoryName] ?? GestureType.UNIDENTIFIED;
             let confidence: number = detected.score;
 
-            // Only check custom gestures if actual gesture is UNIDENTIFIED
-            if (gestureID === GestureType.UNIDENTIFIED) {
-              if (isPinchSign(landmarks)) {
+            // prefer pinching over pointing but not over a closed fist
+            if ((gestureID != GestureType.CLOSED_FIST || confidence < CLOSED_FIST_OVER_PINCHING) && isPinchSign(landmarks)) {
                 gestureID = GestureType.PINCH;
                 confidence = 1.0;
-              } else if (isTwoFingerPointing(landmarks)) {
+            }
+
+            // Only check custom gestures if actual gesture is UNIDENTIFIED
+            if (gestureID === GestureType.UNIDENTIFIED) {
+              if (isTwoFingerPointing(landmarks)) {
                 gestureID =
                   handedness === Handedness.LEFT
                     ? GestureType.TWO_FINGER_POINTING_LEFT
@@ -265,7 +267,7 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip) &&
     dist(wrist, thumbTip) < dist(wrist, thumbPip);
-  const isPointing = isIndexExtended && areOthersCurled;
+  const isPointing = isIndexExtended && areOthersCurled && !isPinchSign(landmarks);
   return isPointing;
 }
 
@@ -291,7 +293,7 @@ function isTwoFingerPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
   const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
   const isPointing =
-    isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended;
+    isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended && !isPinchSign(landmarks);
   return isPointing;
 }
 
@@ -307,18 +309,22 @@ function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
 function isPinchSign(landmarks: NormalizedLandmark[]) {
   if (!landmarks || landmarks.length < 21) return false;
 
+  const thumbBase = landmarks[2];
   const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
 
-  // For implementation of pinching
-  // Distance between thumb and index tip
-  const thumbIndexDistance = Math.hypot(
-    thumbTip.x - indexTip.x,
-    thumbTip.y - indexTip.y,
-  );
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) =>
+    Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
-  // Consider it "PINCH" if thumb + index are touching, and other fingers are up
-  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+  const thumbIndexDistance = dist(thumbTip, indexTip);
+  const thumbBaseIndexDistance = dist(thumbBase, indexTip);
+  
+   // Tune these if needed
+  const dist_threshold = 0.05
 
-  return isThumbIndexClose;
+  const isThumbIndexClose = thumbIndexDistance < dist_threshold;
+  // Is index curled into thumb
+  const isIndexCurled = thumbIndexDistance >= thumbBaseIndexDistance;
+
+  return isThumbIndexClose && !isIndexCurled;
 }

@@ -13,6 +13,9 @@ interface HeaderProps {
   setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
 
+export const toolbarButtonWidth = 70;
+export const toolbarButtonHeight = toolbarButtonWidth;
+
 export const Header: React.FC<HeaderProps> = ({
   backgroundRemoval,
   grayscale,
@@ -31,8 +34,8 @@ export const Header: React.FC<HeaderProps> = ({
         variant="contained"
         onClick={() => navigate("/allpresentations")}
         sx={{
-          width: 40,
-          height: 40,
+          width: toolbarButtonWidth,
+          height: toolbarButtonHeight,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
@@ -50,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
         onClick={onToggleBackgroundRemoval}
         id="background-removal-enable"
         sx={{
-          width: 40,
-          height: 40,
+          width: toolbarButtonWidth,
+          height: toolbarButtonHeight,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
@@ -70,8 +73,8 @@ export const Header: React.FC<HeaderProps> = ({
         variant="contained"
         onClick={onToggleGrayscale}
         sx={{
-          width: 40,
-          height: 40,
+          width: toolbarButtonWidth,
+          height: toolbarButtonHeight,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
@@ -90,8 +93,8 @@ export const Header: React.FC<HeaderProps> = ({
         variant="contained"
         size="small"
         sx={{
-          width: 40,
-          height: 40,
+          width: toolbarButtonWidth,
+          height: toolbarButtonHeight,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",
@@ -111,8 +114,8 @@ export const Header: React.FC<HeaderProps> = ({
         variant="contained"
         onClick={onToggleChart}
         sx={{
-          width: 40,
-          height: 40,
+          width: toolbarButtonWidth,
+          height: toolbarButtonHeight,
           minWidth: 0,
           fontSize: "0.75rem",
           fontWeight: "medium",

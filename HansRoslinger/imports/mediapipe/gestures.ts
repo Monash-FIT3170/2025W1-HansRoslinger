@@ -37,6 +37,7 @@ export const gestureDetector = (
 ) => {
   const NUM_HANDS_DETECTABLE = 2;
   const MIN_HAND_DETECTION_CONFIDENCE = 0.6;
+  const CLOSED_FIST_OVER_PINCHING = 0.8; // 0.8 = at least 80% confidence in closed fist means pinching can not be activated
   const SETUP_MAX_RETRIES = 5;
   const SETUP_RETRY_DELAY = 1000;
   const VIDEO_HAS_ENOUGH_DATA = 4;
@@ -132,8 +133,8 @@ export const gestureDetector = (
               IDtoEnum[detected.categoryName] ?? GestureType.UNIDENTIFIED;
             let confidence: number = detected.score;
 
-            // prefer pinching over pointing
-            if (isPinchSign(landmarks)) {
+            // prefer pinching over pointing but not over a closed fist
+            if ((gestureID != GestureType.CLOSED_FIST || confidence < CLOSED_FIST_OVER_PINCHING) && isPinchSign(landmarks)) {
                 gestureID = GestureType.PINCH;
                 confidence = 1.0;
             }
@@ -312,20 +313,18 @@ function isPinchSign(landmarks: NormalizedLandmark[]) {
   const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
 
-  // Distance between thumb and index tip
-  const thumbIndexDistance = Math.hypot(
-    thumbTip.x - indexTip.x,
-    thumbTip.y - indexTip.y,
-  );
-  const thumbBaseIndexDistance = Math.hypot(
-    thumbBase.x - indexTip.x,
-    thumbBase.y - indexTip.y,
-  );
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) =>
+    Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
-  const threshold = 0.05 // Tune this if needed
+  const thumbIndexDistance = dist(thumbTip, indexTip);
+  const thumbBaseIndexDistance = dist(thumbBase, indexTip);
+  
+   // Tune these if needed
+  const dist_threshold = 0.05
 
-  // Consider it "PINCH" if index is the near tib of thumb, and not the base of the thumb
-  const isThumbIndexClose = thumbIndexDistance < threshold && thumbIndexDistance < thumbBaseIndexDistance;
+  const isThumbIndexClose = thumbIndexDistance < dist_threshold;
+  // Is index curled into thumb
+  const isIndexCurled = thumbIndexDistance >= thumbBaseIndexDistance;
 
-  return isThumbIndexClose;
+  return isThumbIndexClose && !isIndexCurled;
 }

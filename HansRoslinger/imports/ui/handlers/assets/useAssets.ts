@@ -34,6 +34,72 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+// Convert PDF to images using pdf.js
+async function convertPdfToImages(file: File): Promise<File[]> {
+  try {
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    if (typeof window !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    }
+    
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    const imageFiles: File[] = [];
+    
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      await page.render({
+        canvasContext: context!,
+        viewport: viewport,
+        canvas: canvas
+      }).promise;
+      
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.85);
+      });
+      
+      const imageFile = new File(
+        [blob], 
+        `${file.name.replace('.pdf', '')}_page_${pageNum}.jpg`, 
+        { type: 'image/jpeg' }
+      );
+      
+      imageFiles.push(imageFile);
+    }
+    
+    return imageFiles;
+  } catch (error) {
+    console.error('PDF conversion error:', error);
+    // FIX: Proper error handling
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Failed to convert PDF: ${errorMessage}`);
+  }
+}
+
+// Check if file is PDF
+function isPdfFile(file: File): boolean {
+  return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+}
+
+// Process file - convert PDFs to images, pass through other files
+async function processFile(file: File): Promise<File[]> {
+  if (isPdfFile(file)) {
+    return await convertPdfToImages(file);
+  } else {
+    // For non-PDF files, return as single file array
+    return [file];
+  }
+}
+
 // Create asset and upload images
 export async function createAssetWithImages({
   name,
@@ -60,8 +126,18 @@ export async function createAssetWithImages({
   // Wait briefly to ensure asset is available in DB (Meteor eventual consistency)
   await new Promise((res) => setTimeout(res, 300));
 
-  // Upload images and insert docs
+  // Process all files (convert PDFs to images)
+  const allImageFiles: File[] = [];
+  
   for (const file of files) {
+    const processedFiles = await processFile(file);
+    allImageFiles.push(...processedFiles);
+  }
+  
+  console.log(`Converted ${files.length} files to ${allImageFiles.length} images`);
+
+  // Upload images and insert docs
+  for (const file of allImageFiles) {
     const arrayBuffer = await file.arrayBuffer();
     const base64 = arrayBufferToBase64(arrayBuffer);
 

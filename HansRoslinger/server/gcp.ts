@@ -1,17 +1,10 @@
 Meteor.methods({
   // ...existing methods...
-  async "assets.deleteImageFromGCP"(data: {
-    assetId: string;
-    fileName: string;
-  }) {
+  async "assets.deleteImageFromGCP"(data: { assetId: string; fileName: string }) {
     const prefix = `${data.assetId}/`;
     // Find file in bucket with this prefix and fileName (may have hash)
     const [files] = await bucket.getFiles({ prefix });
-    const match = files.find(
-      (f) =>
-        f.name.startsWith(prefix) &&
-        f.name.includes(data.fileName.replace(/\s+/g, "_")),
-    );
+    const match = files.find((f) => f.name.startsWith(prefix) && f.name.includes(data.fileName.replace(/\s+/g, "_")));
     if (match) {
       await match.delete();
       return true;
@@ -30,12 +23,7 @@ const storage = new Storage();
 const bucket = storage.bucket(GCP_BUCKET_NAME);
 
 Meteor.methods({
-  async "assets.uploadImageToGCP"(data: {
-    assetId: string;
-    fileName: string;
-    fileType: string;
-    base64: string;
-  }) {
+  async "assets.uploadImageToGCP"(data: { assetId: string; fileName: string; fileType: string; base64: string }) {
     const buffer = Buffer.from(data.base64, "base64");
     const hash = crypto.randomBytes(8).toString("hex");
     const safeFileName = data.fileName.replace(/\s+/g, "_");
@@ -51,10 +39,7 @@ Meteor.methods({
     const existingCount = await ImageCollection.find({
       assetId: data.assetId,
     }).countAsync?.();
-    const order =
-      typeof existingCount === "number"
-        ? existingCount
-        : ImageCollection.find({ assetId: data.assetId }).count();
+    const order = typeof existingCount === "number" ? existingCount : ImageCollection.find({ assetId: data.assetId }).count();
     // Insert image document into MongoDB with order
     await ImageCollection.insertAsync({
       fileName: data.fileName,

@@ -12,20 +12,18 @@
  * In short: this file provides the logic that turns detected gestures into
  * controlled, rate-limited function calls in the app.
  */
-import {
-  FunctionType,
-  Gesture,
-  GestureType,
-  Handedness,
-  handleGestureToFunc,
-} from "./gesture";
+import { handleGestureToFunc } from "../gesture/gesture";
+import { FunctionType, GestureType } from "../gesture/types";
+import { Gesture, Handedness } from "../mediapipe/types";
 import { useRef } from "react";
 
 let isZoomEnabled = false;
-
-window.addEventListener("chart:togglezoom", () => {
-  isZoomEnabled = !isZoomEnabled;
-});
+// Guard against server-side evaluation where `window` is undefined
+if (typeof window !== "undefined") {
+  window.addEventListener("chart:togglezoom", () => {
+    isZoomEnabled = !isZoomEnabled;
+  });
+}
 
 export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
   const FIRST_ACTIVATION_DELAY_MS = 500; // initial activation
@@ -76,9 +74,7 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
         return;
       }
 
-      const requiredDelay = state.firedOnce
-        ? REPEAT_ACTIVATION_DELAY_MS
-        : FIRST_ACTIVATION_DELAY_MS;
+      const requiredDelay = state.firedOnce ? REPEAT_ACTIVATION_DELAY_MS : FIRST_ACTIVATION_DELAY_MS;
       const elapsed = now - state.lastFiredAt;
 
       if (elapsed >= requiredDelay || isZoomEnabled) {

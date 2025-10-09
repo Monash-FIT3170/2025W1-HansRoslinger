@@ -1,9 +1,6 @@
 export const generateLineChartData = () => {
   const labels = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
-  const values = Array.from(
-    { length: 20 },
-    () => Math.floor(Math.random() * 100) + 10,
-  );
+  const values = Array.from({ length: 20 }, () => Math.floor(Math.random() * 100) + 10);
 
   return {
     labels,

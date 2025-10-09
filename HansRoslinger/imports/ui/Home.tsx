@@ -1,33 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CreateAssetModal from "./components/Assets/CreateAssetModal";
-import {
-  useAssetsWithImageCount,
-  createAssetWithImages,
-  AssetWithCount,
-} from "./handlers/assets/useAssets";
+import { useAssetsWithImageCount, createAssetWithImages, AssetWithCount } from "./handlers/assets/useAssets";
 import { deleteAssetAndFiles } from "./handlers/assets/useDeleteAsset";
 import { ImageCollection, ImageDoc } from "../api/database/images/images";
+import { getRecentPresentationId } from "../api/database/users/users";
+import { getPresentationById } from "../api/database/presentations/presentations";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
-import { clearAuthCookie } from "../cookies/cookies";
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
-import {
-  Settings,
-  ExitToApp,
-  Collections,
-} from "@mui/icons-material";
+import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
+import { Box, Typography, Paper, Button, List, ListItemText, Collapse, ListItemButton, ListItemIcon, ListItem, IconButton, Link as MuiLink, Backdrop, CircularProgress } from "@mui/material";
+import { ExpandLess, ExpandMore, Settings, ExitToApp, Collections } from "@mui/icons-material";
 import * as MuiIcons from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export const Home: React.FC = () => {
   useAuthGuard();
+  const userId = getUserIDCookie();
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(true);
@@ -35,10 +25,24 @@ export const Home: React.FC = () => {
   const assets: AssetWithCount[] = useAssetsWithImageCount();
   const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
   const [hoveredAssetId, setHoveredAssetId] = useState<string | null>(null);
-  const [imagesByAsset, setImagesByAsset] = useState<
-    Record<string, ImageDoc[]>
-  >({});
+  const [imagesByAsset, setImagesByAsset] = useState<Record<string, ImageDoc[]>>({});
+
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [recentPresentationId, setRecentPresentationId] = useState<string | undefined>();
+  const [recentPresentationName, setRecentPresentationName] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (userId) {
+      getRecentPresentationId(userId).then((id) => {
+        setRecentPresentationId(id);
+        if (id) {
+          getPresentationById(id).then((presentation) => {
+            setRecentPresentationName(presentation?.name ?? "Unnamed Presentation");
+          });
+        }
+      });
+    }
+  }, [userId]);
 
   // uploading state
   const [uploading, setUploading] = useState(false);
@@ -57,21 +61,12 @@ export const Home: React.FC = () => {
     setExpandedAssetId(assetId);
     const fetchSorted = async (): Promise<ImageDoc[]> => {
       const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
-      const imgs = (await ImageCollection.find(
-        { assetId },
-        { sort: sortSpec },
-      ).fetch()) as ImageDoc[];
+      const imgs = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
       return imgs;
     };
     let imgs = await fetchSorted();
     if (imgs.some((i) => typeof i.order !== "number")) {
-      await Promise.all(
-        imgs.map((img, idx) =>
-          typeof img.order === "number"
-            ? Promise.resolve()
-            : ImageCollection.updateAsync(img._id!, { $set: { order: idx } }),
-        ),
-      );
+      await Promise.all(imgs.map((img, idx) => (typeof img.order === "number" ? Promise.resolve() : ImageCollection.updateAsync(img._id!, { $set: { order: idx } }))));
       imgs = await fetchSorted();
     }
     setImagesByAsset((prev) => ({ ...prev, [assetId]: imgs }));
@@ -94,25 +89,20 @@ export const Home: React.FC = () => {
     setUploadProgress(0);
 
     try {
-      await createAssetWithImages(data, (progress: number) => {
-        setUploadProgress(progress);
-      });
+      await createAssetWithImages(data);
     } finally {
       setUploading(false);
       setUploadProgress(0);
     }
   };
 
+    const handleClick = () => {
+    setOpen(!open);
+  };
+
   const moveImage = async (assetId: string, fromIdx: number, toIdx: number) => {
     const list = imagesByAsset[assetId] || [];
-    if (
-      fromIdx === toIdx ||
-      fromIdx < 0 ||
-      toIdx < 0 ||
-      fromIdx >= list.length ||
-      toIdx >= list.length
-    )
-      return;
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= list.length || toIdx >= list.length) return;
     const a = list[fromIdx];
     const b = list[toIdx];
     const orderA = typeof a.order === "number" ? a.order : fromIdx;
@@ -122,10 +112,7 @@ export const Home: React.FC = () => {
       ImageCollection.updateAsync(b._id!, { $set: { order: orderA } }),
     ]);
     const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
-    const refreshed = (await ImageCollection.find(
-      { assetId },
-      { sort: sortSpec },
-    ).fetch()) as ImageDoc[];
+    const refreshed = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
     setImagesByAsset((prev) => ({ ...prev, [assetId]: refreshed }));
   };
 
@@ -139,8 +126,7 @@ export const Home: React.FC = () => {
         minHeight: "100vh",
         p: 4,
         gap: 4,
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       <Typography variant="h4" fontWeight="bold" color="text.primary">
@@ -152,7 +138,7 @@ export const Home: React.FC = () => {
         open={uploading}
         sx={{
           color: "#fff",
-          zIndex: (theme) => theme.zIndex.drawer + 1000,
+          zIndex: (theme: import("@mui/material/styles").Theme) => theme.zIndex.drawer + 1000,
           flexDirection: "column",
         }}
       >
@@ -173,11 +159,141 @@ export const Home: React.FC = () => {
           backgroundColor: "#FAFAFA",
         }}
       >
-        {/* assets list unchanged */}
-        ...
+        <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav" aria-labelledby="nested-list-subheader">
+          <ListItemButton onClick={handleClick}>
+            <ListItemIcon>
+              <MuiIcons.Folder color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Assets" />
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {assets.map((asset: AssetWithCount) => {
+                const isExpanded = expandedAssetId === asset._id;
+                const isHovered = hoveredAssetId === asset._id;
+                return (
+                  <React.Fragment key={asset._id}>
+                    <ListItemButton
+                      sx={{ pl: 4, position: "relative" }}
+                      onClick={() => handleExpandAsset(asset._id!)}
+                      onMouseEnter={() => setHoveredAssetId(asset._id!)}
+                      onMouseLeave={() => setHoveredAssetId(null)}
+                    >
+                      <ListItemIcon>
+                        {asset.icon && (MuiIcons as Record<string, React.ElementType>)[asset.icon] ? (
+                          React.createElement((MuiIcons as Record<string, React.ElementType>)[asset.icon], { fontSize: "medium" })
+                        ) : (
+                          <Collections />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText primary={asset.name} secondary={`Images: ${asset.imageCount}`} />
+                      {/* Trash icon on hover */}
+                      {isHovered && (
+                        <Button
+                          size="small"
+                          color="error"
+                          sx={{ minWidth: 0, position: "absolute", right: 12 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteAsset(asset._id!);
+                          }}
+                          disabled={deleting === asset._id}
+                        >
+                          <span role="img" aria-label="delete">
+                            🗑️
+                          </span>
+                        </Button>
+                      )}
+                    </ListItemButton>
+                    {/* Show images if expanded */}
+                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding sx={{ pl: 8 }}>
+                        {(imagesByAsset[asset._id!] || []).length === 0 && <ListItemText primary="No images in this asset." />}
+                        {(imagesByAsset[asset._id!] || []).map((img: ImageDoc, idx: number) => (
+                          <ListItem
+                            key={img._id}
+                            sx={{ pl: 1 }}
+                            secondaryAction={
+                              <Box>
+                                <IconButton
+                                  size="small"
+                                  aria-label="move up"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    moveImage(asset._id!, idx, idx - 1);
+                                  }}
+                                  disabled={idx === 0}
+                                  sx={{
+                                    color: "text.secondary",
+                                    "&:hover": { color: "text.primary" },
+                                  }}
+                                >
+                                  <ArrowUpwardIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  aria-label="move down"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    moveImage(asset._id!, idx, idx + 1);
+                                  }}
+                                  disabled={idx === (imagesByAsset[asset._id!] || []).length - 1}
+                                  sx={{
+                                    color: "text.secondary",
+                                    "&:hover": { color: "text.primary" },
+                                  }}
+                                >
+                                  <ArrowDownwardIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            }
+                          >
+                            <ListItemText primary={<MuiLink href={img.url} target="_blank" underline="hover">{`${idx + 1}. ${img.fileName}`}</MuiLink>} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Collapse>
+                  </React.Fragment>
+                );
+              })}
+            </List>
+          </Collapse>
+        </List>
       </Paper>
 
       <Box sx={{ display: "flex", gap: 3 }}>
+        {recentPresentationId && (
+          <Button
+            variant="contained"
+            startIcon={<MuiIcons.RocketLaunch />}
+            sx={{
+              width: "fit-content",
+              bgcolor: "primary.main",
+              color: "white",
+              px: 3,
+              py: 1.5,
+              borderRadius: "8px",
+              fontWeight: "bold",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+            onClick={() => {
+              navigate(`/present?presentationId=${recentPresentationId}`);
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Quick Present
+            </Typography>
+            {recentPresentationName && (
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                {recentPresentationName}
+              </Typography>
+            )}
+          </Button>
+        )}
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -194,11 +310,7 @@ export const Home: React.FC = () => {
         >
           Import Assets
         </Button>
-        <CreateAssetModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onCreate={handleCreateAsset}
-        />
+        <CreateAssetModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onCreate={handleCreateAsset} />
         <Button
           variant="contained"
           startIcon={<Collections />}

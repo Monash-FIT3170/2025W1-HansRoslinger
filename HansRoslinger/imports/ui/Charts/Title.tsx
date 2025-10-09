@@ -1,11 +1,6 @@
 import React from "react";
 import { Dataset } from "../../api/database/dataset/dataset";
-import {
-  TITLE_FONT_SIZE,
-  TITLE_FONT_FAMILY,
-  TITLE_COLOR,
-  TITLE_TEXT_SHADOW,
-} from "./constants";
+import { TITLE_FONT_SIZE, TITLE_FONT_FAMILY, TITLE_COLOR, TITLE_TEXT_SHADOW } from "./constants";
 
 interface TitleProps {
   dataset: Dataset;

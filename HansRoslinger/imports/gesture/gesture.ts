@@ -22,47 +22,8 @@ import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 import { click } from "./Click";
-
-enum GestureType {
-  CLOSED_FIST,
-  I_LOVE_YOU,
-  UNIDENTIFIED,
-  OPEN_PALM,
-  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched (now also identifies any pointing)
-  THUMB_DOWN,
-  THUMB_UP,
-  VICTORY, // This is the peace sign
-  PINCH, // Team 3 double hand gesture
-  DOUBLE_PINCH,
-  TWO_FINGER_POINTING_LEFT,
-  TWO_FINGER_POINTING_RIGHT,
-}
-
-enum FunctionType {
-  UNUSED,
-  SELECT,
-  FILTER,
-  CLEAR,
-  ZOOM,
-  SWITCH_CHART,
-  SWITCH_DATA,
-  CLICK,
-}
-
-export const IDtoEnum: Record<string, GestureType> = {
-  Thumb_Up: GestureType.THUMB_UP,
-  Thumb_Down: GestureType.THUMB_DOWN,
-  Pointing_Up: GestureType.POINTING_UP,
-  Closed_Fist: GestureType.CLOSED_FIST,
-  I_Love_You: GestureType.I_LOVE_YOU,
-  Unidentified: GestureType.UNIDENTIFIED,
-  Open_Palm: GestureType.OPEN_PALM,
-  Victory: GestureType.VICTORY,
-  Pinch: GestureType.PINCH,
-  Double_Pinch: GestureType.DOUBLE_PINCH,
-  Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
-  Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
-};
+import { FunctionType, GestureType } from "./types";
+import { Gesture } from "../mediapipe/types";
 
 type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
 export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
@@ -74,21 +35,6 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
   [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
   [FunctionType.CLICK]: click as GestureHandlerFn,
-};
-
-enum Handedness {
-  LEFT = "Left",
-  RIGHT = "Right",
-  BOTH = "Both",
-}
-
-type Gesture = {
-  gestureID: GestureType;
-  timestamp: Date;
-  handedness: Handedness;
-  confidence: number; // 0-1
-  singleGestureLandmarks: { x: number; y: number; z?: number }[];
-  doubleGestureLandmarks: { x: number; y: number; z?: number }[][];
 };
 
 // Define a boolean to track the zoom state
@@ -131,12 +77,7 @@ const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
 };
 
-const handleGestureToFunc = (
-  INPUT: GestureType,
-  initialGesture: Gesture,
-  latestGesture: Gesture,
-  mapping: Record<GestureType, FunctionType>,
-): void => {
+const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture, mapping: Record<GestureType, FunctionType>): void => {
   const label = INPUT;
   if (isZoomEnabled) {
     console.log(mapping[label], FunctionType.FILTER);
@@ -150,63 +91,20 @@ const handleGestureToFunc = (
     const functionType = mapping[label];
     const handler = EnumToFunc[functionType];
 
-    // console.log(`label: ${label}`);
-    // console.log(`functionType: ${functionType}`);
     if (handler && functionType !== FunctionType.UNUSED) {
-      console.log(
-        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
-      );
+      console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
       handler(initialGesture, latestGesture);
     } else if (functionType === FunctionType.UNUSED) {
       const defaultFunction = constantMapping[label];
       const defaultHandler = EnumToFunc[defaultFunction];
       if (defaultHandler && defaultFunction !== FunctionType.UNUSED) {
-        console.log(
-          `[GestureHandler] Calling default function '${FunctionType[defaultFunction]}' for gesture '${GestureType[label]}'`,
-        );
         defaultHandler(initialGesture, latestGesture);
       }
-      console.log(
-        `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
-      );
+      console.log(`[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`);
     } else {
-      console.warn(
-        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
-      );
+      console.warn(`[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`);
     }
   }
 };
 
-export {
-  Gesture,
-  GestureType,
-  FunctionType,
-  Handedness,
-  handleGestureToFunc,
-  isZoomEnabled,
-  defaultMapping,
-};
-
-export const gestureToScreenPosition = (
-  x: number,
-  y: number,
-  z?: number,
-): { screenX: number; screenY: number } => {
-  // Get the screen dimensions
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  // Flip the x coordinate (mirrored horizontally)
-  const flippedX = 1 - x;
-
-  // Convert normalized x and y to absolute screen positions
-  const screenX = Math.round(flippedX * screenWidth);
-  const screenY = Math.round(y * screenHeight);
-
-  // Optionally, you can use z for depth-related calculations if needed
-  if (z !== undefined) {
-    console.log(`Depth (z): ${z}`);
-  }
-
-  return { screenX, screenY };
-};
+export { Gesture, GestureType, FunctionType, handleGestureToFunc, isZoomEnabled, defaultMapping };

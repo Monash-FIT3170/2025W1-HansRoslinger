@@ -12,7 +12,7 @@ interface ImageSegmentationProps {
 export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
   grayscale,
 }) => {
-  const isPresenting = useMatch("/present")
+  const isPresenting = useMatch("/present");
 
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
@@ -171,7 +171,8 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
         };
 
         // Activate the webcam stream.
-        video.srcObject = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject =
+          await navigator.mediaDevices.getUserMedia(constraints);
         video.addEventListener("loadeddata", predictWebcam);
       }
     }
@@ -179,7 +180,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
     function stopWebcam() {
       const stream = video.srcObject as MediaStream | null;
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
       video.srcObject = null;
       if (rafID != null) {

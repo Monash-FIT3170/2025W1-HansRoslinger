@@ -134,9 +134,13 @@ export const gestureDetector = (
             let confidence: number = detected.score;
 
             // prefer pinching over pointing but not over a closed fist
-            if ((gestureID != GestureType.CLOSED_FIST || confidence < CLOSED_FIST_OVER_PINCHING) && isPinchSign(landmarks)) {
-                gestureID = GestureType.PINCH;
-                confidence = 1.0;
+            if (
+              (gestureID != GestureType.CLOSED_FIST ||
+                confidence < CLOSED_FIST_OVER_PINCHING) &&
+              isPinchSign(landmarks)
+            ) {
+              gestureID = GestureType.PINCH;
+              confidence = 1.0;
             }
 
             // Only check custom gestures if actual gesture is UNIDENTIFIED
@@ -267,7 +271,8 @@ function isPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip) &&
     dist(wrist, thumbTip) < dist(wrist, thumbPip);
-  const isPointing = isIndexExtended && areOthersCurled && !isPinchSign(landmarks);
+  const isPointing =
+    isIndexExtended && areOthersCurled && !isPinchSign(landmarks);
   return isPointing;
 }
 
@@ -293,7 +298,11 @@ function isTwoFingerPointing(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
   const thumbExtended = dist(thumbTip, wrist) > dist(thumbPip, wrist);
   const isPointing =
-    isIndexExtended && isMiddleExtended && areOthersCurled && thumbExtended && !isPinchSign(landmarks);
+    isIndexExtended &&
+    isMiddleExtended &&
+    areOthersCurled &&
+    thumbExtended &&
+    !isPinchSign(landmarks);
   return isPointing;
 }
 
@@ -318,9 +327,9 @@ function isPinchSign(landmarks: NormalizedLandmark[]) {
 
   const thumbIndexDistance = dist(thumbTip, indexTip);
   const thumbBaseIndexDistance = dist(thumbBase, indexTip);
-  
-   // Tune these if needed
-  const dist_threshold = 0.05
+
+  // Tune these if needed
+  const dist_threshold = 0.05;
 
   const isThumbIndexClose = thumbIndexDistance < dist_threshold;
   // Is index curled into thumb

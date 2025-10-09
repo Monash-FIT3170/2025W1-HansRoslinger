@@ -5,7 +5,7 @@ echo "Installing system dependencies..."
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
-  libasound2 \
+  libasound2t64 \
   libatk1.0-0 \
   libatk-bridge2.0-0 \
   libc6 \

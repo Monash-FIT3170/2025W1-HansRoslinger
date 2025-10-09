@@ -116,4 +116,3 @@ export async function updateRecentPresentationId(
     { $set: { _recent_presentation_id: presentationId } },
   );
 }
-

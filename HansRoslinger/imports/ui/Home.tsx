@@ -54,8 +54,12 @@ export const Home: React.FC = () => {
   >({});
 
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [recentPresentationId, setRecentPresentationId] = useState<string | undefined>();
-  const [recentPresentationName, setRecentPresentationName] = useState<string | undefined>();
+  const [recentPresentationId, setRecentPresentationId] = useState<
+    string | undefined
+  >();
+  const [recentPresentationName, setRecentPresentationName] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     if (userId) {
@@ -63,7 +67,9 @@ export const Home: React.FC = () => {
         setRecentPresentationId(id);
         if (id) {
           getPresentationById(id).then((presentation) => {
-            setRecentPresentationName(presentation?.name ?? "Unnamed Presentation");
+            setRecentPresentationName(
+              presentation?.name ?? "Unnamed Presentation",
+            );
           });
         }
       });

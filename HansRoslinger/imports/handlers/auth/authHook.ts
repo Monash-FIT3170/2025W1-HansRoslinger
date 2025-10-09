@@ -8,7 +8,10 @@ export function useAuthGuard() {
 
   useEffect(() => {
     const { token, userId } = getAuthCookie();
-    const valid = (token != undefined && userId != undefined) ? verifyJWT(token, userId) : false;
+    const valid =
+      token != undefined && userId != undefined
+        ? verifyJWT(token, userId)
+        : false;
     if (!valid) {
       navigate("/", { replace: true });
     }

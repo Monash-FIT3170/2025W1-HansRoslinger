@@ -199,7 +199,7 @@ export const Present: React.FC = () => {
       };
 
   const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
-  let settings = defaultMapping;
+    let settings = defaultMapping;
     const userID = getUserIDCookie();
     if (userID) {
       const user = await getUserById(userID);

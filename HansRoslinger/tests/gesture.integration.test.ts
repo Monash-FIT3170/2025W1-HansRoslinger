@@ -1,131 +1,154 @@
 import { Meteor } from "meteor/meteor";
 import assert from "assert";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { setupGestureRecognizer, useGestureDetector } from "/imports/mediapipe/gestures";
 import type { GestureRecognizer } from "@mediapipe/tasks-vision";
-import { GestureType, FunctionType, Gesture } from "/imports/gesture/gesture";
+import { GestureType, FunctionType } from "/imports/gesture/gesture";
 
-// A tiny harness component to run the real hook against an HTMLImageElement
-const ImageGestureHarness: React.FC<{ src: string; onDone: (gestureType: GestureType | undefined) => void }> = ({ src, onDone }) => {
-	const videoRef = useRef<HTMLVideoElement | null>(null);
-	const imageRef = useRef<HTMLImageElement | null>(null);
-	const [recognizer, setRecognizer] = useState<GestureRecognizer | null>(null);
-	const [imageLoaded, setImageLoaded] = useState(false);
+const ImageGestureHarness: React.FC<{
+  src: string;
+  recognizer: GestureRecognizer;
+  expected: GestureType;
+  onDone: (err?: Error) => void;
+}> = ({ src, recognizer, expected, onDone }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [ready, setReady] = useState(false);
 
-	const settings = useMemo<Record<GestureType, FunctionType>>(() => {
-		const map = {} as Record<GestureType, FunctionType>;
-		for (const key of Object.values(GestureType)) {
-			map[key as GestureType] = FunctionType.UNUSED as FunctionType;
-		}
-		return map;
-	}, []);
+  const settings = useMemo<Record<GestureType, FunctionType>>(() => {
+    const map = {} as Record<GestureType, FunctionType>;
+    for (const key of Object.values(GestureType)) {
+      map[key as GestureType] = FunctionType.UNUSED as FunctionType;
+    }
+    return map;
+  }, []);
 
-	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			const rec = await setupGestureRecognizer("IMAGE");
-			if (!cancelled) {
-				setRecognizer(rec);
-				console.log("[Test] Recognizer ready (IMAGE)", !!rec);
-			}
-		})();
-		return () => {
-			cancelled = true;
-			recognizer?.close?.();
-		};
-	}, []);
+  const { currentGestures: gestures, gesturesRef } = useGestureDetector(
+    recognizer, videoRef, imageRef, true, settings, "IMAGE", false
+  );
 
-	useEffect(() => {
-		const img = new Image();
-		img.crossOrigin = "anonymous";
-		img.onload = () => {
-			imageRef.current = img;
-			setImageLoaded(true);
-			console.log("[Test] Image loaded", { width: img.width, height: img.height, src });
-		};
-		img.onerror = (e) => {
-			console.error("[Test] Failed to load image", e);
-			setImageLoaded(false);
-		};
-		img.src = src;
-	}, [src]);
+  useEffect(() => {
+    gesturesRef.current = gestures;
+  }, [gestures]);
 
-	const gestures = useGestureDetector(recognizer, videoRef, imageRef, true, settings, "IMAGE");
+  // --- wait for image to be fully decoded and painted ---
+  const handleImageLoad = useCallback(async () => {
+    const el = imageRef.current;
+    if (!el) return;
+    try {
+      // Ensure decode & layout are complete
+      await el.decode();
+    } catch {}
+    if (el.naturalWidth === 0 || el.naturalHeight === 0) {
+      onDone(new Error(`Image loaded with zero dimensions: ${src}`));
+      return;
+    }
+    console.log(`[Test] Image decoded (${el.naturalWidth}x${el.naturalHeight})`);
+    el.width = el.naturalWidth;
+    el.height = el.naturalHeight;
+    // Force paint flush
+    requestAnimationFrame(() => {
+      setTimeout(() => setReady(true), 200);
+    });
+  }, [onDone, src]);
 
-	useEffect(() => {
-		if (!recognizer || !imageLoaded) return;
-		const MAX_WAIT_MS = 15000;
-		const POLL_MS = 400;
-		const start = Date.now();
-		const int = setInterval(() => {
-			const gs = (gestures as Gesture[]) ?? [];
-			const firstGestureType = gs.length > 0 ? gs[0].gestureID : undefined;
-			if (firstGestureType !== undefined || Date.now() - start > MAX_WAIT_MS) {
-				console.log("[Test] Recognized gesture type (final):", firstGestureType);
-				clearInterval(int);
-				onDone(firstGestureType);
-			}
-		}, POLL_MS);
-		return () => clearInterval(int);
-	}, [recognizer, imageLoaded, gestures, onDone]);
+  const handleImageError = useCallback(() => {
+    onDone(new Error("Failed to load image: " + src));
+  }, [onDone, src]);
 
-	return null;
+  useEffect(() => {
+    if (!ready) return;
+    const MAX_WAIT_MS = 15000;
+    const POLL_MS = 400;
+    const start = Date.now();
+
+    console.log(`[Test] Starting recognition wait loop for ${src}`);
+    const int = setInterval(() => {
+      const gs = gesturesRef.current ?? [];
+      const firstGestureType = gs[0]?.gestureID;
+      if (firstGestureType !== undefined) {
+        clearInterval(int);
+        try {
+          console.log(`[Test] Result for ${src}: ${GestureType[firstGestureType]} (expected ${GestureType[expected]})`);
+          assert.strictEqual(firstGestureType, expected);
+          onDone();
+        } catch (e) {
+          console.error(`[Test] Assertion failed for ${src}.`, {
+            expected: GestureType[expected],
+            received: GestureType[firstGestureType],
+          });
+          onDone(e as Error);
+        }
+      } else if (Date.now() - start > MAX_WAIT_MS) {
+        clearInterval(int);
+        console.error(`[Test] Timeout waiting for gesture for ${src}`);
+        onDone(new Error(`Timeout for ${src}`));
+      }
+    }, POLL_MS);
+    return () => clearInterval(int);
+  }, [ready, expected, onDone]);
+
+  return React.createElement("img", {
+    ref: imageRef,
+    src,
+    alt: "gesture test",
+    crossOrigin: "anonymous",
+    style: {
+      visibility: "hidden",
+      position: "absolute",
+      left: "-9999px",
+      width: "auto",
+      height: "auto"
+    },
+    onLoad: handleImageLoad,
+    onError: handleImageError
+  });
 };
 
 if (Meteor.isClient) {
-	describe("Gesture recognition from image (IMAGE mode)", function () {
-		this.timeout(60000);
+  describe("Gesture recognition from images (IMAGE mode)", function () {
+    this.timeout(60000);
 
-		it("loads an image and returns the recognized gesture type", (done) => {
-			const container = document.createElement("div");
-			document.body.appendChild(container);
-			const root = createRoot(container);
+    const testCases: { src: string; expected: GestureType }[] = [
+      { src: "/images/integrationtests/thumbs_up.jpg", expected: GestureType.THUMB_UP },
+      { src: "/images/integrationtests/thumbs_down.jpg", expected: GestureType.THUMB_DOWN },
+      { src: "/images/integrationtests/pointing_up.jpg", expected: GestureType.POINTING_UP },
+      { src: "/images/integrationtests/double_point_left.jpg", expected: GestureType.TWO_FINGER_POINTING_LEFT },
+      { src: "/images/integrationtests/double_point_right.jpg", expected: GestureType.TWO_FINGER_POINTING_RIGHT },
+      { src: "/images/integrationtests/open_palm.jpg", expected: GestureType.OPEN_PALM },
+      { src: "/images/integrationtests/fist.jpg", expected: GestureType.CLOSED_FIST },
+      { src: "/images/integrationtests/pinch.jpg", expected: GestureType.PINCH },
+      { src: "/images/integrationtests/victory.png", expected: GestureType.VICTORY },
+    ];
 
-			const imagePath = "/images/integrationtests/thumbs_up.jpg";
+    it("recognises gestures from images sequentially with shared recognizer", async function () {
+      const rec = await setupGestureRecognizer("IMAGE");
+      if (!rec) throw new Error("GestureRecognizer failed to initialize");
 
-			function handleDone(gestureType: GestureType | undefined) {
-				try {
-					assert.strictEqual(gestureType, GestureType.THUMB_UP, "Expected to recognize a THUMB_UP gesture from the image");
-				} catch (e) {
-					done(e as Error);
-					return;
-				} finally {
-					root.unmount();
-					container.remove();
-				}
-				done();
-			}
+      for (const { src, expected } of testCases) {
+        await new Promise<void>((resolve, reject) => {
+          const container = document.createElement("div");
+          document.body.appendChild(container);
+          const root = createRoot(container);
 
-			root.render(React.createElement(ImageGestureHarness, { src: imagePath, onDone: handleDone }));
-		});
+          function handleDone(err?: Error) {
+            root.unmount();
+            container.remove();
+            if (err) reject(err);
+            else resolve();
+          }
 
-		it("loads an image and returns the recognized gesture type", (done) => {
-			const container = document.createElement("div");
-			document.body.appendChild(container);
-			const root = createRoot(container);
-
-			const imagePath = "/images/integrationtests/thumbs_down.jpg";
-
-			function handleDone(gestureType: GestureType | undefined) {
-				try {
-					assert.strictEqual(gestureType, GestureType.THUMB_DOWN, "Expected to recognize a THUMB_DOWN gesture from the image");
-				} catch (e) {
-					done(e as Error);
-					return;
-				} finally {
-					root.unmount();
-					container.remove();
-				}
-				done();
-			}
-
-			root.render(React.createElement(ImageGestureHarness, { src: imagePath, onDone: handleDone }));
-		});
-
-		it("simple sanity test", function () {
-			assert.strictEqual(true, true, "True should be true");
-		});
-	});
+          root.render(
+            React.createElement(ImageGestureHarness, {
+              src,
+              recognizer: rec,
+              expected,
+              onDone: handleDone,
+            })
+          );
+        });
+      }
+    });
+  });
 }
-

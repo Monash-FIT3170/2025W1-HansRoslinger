@@ -52,13 +52,18 @@ export function useGestureDetector(
   imageRef: MutableRefObject<HTMLImageElement | null>,
   gestureDetectionStatus: boolean,
   settings: Record<GestureType, FunctionType>,
-  mode: RunningMode = "VIDEO"
+  mode: RunningMode = "VIDEO",
+  handleGesture: boolean = true
 ) {
   const VIDEO_HAS_ENOUGH_DATA = 4;
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>([]);
+  const gesturesRef = useRef<Gesture[]>([]);
   const { HandleGesture } = GestureHandler(settings);
   const rafIdRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    gesturesRef.current = currentGestures;
+  }, [currentGestures]);
   // Helper function
   const cleanupLoop = () => {
     if (rafIdRef.current !== null) {
@@ -69,7 +74,7 @@ export function useGestureDetector(
 
   // Run detection loop
   useEffect(() => {
-    console.log("[Gesture] useGestureDetector effect run", { hasRecognizer: !!gestureRecognizer, mode, gestureDetectionStatus });
+    console.log("[Gesture] useGestureDetector effect run", { hasRecognizer: !!gestureRecognizer, mode, gestureDetectionStatus, handleGesture });
     if (!gestureRecognizer) {
       console.log("[Gesture] Exiting effect early: recognizer not ready");
       return cleanupLoop;
@@ -80,7 +85,25 @@ export function useGestureDetector(
         hasEnoughData = true;
       }
       if (imageRef.current) {
-        hasEnoughData = true;
+        const imageEl = imageRef.current;
+        const imageReady = imageEl.complete && imageEl.naturalWidth > 0 && imageEl.naturalHeight > 0;
+        if (!imageReady) {
+          console.debug("[Gesture] Image not ready", {
+            complete: imageEl.complete,
+            naturalWidth: imageEl.naturalWidth,
+            naturalHeight: imageEl.naturalHeight,
+          });
+        } else {
+          if (imageEl.width === 0 || imageEl.height === 0) {
+            imageEl.width = imageEl.naturalWidth;
+            imageEl.height = imageEl.naturalHeight;
+            console.debug("[Gesture] Applied natural dimensions to image element", {
+              width: imageEl.width,
+              height: imageEl.height,
+            });
+          }
+          hasEnoughData = true;
+        }
       }
       if (!hasEnoughData) {
         // Debug why we don't have enough data yet
@@ -92,8 +115,19 @@ export function useGestureDetector(
       try {
         let detectedGestures: GestureRecognizerResult;
         if (mode === "IMAGE") {
+          const imageEl = imageRef.current;
+          if (!imageEl || !imageEl.complete || imageEl.naturalWidth <= 0 || imageEl.naturalHeight <= 0) {
+            console.debug("[Gesture] Skipping IMAGE recognition; image element not ready", {
+              hasImage: !!imageEl,
+              complete: imageEl?.complete,
+              naturalWidth: imageEl?.naturalWidth,
+              naturalHeight: imageEl?.naturalHeight,
+            });
+            rafIdRef.current = requestAnimationFrame(loop);
+            return;
+          }
           console.debug("[Gesture] Calling recognize (IMAGE mode)");
-          detectedGestures = await gestureRecognizer.recognize(imageRef.current!);
+          detectedGestures = await gestureRecognizer.recognize(imageEl);
         } else {
           const ts = performance.now();
           console.debug("[Gesture] Calling recognizeForVideo (VIDEO mode)", { ts });
@@ -136,25 +170,27 @@ export function useGestureDetector(
     return cleanupLoop;
   }, [gestureRecognizer, gestureDetectionStatus, mode]);
 
-  // Handle gestures
-  useEffect(() => {
-    const leftGesture = currentGestures.find((g) => g?.handedness === Handedness.LEFT);
-    const rightGesture = currentGestures.find((g) => g?.handedness === Handedness.RIGHT);
-    console.debug("[Gesture] Handling gestures", { count: currentGestures.length, leftGesture, rightGesture, gestureDetectionStatus });
-    if (!gestureDetectionStatus) {
-      handleDisableExemptGestures(currentGestures, HandleGesture);
-      return;
-    }
-    if (handleTwoHandedGestures(leftGesture, rightGesture, HandleGesture)) {
-      return;
-    }
-    if (handleSingleHandedGestures(currentGestures, HandleGesture)) {
-      return;
-    }
-    console.log("[Gesture] No gestures handled");
-  }, [currentGestures]);
+  if (handleGesture) {
+    // Handle gestures
+    useEffect(() => {
+      const leftGesture = currentGestures.find((g) => g?.handedness === Handedness.LEFT);
+      const rightGesture = currentGestures.find((g) => g?.handedness === Handedness.RIGHT);
+      console.debug("[Gesture] Handling gestures", { count: currentGestures.length, leftGesture, rightGesture, gestureDetectionStatus });
+      if (!gestureDetectionStatus) {
+        handleDisableExemptGestures(currentGestures, HandleGesture);
+        return;
+      }
+      if (handleTwoHandedGestures(leftGesture, rightGesture, HandleGesture)) {
+        return;
+      }
+      if (handleSingleHandedGestures(currentGestures, HandleGesture)) {
+        return;
+      }
+      console.log("[Gesture] No gestures handled");
+    }, [currentGestures]);
+  }
 
-  return currentGestures;
+  return {currentGestures, gesturesRef };
 }
 
 export default useGestureDetector;

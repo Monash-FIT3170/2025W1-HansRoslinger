@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Toolbar from "./components/Toolbar/Toolbar";
 import Modal from "./components/Modal/Modal";
 import { Meteor } from "meteor/meteor";
-import { useNavigate } from "react-router-dom";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useAssetsWithImageCount } from "./handlers/assets/useAssets";
 import { doesPresentationExist, createPresentation, getPresentationsByUser, Presentation } from "../api/database/presentations/presentations";
@@ -34,6 +33,7 @@ import {
 } from "@mui/material";
 import { Asset } from "../api/database/assets/assets";
 import { updateRecentPresentationId } from "../api/database/users/users";
+import { useNavigate } from "react-router";
 
 export default function AllPresentations() {
   // Dataset summary modal
@@ -84,6 +84,8 @@ export default function AllPresentations() {
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetChartType, setDatasetChartType] = useState<ChartType>(ChartType.BAR);
   const [datasetMessage, setDatasetMessage] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     clearAuthCookie();
@@ -212,10 +214,6 @@ export default function AllPresentations() {
     } catch {
       setDatasetMessage("Failed to create dataset.");
     }
-  }
-
-  function handlePresentDataset(presentation: Presentation) {
-    navigate(`/present?presentationId=${presentation._id}`);
   }
 
   return (

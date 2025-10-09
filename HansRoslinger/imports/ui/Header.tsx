@@ -109,10 +109,7 @@ export const Header: React.FC<HeaderProps> = ({ backgroundRemoval, grayscale, sh
       </Tooltip>
 
       {/* Chart Toggle */}
-      <Tooltip
-        title={showLineChart ? "Switch to bar chart" : "Switch to line chart"}
-        arrow
-      >
+      <Tooltip title={showLineChart ? "Switch to bar chart" : "Switch to line chart"} arrow>
         <Button
           variant="contained"
           onClick={onToggleChart}

@@ -80,11 +80,7 @@ export const Home: React.FC = () => {
   };
 
   // now tracks progress
-  const handleCreateAsset = async (data: {
-    name: string;
-    icon: string;
-    files: File[];
-  }) => {
+  const handleCreateAsset = async (data: { name: string; icon: string; files: File[] }) => {
     setUploading(true);
     setUploadProgress(0);
 
@@ -96,7 +92,7 @@ export const Home: React.FC = () => {
     }
   };
 
-    const handleClick = () => {
+  const handleClick = () => {
     setOpen(!open);
   };
 
@@ -107,10 +103,7 @@ export const Home: React.FC = () => {
     const b = list[toIdx];
     const orderA = typeof a.order === "number" ? a.order : fromIdx;
     const orderB = typeof b.order === "number" ? b.order : toIdx;
-    await Promise.all([
-      ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }),
-      ImageCollection.updateAsync(b._id!, { $set: { order: orderA } }),
-    ]);
+    await Promise.all([ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }), ImageCollection.updateAsync(b._id!, { $set: { order: orderA } })]);
     const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
     const refreshed = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
     setImagesByAsset((prev) => ({ ...prev, [assetId]: refreshed }));

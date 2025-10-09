@@ -417,10 +417,7 @@ export default function AllPresentations() {
             </Typography>
             <Stack>
               {summaryDataset.data && summaryDataset.data.length > 0 ? (
-                <TableContainer
-                  component={Paper}
-                  sx={{ maxHeight: "40vh", overflow: "auto" }}
-                >
+                <TableContainer component={Paper} sx={{ maxHeight: "40vh", overflow: "auto" }}>
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -448,25 +445,13 @@ export default function AllPresentations() {
       </Modal>
 
       {/* Add Dataset Modal (with drag & drop) */}
-      <Modal
-        isOpen={showDatasetModal}
-        onClose={closeDatasetModal}
-        maxwidth={"40vw"}
-      >
+      <Modal isOpen={showDatasetModal} onClose={closeDatasetModal} maxwidth={"40vw"}>
         <Stack spacing={2}>
           <Typography variant="h3">Add Dataset</Typography>
 
-          <TextField
-            label="Dataset Title"
-            variant="outlined"
-            value={datasetTitle}
-            onChange={(e) => setDatasetTitle(e.target.value)}
-          />
+          <TextField label="Dataset Title" variant="outlined" value={datasetTitle} onChange={(e) => setDatasetTitle(e.target.value)} />
 
-          <Select
-            value={datasetChartType}
-            onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
-          >
+          <Select value={datasetChartType} onChange={(e) => setDatasetChartType(e.target.value as ChartType)}>
             <MenuItem value={ChartType.BAR}>Bar</MenuItem>
             <MenuItem value={ChartType.LINE}>Line</MenuItem>
           </Select>
@@ -513,25 +498,14 @@ export default function AllPresentations() {
               }
             }}
           >
-            <Typography variant="body1">
-              Drag & drop your CSV file here, or click to upload.
-            </Typography>
+            <Typography variant="body1">Drag & drop your CSV file here, or click to upload.</Typography>
           </Box>
 
-          <TextField
-            label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`}
-            value={datasetCSV}
-            onChange={(e) => setDatasetCSV(e.target.value)}
-            multiline
-            maxRows={6}
-          />
+          <TextField label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`} value={datasetCSV} onChange={(e) => setDatasetCSV(e.target.value)} multiline maxRows={6} />
 
           {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
 
-          <Button
-            onClick={handleCreateDataset}
-            disabled={!datasetTitle.trim() || !datasetCSV.trim()}
-          >
+          <Button onClick={handleCreateDataset} disabled={!datasetTitle.trim() || !datasetCSV.trim()}>
             Create Dataset
           </Button>
         </Stack>

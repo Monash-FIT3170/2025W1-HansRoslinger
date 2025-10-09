@@ -229,6 +229,15 @@ export const Present: React.FC = () => {
     loadSettings().then(setGestureSettings);
   }, []);
 
+  if (loadStateFlag) {
+    loadState()
+    // Apply State
+  } else {
+    // Collect state
+    saveState(state)
+  }
+  
+
   
 
   return (

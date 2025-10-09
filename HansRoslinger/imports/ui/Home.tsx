@@ -8,27 +8,8 @@ import { getPresentationById } from "../api/database/presentations/presentations
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  List,
-  ListItemText,
-  Collapse,
-  ListItemButton,
-  ListItemIcon,
-  ListItem,
-  IconButton,
-  Link as MuiLink,
-} from "@mui/material";
-import {
-  ExpandLess,
-  ExpandMore,
-  Settings,
-  ExitToApp,
-  Collections,
-} from "@mui/icons-material";
+import { Box, Typography, Paper, Button, List, ListItemText, Collapse, ListItemButton, ListItemIcon, ListItem, IconButton, Link as MuiLink } from "@mui/material";
+import { ExpandLess, ExpandMore, Settings, ExitToApp, Collections } from "@mui/icons-material";
 import * as MuiIcons from "@mui/icons-material";
 import Folder from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
@@ -45,17 +26,11 @@ export const Home: React.FC = () => {
   const assets: AssetWithCount[] = useAssetsWithImageCount();
   const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
   const [hoveredAssetId, setHoveredAssetId] = useState<string | null>(null);
-  const [imagesByAsset, setImagesByAsset] = useState<
-    Record<string, ImageDoc[]>
-  >({});
+  const [imagesByAsset, setImagesByAsset] = useState<Record<string, ImageDoc[]>>({});
 
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [recentPresentationId, setRecentPresentationId] = useState<
-    string | undefined
-  >();
-  const [recentPresentationName, setRecentPresentationName] = useState<
-    string | undefined
-  >();
+  const [recentPresentationId, setRecentPresentationId] = useState<string | undefined>();
+  const [recentPresentationName, setRecentPresentationName] = useState<string | undefined>();
 
   useEffect(() => {
     if (userId) {
@@ -63,9 +38,7 @@ export const Home: React.FC = () => {
         setRecentPresentationId(id);
         if (id) {
           getPresentationById(id).then((presentation) => {
-            setRecentPresentationName(
-              presentation?.name ?? "Unnamed Presentation",
-            );
+            setRecentPresentationName(presentation?.name ?? "Unnamed Presentation");
           });
         }
       });

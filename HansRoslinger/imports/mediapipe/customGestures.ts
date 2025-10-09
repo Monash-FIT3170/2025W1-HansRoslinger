@@ -8,17 +8,17 @@ export function recogniseCustomGesture(landmarks: NormalizedLandmark[], handedne
   if (isPinchSign(landmarks)) {
     return {
       gestureID: GestureType.PINCH,
-      confidence: 1.0
+      confidence: 1.0,
     };
   } else if (isTwoFingerPointing(landmarks)) {
     return {
       gestureID: handedness === Handedness.LEFT ? GestureType.TWO_FINGER_POINTING_LEFT : GestureType.TWO_FINGER_POINTING_RIGHT,
-      confidence: 1.0
+      confidence: 1.0,
     };
   } else if (isPointing(landmarks)) {
     return {
       gestureID: GestureType.POINTING_UP,
-      confidence: 1.0
+      confidence: 1.0,
     };
   }
   return null;
@@ -38,10 +38,7 @@ export function handleDisableExemptGestures(currentGestures: Gesture[], HandleGe
 }
 
 // Calls HandleGesture for each single-handed gesture; returns true if any were handled
-export function handleSingleHandedGestures(
-  currentGestures: Gesture[],
-  HandleGesture: (g: Gesture) => void
-): boolean {
+export function handleSingleHandedGestures(currentGestures: Gesture[], HandleGesture: (g: Gesture) => void): boolean {
   let handled = false;
   for (let index = 0; index < currentGestures.length; index++) {
     if (currentGestures[index]) {
@@ -52,11 +49,7 @@ export function handleSingleHandedGestures(
   return handled;
 }
 // Returns true if a two-handed gesture is detected and handled, otherwise false
-export function handleTwoHandedGestures(
-  leftGesture: Gesture | undefined,
-  rightGesture: Gesture | undefined,
-  HandleGesture: (g: Gesture) => void
-): boolean {
+export function handleTwoHandedGestures(leftGesture: Gesture | undefined, rightGesture: Gesture | undefined, HandleGesture: (g: Gesture) => void): boolean {
   if (leftGesture && rightGesture && isDoublePinchSign(leftGesture, rightGesture)) {
     const twoHandedGesture: Gesture = {
       gestureID: GestureType.DOUBLE_PINCH,

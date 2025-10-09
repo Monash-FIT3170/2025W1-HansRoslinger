@@ -24,9 +24,7 @@ const ImageGestureHarness: React.FC<{
     return map;
   }, []);
 
-  const { currentGestures: gestures, gesturesRef } = useGestureDetector(
-    recognizer, videoRef, imageRef, true, settings, "IMAGE", false
-  );
+  const { currentGestures: gestures, gesturesRef } = useGestureDetector(recognizer, videoRef, imageRef, true, settings, "IMAGE", false);
 
   useEffect(() => {
     gesturesRef.current = gestures;
@@ -99,10 +97,10 @@ const ImageGestureHarness: React.FC<{
       position: "absolute",
       left: "-9999px",
       width: "auto",
-      height: "auto"
+      height: "auto",
     },
     onLoad: handleImageLoad,
-    onError: handleImageError
+    onError: handleImageError,
   });
 };
 
@@ -145,7 +143,7 @@ if (Meteor.isClient) {
               recognizer: rec,
               expected,
               onDone: handleDone,
-            })
+            }),
           );
         });
       }

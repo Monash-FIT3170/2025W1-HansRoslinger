@@ -11,9 +11,7 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
   const screenPosition = gestureToScreenPosition(
     (indexTipLandmark.x + thumbTipLandmark.x) / 2,
     (indexTipLandmark.y + thumbTipLandmark.y) / 2,
-    indexTipLandmark.z && thumbTipLandmark.z
-      ? (indexTipLandmark.z + thumbTipLandmark.z) / 2
-      : undefined,
+    indexTipLandmark.z && thumbTipLandmark.z ? (indexTipLandmark.z + thumbTipLandmark.z) / 2 : undefined,
   );
 
   // If pinch is wished to be used like a mouse click anywhere (not restricted to specified elements), use this line:

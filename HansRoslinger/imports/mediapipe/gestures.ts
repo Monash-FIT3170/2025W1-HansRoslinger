@@ -31,36 +31,36 @@ const SETUP_MAX_RETRIES = 5;
 const SETUP_RETRY_DELAY = 1000;
 
 export const setupGestureRecognizer = async (mode: RunningMode = "VIDEO", retryCount: number = 0): Promise<GestureRecognizer | null> => {
-      // Prevent running on the server where window and WebAssembly Web APIs don't exist
-      if (typeof window === "undefined") {
-        return null;
-      }
-      try {
-        console.log(`[Gesture] setupGestureRecognizer called. mode=${mode}, retry=${retryCount}`);
-        // Dynamically import Mediapipe only on the client to avoid SSR import side-effects
-        const { FilesetResolver, GestureRecognizer } = await import("@mediapipe/tasks-vision");
-        const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
+  // Prevent running on the server where window and WebAssembly Web APIs don't exist
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    console.log(`[Gesture] setupGestureRecognizer called. mode=${mode}, retry=${retryCount}`);
+    // Dynamically import Mediapipe only on the client to avoid SSR import side-effects
+    const { FilesetResolver, GestureRecognizer } = await import("@mediapipe/tasks-vision");
+    const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
 
-        const gestureRecognizerInternal = await GestureRecognizer.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
-            delegate: "GPU",
-          },
-          runningMode: mode,
-          numHands: NUM_HANDS_DETECTABLE,
-          minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
-        });
-        console.log("[Gesture] GestureRecognizer setup complete");
-        return gestureRecognizerInternal;
-      } catch (error) {
-        console.error(`[Gesture] GestureRecognizer setup failed (attempt ${retryCount + 1}):`, error);
-        if (retryCount < SETUP_MAX_RETRIES) {
-          await new Promise((resolve) => setTimeout(resolve, SETUP_RETRY_DELAY));
-          return setupGestureRecognizer(mode, retryCount + 1);
-        }
-        return null;
-      }
-    };
+    const gestureRecognizerInternal = await GestureRecognizer.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
+        delegate: "GPU",
+      },
+      runningMode: mode,
+      numHands: NUM_HANDS_DETECTABLE,
+      minHandDetectionConfidence: MIN_HAND_DETECTION_CONFIDENCE,
+    });
+    console.log("[Gesture] GestureRecognizer setup complete");
+    return gestureRecognizerInternal;
+  } catch (error) {
+    console.error(`[Gesture] GestureRecognizer setup failed (attempt ${retryCount + 1}):`, error);
+    if (retryCount < SETUP_MAX_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, SETUP_RETRY_DELAY));
+      return setupGestureRecognizer(mode, retryCount + 1);
+    }
+    return null;
+  }
+};
 
 export function useGestureDetector(
   gestureRecognizer: GestureRecognizer | null,
@@ -69,7 +69,7 @@ export function useGestureDetector(
   gestureDetectionStatus: boolean,
   settings: Record<GestureType, FunctionType>,
   mode: RunningMode = "VIDEO",
-  handleGesture: boolean = true
+  handleGesture: boolean = true,
 ) {
   const VIDEO_HAS_ENOUGH_DATA = 4;
   const [currentGestures, setCurrentGestures] = useState<Gesture[]>([]);
@@ -206,7 +206,7 @@ export function useGestureDetector(
     }, [currentGestures]);
   }
 
-  return {currentGestures, gesturesRef };
+  return { currentGestures, gesturesRef };
 }
 
 export default useGestureDetector;

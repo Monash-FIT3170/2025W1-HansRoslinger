@@ -79,22 +79,11 @@ export async function correctLogin(email: string, password: string): Promise<boo
   return verifyPassword(password, user.password);
 }
 
-export async function getRecentPresentationId(
-  userId: string,
-): Promise<string | undefined> {
-  const user = await UserCollection.findOneAsync(
-    { _id: userId },
-    { projection: { _recent_presentation_id: 1, _id: 0 } },
-  );
+export async function getRecentPresentationId(userId: string): Promise<string | undefined> {
+  const user = await UserCollection.findOneAsync({ _id: userId }, { projection: { _recent_presentation_id: 1, _id: 0 } });
   return user?._recent_presentation_id;
 }
 
-export async function updateRecentPresentationId(
-  userId: string,
-  presentationId: string,
-): Promise<number> {
-  return await UserCollection.updateAsync(
-    { _id: userId },
-    { $set: { _recent_presentation_id: presentationId } },
-  );
+export async function updateRecentPresentationId(userId: string, presentationId: string): Promise<number> {
+  return await UserCollection.updateAsync({ _id: userId }, { $set: { _recent_presentation_id: presentationId } });
 }

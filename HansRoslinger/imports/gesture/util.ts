@@ -1,10 +1,6 @@
 // Need to get bounding rectangle of videoelement passed into this function to get this working correctly for all window scales where the video feed does not match the window
 // Otherwise, positions are only accurate if scale of video feed matches scale of the window
-export const gestureToScreenPosition = (
-  x: number,
-  y: number,
-  z?: number,
-): { screenX: number; screenY: number } => {
+export const gestureToScreenPosition = (x: number, y: number, z?: number): { screenX: number; screenY: number } => {
   // Get the screen dimensions
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;

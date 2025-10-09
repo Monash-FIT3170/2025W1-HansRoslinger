@@ -9,9 +9,7 @@ interface ImageSegmentationProps {
   grayscale: () => boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
-  grayscale,
-}) => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale }) => {
   const isPresenting = useMatch("/present");
 
   useEffect(() => {
@@ -152,8 +150,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
         };
 
         // Activate the webcam stream.
-        video.srcObject =
-          await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = await navigator.mediaDevices.getUserMedia(constraints);
         video.addEventListener("loadeddata", predictWebcam);
       }
     }
@@ -174,9 +171,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
     if (hasGetUserMedia()) {
       enableWebcamButton = document.getElementById("background-removal-enable") as HTMLButtonElement;
       enableWebcamButton.addEventListener("click", enableCam);
-      enableWebcamButton = document.getElementById(
-        "background-removal-enable",
-      ) as HTMLButtonElement;
+      enableWebcamButton = document.getElementById("background-removal-enable") as HTMLButtonElement;
       enableWebcamButton.addEventListener("click", enableCam);
     } else {
       console.warn("getUserMedia() is not supported by your browser");

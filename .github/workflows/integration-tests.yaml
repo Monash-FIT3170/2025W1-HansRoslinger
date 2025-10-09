@@ -24,7 +24,7 @@ jobs:
           node-version: "20"
 
       - name: Install system dependencies
-        run: bash .github/workflows/scripts/install-system-deps.sh
+        run: bash ../.github/workflows/scripts/install-system-deps.sh
 
       - name: Install Meteor CLI
         run: |

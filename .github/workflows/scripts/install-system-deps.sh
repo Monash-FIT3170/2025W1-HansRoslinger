@@ -39,9 +39,3 @@ sudo apt-get install -y --no-install-recommends \
   fonts-liberation \
   wget \
   xvfb
-
-if apt-cache show libasound2 >/dev/null 2>&1; then
-  sudo apt-get install -y --no-install-recommends libasound2
-else
-  sudo apt-get install -y --no-install-recommends libasound2t64
-fi

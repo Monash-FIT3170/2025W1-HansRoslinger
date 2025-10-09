@@ -45,8 +45,7 @@ export const Present: React.FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
   const assets = useTracker(() => {
     Meteor.subscribe("assets");
-    if (!userId)
-      return [] as Array<{ _id: string; name: string; icon?: string }>;
+    if (!userId) return [] as Array<{ _id: string; name: string; icon?: string }>;
     return AssetCollection.find({ userId }, { sort: { name: 1 } }).fetch();
   }, [userId]);
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
@@ -62,10 +61,7 @@ export const Present: React.FC = () => {
         assetId: string;
         order?: number;
       }>;
-    return ImageCollection.find(
-      { assetId: currentAssetId },
-      { sort: { order: 1, fileName: 1 } },
-    ).fetch();
+    return ImageCollection.find({ assetId: currentAssetId }, { sort: { order: 1, fileName: 1 } }).fetch();
   }, [currentAssetId]);
   const currentAssetImage = assetImages[currentImageIndex] ?? null;
   // Preload current, next, and previous images for smooth navigation
@@ -74,9 +70,7 @@ export const Present: React.FC = () => {
       ? ([
           assetImages[currentImageIndex]?.url,
           assetImages[(currentImageIndex + 1) % assetImages.length]?.url,
-          assetImages[
-            (currentImageIndex - 1 + assetImages.length) % assetImages.length
-          ]?.url,
+          assetImages[(currentImageIndex - 1 + assetImages.length) % assetImages.length]?.url,
         ].filter(Boolean) as string[])
       : [],
   );
@@ -108,15 +102,12 @@ export const Present: React.FC = () => {
     };
 
     window.addEventListener("chart:switch", handleSwitchChartOrImage);
-    return () =>
-      window.removeEventListener("chart:switch", handleSwitchChartOrImage);
+    return () => window.removeEventListener("chart:switch", handleSwitchChartOrImage);
   }, [showAssets, assetImages.length, assets.length]);
 
   // Initialize chart type
   useEffect(() => {
-    setShowLineChart(
-      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
-    );
+    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
   }, [currentDataset]);
 
   // Load the selected presentation to pick initial asset
@@ -144,9 +135,7 @@ export const Present: React.FC = () => {
   // When assets list changes and there's a selectedAssetId, sync index
   useEffect(() => {
     if (!selectedAssetId) return;
-    const idx = assets.findIndex(
-      (a: { _id: string }) => a._id === selectedAssetId,
-    );
+    const idx = assets.findIndex((a: { _id: string }) => a._id === selectedAssetId);
     if (idx >= 0) setCurrentAssetIndex(idx);
   }, [selectedAssetId, assets.length]);
 
@@ -163,9 +152,7 @@ export const Present: React.FC = () => {
     const onNextData = () => {
       if (!showAssets) return;
       if (assetImages.length <= 1) return; // nothing to go back to
-      setCurrentImageIndex(
-        (prev) => (prev - 1 + assetImages.length) % assetImages.length,
-      );
+      setCurrentImageIndex((prev) => (prev - 1 + assetImages.length) % assetImages.length);
     };
     window.addEventListener("chart:next-data", onNextData);
     return () => window.removeEventListener("chart:next-data", onNextData);
@@ -224,8 +211,7 @@ export const Present: React.FC = () => {
     return settings;
   };
 
-  const [gestureSettings, setGestureSettings] =
-    useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     loadSettings().then(setGestureSettings);
@@ -249,11 +235,7 @@ export const Present: React.FC = () => {
           pointerEvents: backgroundRemoval ? "none" : "auto",
         }}
       >
-        <WebcamComponent
-          gestureDetectionStatus={gestureDetectionStatus}
-          grayscale={grayscale}
-          settings={gestureSettings}
-        />
+        <WebcamComponent gestureDetectionStatus={gestureDetectionStatus} grayscale={grayscale} settings={gestureSettings} />
       </Box>
 
       <Box
@@ -293,34 +275,14 @@ export const Present: React.FC = () => {
 
       {/* Charts (hidden when showing assets) */}
       {!showAssets && (
-        <Box
-          position="absolute"
-          left="50%"
-          sx={{ transform: "translateX(-50%)" }}
-          bgcolor="transparent"
-          display="flex"
-          justifyContent="center"
-          style={{ bottom: "10%", width: "95%", height: "50%" }}
-        >
-          {showLineChart ? (
-            <D3LineChart dataset={currentDataset ?? defaultDataset} />
-          ) : (
-            <D3BarChart dataset={currentDataset ?? defaultDataset} />
-          )}
+        <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: "10%", width: "95%", height: "50%" }}>
+          {showLineChart ? <D3LineChart dataset={currentDataset ?? defaultDataset} /> : <D3BarChart dataset={currentDataset ?? defaultDataset} />}
         </Box>
       )}
 
       {/* Title area */}
       {!showAssets && (
-        <Box
-          position="absolute"
-          left="50%"
-          sx={{ transform: "translateX(-50%)" }}
-          bgcolor="transparent"
-          display="flex"
-          justifyContent="center"
-          style={{ bottom: 0, width: "95%", height: "10%" }}
-        >
+        <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: 0, width: "95%", height: "10%" }}>
           <Title dataset={currentDataset ?? defaultDataset} />
         </Box>
       )}

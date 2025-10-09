@@ -1,14 +1,9 @@
-import { Gesture, gestureToScreenPosition } from "./gesture";
+import { Gesture } from "./gesture";
+import { gestureToScreenPosition } from "./util";
 
 export const click = (_: Gesture, latestGesture: Gesture): void => {
-  if (
-    !latestGesture.singleGestureLandmarks ||
-    latestGesture.singleGestureLandmarks.length < 9
-  ) {
-    console.warn(
-      "[click] Not enough landmarks to click (need at least 9)",
-      latestGesture.singleGestureLandmarks,
-    );
+  if (!latestGesture.singleGestureLandmarks || latestGesture.singleGestureLandmarks.length < 9) {
+    console.warn("[click] Not enough landmarks to click (need at least 9)", latestGesture.singleGestureLandmarks);
     return;
   }
   const indexTipLandmark = latestGesture.singleGestureLandmarks[8];
@@ -31,14 +26,7 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     const clickableElement = document.getElementById(clickableElementID);
     const rect = clickableElement?.getBoundingClientRect();
 
-    if (
-      clickableElement &&
-      rect &&
-      screenPosition.screenX >= rect.left &&
-      screenPosition.screenX <= rect.right &&
-      screenPosition.screenY >= rect.top &&
-      screenPosition.screenY <= rect.bottom
-    ) {
+    if (clickableElement && rect && screenPosition.screenX >= rect.left && screenPosition.screenX <= rect.right && screenPosition.screenY >= rect.top && screenPosition.screenY <= rect.bottom) {
       const clickEvent = new MouseEvent("click", {
         bubbles: true,
         cancelable: true,

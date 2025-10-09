@@ -1,23 +1,10 @@
-import {
-  correctLogin,
-  createUser,
-  doesUserExist,
-  getUserByEmail,
-} from "../../api/database/users/users";
-import {
-  validateEmail,
-  validatePassword,
-  hashPassword,
-} from "../../api/database/users/util";
+import { correctLogin, createUser, doesUserExist, getUserByEmail } from "../../api/database/users/users";
+import { validateEmail, validatePassword, hashPassword } from "../../api/database/users/util";
 import jwt from "jsonwebtoken";
 const { sign } = jwt;
 import type { User } from "../../api/database/users/users";
 import { generateJWT } from "./authToken";
-import {
-  FunctionType,
-  GestureType,
-  defaultMapping,
-} from "/imports/gesture/gesture";
+import { FunctionType, GestureType, defaultMapping } from "/imports/gesture/gesture";
 
 export const loginUser = async (email: string, password: string) => {
   if (!email || !password) {

@@ -1,13 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Link,
-} from "@mui/material";
+import { Box, Typography, List, ListItem, ListItemText, IconButton, Link } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useTracker } from "meteor/react-meteor-data";
@@ -20,28 +12,18 @@ export interface AssetFilesModalProps {
   assetName: string;
 }
 
-export default function AssetFilesModal({
-  isOpen,
-  onClose,
-  assetId,
-  assetName,
-}: AssetFilesModalProps) {
+export default function AssetFilesModal({ isOpen, onClose, assetId, assetName }: AssetFilesModalProps) {
   if (!isOpen) return null;
 
   const images = useTracker(() => {
     if (!assetId) return [] as ImageDoc[];
-    return ImageCollection.find(
-      { assetId },
-      { sort: { order: 1, fileName: 1 } },
-    ).fetch() as ImageDoc[];
+    return ImageCollection.find({ assetId }, { sort: { order: 1, fileName: 1 } }).fetch() as ImageDoc[];
   }, [assetId]);
 
   // Ensure legacy items get an order assigned (first time modal opens)
   useEffect(() => {
     (async () => {
-      const needsOrder = images.some(
-        (img: ImageDoc) => typeof img.order !== "number",
-      );
+      const needsOrder = images.some((img: ImageDoc) => typeof img.order !== "number");
       if (!needsOrder) return;
       await Promise.all(
         images.map((img: ImageDoc, idx: number) => {
@@ -55,23 +37,13 @@ export default function AssetFilesModal({
   }, [images.map((i: ImageDoc) => `${i._id}:${i.order ?? "x"}`).join("|")]);
 
   const move = async (from: number, to: number) => {
-    if (
-      from === to ||
-      from < 0 ||
-      to < 0 ||
-      from >= images.length ||
-      to >= images.length
-    )
-      return;
+    if (from === to || from < 0 || to < 0 || from >= images.length || to >= images.length) return;
     const a = images[from];
     const b = images[to];
     const orderA = typeof a.order === "number" ? a.order : from;
     const orderB = typeof b.order === "number" ? b.order : to;
     // Swap orders
-    await Promise.all([
-      ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }),
-      ImageCollection.updateAsync(b._id!, { $set: { order: orderA } }),
-    ]);
+    await Promise.all([ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }), ImageCollection.updateAsync(b._id!, { $set: { order: orderA } })]);
   };
 
   return (
@@ -121,12 +93,7 @@ export default function AssetFilesModal({
                 <ArrowDownwardIcon fontSize="small" />
               </IconButton>
             </Box>
-            <Link
-              href={img.url}
-              target="_blank"
-              underline="hover"
-              sx={{ flexGrow: 1 }}
-            >
+            <Link href={img.url} target="_blank" underline="hover" sx={{ flexGrow: 1 }}>
               <ListItemText primary={`${idx + 1}. ${img.fileName}`} />
             </Link>
           </ListItem>

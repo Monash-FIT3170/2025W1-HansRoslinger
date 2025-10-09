@@ -6,8 +6,7 @@ export const Button: React.FC<{
   onClick: () => void;
   className?: string;
 }> = ({ label, onClick, className = "" }) => {
-  const defaultClasses =
-    "px-4 py-2 bg-gray-500 text-white rounded hover:bg-blue-600 transition";
+  const defaultClasses = "px-4 py-2 bg-gray-500 text-white rounded hover:bg-blue-600 transition";
 
   return (
     <button

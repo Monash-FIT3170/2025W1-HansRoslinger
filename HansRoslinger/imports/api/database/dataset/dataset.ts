@@ -44,10 +44,7 @@ export async function getDatasetById(id: string): Promise<Dataset | undefined> {
   return await DatasetCollection.findOneAsync({ _id: id });
 }
 
-export async function updateDataset(
-  id: string,
-  updates: Partial<Dataset>,
-): Promise<number> {
+export async function updateDataset(id: string, updates: Partial<Dataset>): Promise<number> {
   return await DatasetCollection.updateAsync({ _id: id }, { $set: updates });
 }
 
@@ -64,8 +61,6 @@ export async function getDatasetsByTitle(title: string): Promise<Dataset[]> {
   return DatasetCollection.find({ title }).fetch();
 }
 
-export async function getDatasetsByPresentationId(
-  presentationID: string,
-): Promise<Dataset[]> {
+export async function getDatasetsByPresentationId(presentationID: string): Promise<Dataset[]> {
   return DatasetCollection.find({ presentationID }).fetch();
 }

@@ -1,13 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  Box,
-  Typography,
-  IconButton,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
+import { Box, Typography, IconButton, Button, List, ListItem, ListItemText } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { ImageCollection, ImageDoc } from "../../../api/database/images/images";
@@ -20,30 +12,15 @@ interface Props {
   assetName: string;
 }
 
-export default function AssetReorderModal({
-  isOpen,
-  onClose,
-  assetId,
-  assetName,
-}: Props) {
-  const images = useTracker(
-    () =>
-      ImageCollection.find(
-        { assetId },
-        { sort: { order: 1, fileName: 1 } },
-      ).fetch(),
-    [assetId],
-  ) as ImageDoc[];
+export default function AssetReorderModal({ isOpen, onClose, assetId, assetName }: Props) {
+  const images = useTracker(() => ImageCollection.find({ assetId }, { sort: { order: 1, fileName: 1 } }).fetch(), [assetId]) as ImageDoc[];
   const [localOrder, setLocalOrder] = useState<string[]>([]);
 
   React.useEffect(() => {
     setLocalOrder(images.map((i) => i._id!));
   }, [images.map((i) => i._id).join("|")]);
 
-  const idToImage = useMemo(
-    () => new Map<string, ImageDoc>(images.map((i) => [i._id!, i])),
-    [images.map((i) => i._id).join("|")],
-  );
+  const idToImage = useMemo(() => new Map<string, ImageDoc>(images.map((i) => [i._id!, i])), [images.map((i) => i._id).join("|")]);
 
   if (!isOpen) return null;
 
@@ -58,11 +35,7 @@ export default function AssetReorderModal({
 
   const save = async () => {
     // Persist new order: index in localOrder becomes the `order` field
-    await Promise.all(
-      localOrder.map((id, idx) =>
-        ImageCollection.updateAsync(id, { $set: { order: idx } }),
-      ),
-    );
+    await Promise.all(localOrder.map((id, idx) => ImageCollection.updateAsync(id, { $set: { order: idx } })));
     onClose();
   };
 
@@ -120,9 +93,7 @@ export default function AssetReorderModal({
                   </IconButton>
                   <IconButton
                     aria-label="down"
-                    onClick={() =>
-                      idx < localOrder.length - 1 && move(idx, idx + 1)
-                    }
+                    onClick={() => idx < localOrder.length - 1 && move(idx, idx + 1)}
                     sx={{
                       color: "text.secondary",
                       "&:hover": { color: "text.primary" },
@@ -134,10 +105,7 @@ export default function AssetReorderModal({
               }
               sx={{ cursor: "grab" }}
             >
-              <ListItemText
-                primary={`${idx + 1}. ${img.fileName}`}
-                secondary={img.url}
-              />
+              <ListItemText primary={`${idx + 1}. ${img.fileName}`} secondary={img.url} />
             </ListItem>
           );
         })}

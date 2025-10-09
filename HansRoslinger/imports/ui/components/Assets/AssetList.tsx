@@ -1,17 +1,7 @@
 import React, { useState } from "react";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  IconButton,
-} from "@mui/material";
+import { Box, List, ListItem, ListItemIcon, ListItemText, IconButton } from "@mui/material";
 import * as MuiIconsRaw from "@mui/icons-material";
-const MuiIcons: Record<string, React.ElementType> = MuiIconsRaw as Record<
-  string,
-  React.ElementType
->;
+const MuiIcons: Record<string, React.ElementType> = MuiIconsRaw as Record<string, React.ElementType>;
 import DeleteIcon from "@mui/icons-material/Delete";
 import AssetFilesModal from "./AssetFilesModal";
 import AssetReorderModal from "./AssetReorderModal";
@@ -55,27 +45,14 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
             onMouseLeave={() => setHovered(null)}
             secondaryAction={
               hovered === asset._id && (
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleDelete(asset._id)}
-                >
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(asset._id)}>
                   <DeleteIcon />
                 </IconButton>
               )
             }
           >
-            <ListItemIcon>
-              {MuiIcons[asset.icon]
-                ? React.createElement(MuiIcons[asset.icon])
-                : null}
-            </ListItemIcon>
-            <ListItemText
-              primary={asset.name}
-              secondary={`${asset.imageCount} file(s)`}
-              onClick={() => handleOpenModal(asset)}
-              sx={{ cursor: "pointer" }}
-            />
+            <ListItemIcon>{MuiIcons[asset.icon] ? React.createElement(MuiIcons[asset.icon]) : null}</ListItemIcon>
+            <ListItemText primary={asset.name} secondary={`${asset.imageCount} file(s)`} onClick={() => handleOpenModal(asset)} sx={{ cursor: "pointer" }} />
             <IconButton
               edge="end"
               aria-label="reorder"
@@ -91,18 +68,8 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
           </ListItem>
         ))}
       </List>
-      <AssetFilesModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        assetId={modalAssetId}
-        assetName={modalAssetName}
-      />
-      <AssetReorderModal
-        isOpen={reorderOpen}
-        onClose={() => setReorderOpen(false)}
-        assetId={reorderAssetId}
-        assetName={reorderAssetName}
-      />
+      <AssetFilesModal isOpen={modalOpen} onClose={() => setModalOpen(false)} assetId={modalAssetId} assetName={modalAssetName} />
+      <AssetReorderModal isOpen={reorderOpen} onClose={() => setReorderOpen(false)} assetId={reorderAssetId} assetName={reorderAssetName} />
     </Box>
   );
 }

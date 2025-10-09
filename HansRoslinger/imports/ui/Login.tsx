@@ -2,18 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, registerUser } from "../handlers/auth/authHandlers";
 import { setAuthCookie } from "../cookies/cookies";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Alert,
-  Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, Alert, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 export const Login: React.FC = () => {
   type FloatingQuote = {
@@ -143,8 +132,7 @@ export const Login: React.FC = () => {
       sx={{
         minHeight: "100vh",
         width: "100vw",
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -166,19 +154,12 @@ export const Login: React.FC = () => {
             zIndex: 0,
           }}
         >
-          {quotes[fq.idx].text}{" "}
-          <span style={{ fontWeight: 300 }}>{quotes[fq.idx].author}</span>
+          {quotes[fq.idx].text} <span style={{ fontWeight: 300 }}>{quotes[fq.idx].author}</span>
         </Box>
       ))}
 
       {/* Logo first */}
-      <Box
-        width="100%"
-        textAlign="center"
-        pt={4}
-        mb={0.4}
-        sx={{ position: "relative", zIndex: 1 }}
-      >
+      <Box width="100%" textAlign="center" pt={4} mb={0.4} sx={{ position: "relative", zIndex: 1 }}>
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
             src="/images/logo.jpg"
@@ -215,15 +196,7 @@ export const Login: React.FC = () => {
       </Box>
 
       {/* Login form */}
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="50vh"
-        gap={1}
-        sx={{ position: "relative", zIndex: 1 }}
-      >
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh" gap={1} sx={{ position: "relative", zIndex: 1 }}>
         <Box
           sx={{
             background: "rgba(255,255,255,0.9)",
@@ -243,38 +216,13 @@ export const Login: React.FC = () => {
           </Typography>
 
           <Stack spacing={2} width="300px">
-            <TextField
-              label="Username"
-              variant="outlined"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-            />
+            <TextField label="Username" variant="outlined" value={username} onChange={(e) => setUsername(e.target.value)} fullWidth />
+            <TextField label="Password" type="password" variant="outlined" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
             <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                onClick={handleLogin}
-                sx={{ fontWeight: 600, letterSpacing: 1 }}
-              >
+              <Button variant="contained" color="primary" fullWidth onClick={handleLogin} sx={{ fontWeight: 600, letterSpacing: 1 }}>
                 Login
               </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                fullWidth
-                onClick={() => setRegisterOpen(true)}
-                sx={{ fontWeight: 600, letterSpacing: 1 }}
-              >
+              <Button variant="outlined" color="secondary" fullWidth onClick={() => setRegisterOpen(true)} sx={{ fontWeight: 600, letterSpacing: 1 }}>
                 Register
               </Button>
             </Stack>
@@ -292,29 +240,9 @@ export const Login: React.FC = () => {
         <DialogTitle>Register</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1} width="300px">
-            <TextField
-              label="Username"
-              variant="outlined"
-              value={regUsername}
-              onChange={(e) => setRegUsername(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              value={regPassword}
-              onChange={(e) => setRegPassword(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Confirm Password"
-              type="password"
-              variant="outlined"
-              value={regConfirmPassword}
-              onChange={(e) => setRegConfirmPassword(e.target.value)}
-              fullWidth
-            />
+            <TextField label="Username" variant="outlined" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} fullWidth />
+            <TextField label="Password" type="password" variant="outlined" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} fullWidth />
+            <TextField label="Confirm Password" type="password" variant="outlined" value={regConfirmPassword} onChange={(e) => setRegConfirmPassword(e.target.value)} fullWidth />
             {regMessage && (
               <Alert severity="error" variant="filled">
                 {regMessage}

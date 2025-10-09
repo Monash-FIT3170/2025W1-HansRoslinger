@@ -8,10 +8,9 @@ import { getPresentationById } from "../api/database/presentations/presentations
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
-import { Box, Typography, Paper, Button, List, ListItemText, Collapse, ListItemButton, ListItemIcon, ListItem, IconButton, Link as MuiLink } from "@mui/material";
+import { Box, Typography, Paper, Button, List, ListItemText, Collapse, ListItemButton, ListItemIcon, ListItem, IconButton, Link as MuiLink, Backdrop, CircularProgress } from "@mui/material";
 import { ExpandLess, ExpandMore, Settings, ExitToApp, Collections } from "@mui/icons-material";
 import * as MuiIcons from "@mui/icons-material";
-import Folder from "@mui/icons-material/Folder";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -45,16 +44,14 @@ export const Home: React.FC = () => {
     }
   }, [userId]);
 
-  const handleClick = () => {
-    setOpen(!open);
-  };
+  // uploading state
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const handleLogout = () => {
     clearAuthCookie();
     navigate("/", { replace: true });
   };
-
-  // projectItems replaced by assets from useAssetsWithImageCount
 
   const handleExpandAsset = async (assetId: string) => {
     if (expandedAssetId === assetId) {
@@ -62,7 +59,6 @@ export const Home: React.FC = () => {
       return;
     }
     setExpandedAssetId(assetId);
-    // Fetch images for this asset (sorted), and backfill missing order values
     const fetchSorted = async (): Promise<ImageDoc[]> => {
       const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
       const imgs = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
@@ -83,8 +79,25 @@ export const Home: React.FC = () => {
     setExpandedAssetId(null);
   };
 
-  const handleCreateAsset = async (data: { name: string; icon: string; files: File[] }) => {
-    await createAssetWithImages(data);
+  // now tracks progress
+  const handleCreateAsset = async (data: {
+    name: string;
+    icon: string;
+    files: File[];
+  }) => {
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      await createAssetWithImages(data);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+    const handleClick = () => {
+    setOpen(!open);
   };
 
   const moveImage = async (assetId: string, fromIdx: number, toIdx: number) => {
@@ -94,8 +107,10 @@ export const Home: React.FC = () => {
     const b = list[toIdx];
     const orderA = typeof a.order === "number" ? a.order : fromIdx;
     const orderB = typeof b.order === "number" ? b.order : toIdx;
-    await Promise.all([ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }), ImageCollection.updateAsync(b._id!, { $set: { order: orderA } })]);
-    // Refetch sorted list and update state
+    await Promise.all([
+      ImageCollection.updateAsync(a._id!, { $set: { order: orderB } }),
+      ImageCollection.updateAsync(b._id!, { $set: { order: orderA } }),
+    ]);
     const sortSpec: Record<string, 1 | -1> = { order: 1, fileName: 1 };
     const refreshed = (await ImageCollection.find({ assetId }, { sort: sortSpec }).fetch()) as ImageDoc[];
     setImagesByAsset((prev) => ({ ...prev, [assetId]: refreshed }));
@@ -118,6 +133,21 @@ export const Home: React.FC = () => {
         Home
       </Typography>
 
+      {/* Upload overlay */}
+      <Backdrop
+        open={uploading}
+        sx={{
+          color: "#fff",
+          zIndex: (theme: import("@mui/material/styles").Theme) => theme.zIndex.drawer + 1000,
+          flexDirection: "column",
+        }}
+      >
+        <CircularProgress size={80} thickness={5} color="inherit" />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Uploading... {uploadProgress}%
+        </Typography>
+      </Backdrop>
+
       <Paper
         elevation={4}
         sx={{
@@ -132,7 +162,7 @@ export const Home: React.FC = () => {
         <List sx={{ width: "100%", bgcolor: "background.paper" }} component="nav" aria-labelledby="nested-list-subheader">
           <ListItemButton onClick={handleClick}>
             <ListItemIcon>
-              <Folder color="primary" />
+              <MuiIcons.Folder color="primary" />
             </ListItemIcon>
             <ListItemText primary="Assets" />
             {open ? <ExpandLess /> : <ExpandMore />}
@@ -267,6 +297,7 @@ export const Home: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
+          disabled={uploading} // disable while uploading
           sx={{
             bgcolor: "primary.main",
             color: "white",

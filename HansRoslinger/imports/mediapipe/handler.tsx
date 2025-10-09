@@ -1,3 +1,17 @@
+/**
+ * Purpose
+ * -------
+ * This file defines the `GestureHandler`, which manages how recognized
+ * gestures are interpreted and dispatched to application functions. It:
+ *   • Maintains active gesture state per hand (left, right, both).
+ *   • Applies cooldowns/delays to prevent repeated rapid activations.
+ *   • Handles special cases (e.g., POINTING_UP runs instantly, ignores cooldowns).
+ *   • Calls `handleGestureToFunc` to map gestures to their configured
+ *     application actions.
+ *
+ * In short: this file provides the logic that turns detected gestures into
+ * controlled, rate-limited function calls in the app.
+ */
 import { handleGestureToFunc } from "../gesture/gesture";
 import { FunctionType, GestureType } from "../gesture/types";
 import { Gesture, Handedness } from "../mediapipe/types";

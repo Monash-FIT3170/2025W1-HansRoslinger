@@ -14,6 +14,7 @@ jobs:
     env:
       METEOR_ALLOW_SUPERUSER: "1"
       TAILWIND_DISABLE_LIGHTNINGCSS: "1"
+      TAILWIND_DISABLE_OPTIMIZE: "1"
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

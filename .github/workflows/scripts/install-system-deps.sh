@@ -5,7 +5,6 @@ echo "Installing system dependencies..."
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
-  libasound2t64 \
   libatk1.0-0 \
   libatk-bridge2.0-0 \
   libc6 \
@@ -40,3 +39,9 @@ sudo apt-get install -y --no-install-recommends \
   fonts-liberation \
   wget \
   xvfb
+
+if apt-cache show libasound2 >/dev/null 2>&1; then
+  sudo apt-get install -y --no-install-recommends libasound2
+else
+  sudo apt-get install -y --no-install-recommends libasound2t64
+fi

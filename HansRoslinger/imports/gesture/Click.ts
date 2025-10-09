@@ -6,8 +6,18 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     console.warn("[click] Not enough landmarks to click (need at least 9)", latestGesture.singleGestureLandmarks);
     return;
   }
-  const pointerLandmark = latestGesture.singleGestureLandmarks[8];
-  const screenPosition = gestureToScreenPosition(pointerLandmark.x, pointerLandmark.y, pointerLandmark.z);
+  const indexTipLandmark = latestGesture.singleGestureLandmarks[8];
+  const thumbTipLandmark = latestGesture.singleGestureLandmarks[4];
+  const screenPosition = gestureToScreenPosition(
+    (indexTipLandmark.x + thumbTipLandmark.x) / 2,
+    (indexTipLandmark.y + thumbTipLandmark.y) / 2,
+    indexTipLandmark.z && thumbTipLandmark.z
+      ? (indexTipLandmark.z + thumbTipLandmark.z) / 2
+      : undefined,
+  );
+
+  // If pinch is wished to be used like a mouse click anywhere (not restricted to specified elements), use this line:
+  // const target = document.elementFromPoint(screenPosition.screenX, screenPosition.screenY);
 
   // ADD IDs of other clickable (pinchable) elements here
   const clickableElementIDs = ["gesture-detection-toggle"];

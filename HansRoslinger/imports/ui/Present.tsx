@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
-import { Header } from "./Header";
+import { Header, toolbarButtonHeight, toolbarButtonWidth } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
 import { useDatasetNavigation, usePresentationDatasets } from "./Input/Data";
 import { Title } from "./Charts/Title";
@@ -166,34 +166,36 @@ export const Present: React.FC = () => {
   const toolbarStyles = showHeader
     ? {
         position: "absolute" as const,
-        height: 520,
+        height: toolbarButtonHeight * 6 + 150,
         right: 16,
         bottom: 16,
-        width: 64,
+        width: toolbarButtonWidth + 24,
         backgroundColor: "#1f2937",
-        borderRadius: 16,
+        borderRadius: 5,
         boxShadow: 4,
         display: "flex",
         flexDirection: "column" as const,
         alignItems: "center",
         justifyContent: "flex-end",
         paddingY: 2,
-        gap: 6,
+        gap: 3,
         zIndex: 50,
+        opacity: 0.85,
       }
     : {
         position: "absolute" as const,
         bottom: 16,
         right: 16,
-        width: 64,
-        height: 64,
+        width: toolbarButtonWidth + 24,
+        height: toolbarButtonHeight + 24,
         backgroundColor: "#111827",
-        borderRadius: 12,
+        borderRadius: 5,
         boxShadow: 4,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 50,
+        opacity: 0.85,
       };
 
   const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
@@ -363,13 +365,19 @@ export const Present: React.FC = () => {
 
         <Button
           variant="contained"
-          size="small"
-          sx={{
-            backgroundColor: "#4b5563",
-            "&:hover": { backgroundColor: "#6b7280" },
-            textTransform: "none",
-          }}
           onClick={() => setShowHeader((h) => !h)}
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: "cyan.400",
+            color: "black",
+            "&:hover": {
+              backgroundColor: "cyan.300",
+            },
+          }}
         >
           {showHeader ? "Hide" : "Show"}
         </Button>

@@ -33,6 +33,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Asset } from "../api/database/assets/assets";
+import { updateRecentPresentationId } from "../api/database/users/users";
 
 export default function AllPresentations() {
   // State for dataset summary modal
@@ -62,7 +63,11 @@ export default function AllPresentations() {
     setSummaryDataset(null);
   }
   // Navigate to Present page with dataset ID
-  function handlePresentDataset(presentation: Presentation) {
+  async function handlePresentDataset(presentation: Presentation) {
+    const userId = getUserIDCookie();
+    if (userId && presentation._id) {
+      await updateRecentPresentationId(userId, presentation._id);
+    }
     navigate(`/present?presentationId=${presentation._id}`);
   }
   useAuthGuard();
@@ -374,9 +379,9 @@ export default function AllPresentations() {
               </Button>
               <Button
                 variant="contained"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  handlePresentDataset(selectedPresentation);
+                  await handlePresentDataset(selectedPresentation);
                 }}
               >
                 Present

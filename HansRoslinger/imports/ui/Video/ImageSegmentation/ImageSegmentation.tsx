@@ -1,5 +1,6 @@
 // src/components/ImageSegmentation.jsx
 import React, { useEffect } from "react";
+import { useMatch } from "react-router-dom";
 import { ImageSegmenter, FilesetResolver } from "@mediapipe/tasks-vision";
 import "./imageSegmentation.css";
 // import './imageSegmentationScript'; // Assuming this TypeScript file contains imperative logic
@@ -8,7 +9,11 @@ interface ImageSegmentationProps {
   grayscale: () => boolean;
 }
 
-export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale }) => {
+export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({
+  grayscale,
+}) => {
+  const isPresenting = useMatch("/present");
+
   useEffect(() => {
     const video = document.getElementById("webcam") as HTMLVideoElement;
     const canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
@@ -21,6 +26,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
     // const videoWidth: string = "480px";
     let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
     // const resultWidthHeigth = 256;
+    let rafID: number | null = null;
 
     let imageSegmenter: ImageSegmenter;
     // let labels: Array<string>;
@@ -88,7 +94,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
 
       // Continue prediction loop
       if (webcamRunning) {
-        window.requestAnimationFrame(predictWebcam);
+        rafID = window.requestAnimationFrame(predictWebcam);
       }
     }
 
@@ -106,7 +112,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
     async function predictWebcam() {
       if (video.currentTime === lastWebcamTime) {
         if (webcamRunning === true) {
-          window.requestAnimationFrame(predictWebcam);
+          rafID = window.requestAnimationFrame(predictWebcam);
         }
         return;
       }
@@ -137,28 +143,50 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
 
       if (webcamRunning === true) {
         webcamRunning = false;
+        stopWebcam();
       } else {
         webcamRunning = true;
+        // getUsermedia parameters.
+        const constraints = {
+          video: true,
+        };
+
+        // Activate the webcam stream.
+        video.srcObject =
+          await navigator.mediaDevices.getUserMedia(constraints);
+        video.addEventListener("loadeddata", predictWebcam);
       }
+    }
 
-      // getUsermedia parameters.
-      const constraints = {
-        video: true,
-      };
-
-      // Activate the webcam stream.
-      video.srcObject = await navigator.mediaDevices.getUserMedia(constraints);
-      video.addEventListener("loadeddata", predictWebcam);
+    function stopWebcam() {
+      const stream = video.srcObject as MediaStream | null;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      video.srcObject = null;
+      if (rafID != null) {
+        cancelAnimationFrame(rafID);
+      }
+      video.removeEventListener("loadeddata", predictWebcam);
     }
 
     // If webcam supported, add event listener to button.s
     if (hasGetUserMedia()) {
       enableWebcamButton = document.getElementById("background-removal-enable") as HTMLButtonElement;
       enableWebcamButton.addEventListener("click", enableCam);
+      enableWebcamButton = document.getElementById(
+        "background-removal-enable",
+      ) as HTMLButtonElement;
+      enableWebcamButton.addEventListener("click", enableCam);
     } else {
       console.warn("getUserMedia() is not supported by your browser");
     }
-  }, []);
+
+    return () => {
+      webcamRunning = false;
+      stopWebcam();
+    };
+  }, [isPresenting]);
 
   return (
     <div className="`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? 'grayscale' : ''}`">

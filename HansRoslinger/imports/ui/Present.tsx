@@ -199,7 +199,7 @@ export const Present: React.FC = () => {
       };
 
   const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
-    var settings = defaultMapping;
+  let settings = defaultMapping;
     const userID = getUserIDCookie();
     if (userID) {
       const user = await getUserById(userID);
@@ -251,6 +251,7 @@ export const Present: React.FC = () => {
         sx={{
           visibility: !backgroundRemoval ? "hidden" : "visible",
           pointerEvents: !backgroundRemoval ? "none" : "auto",
+          zIndex: backgroundRemoval ? 30 : undefined,
         }}
       >
         <ImageSegmentation grayscale={() => determineGrayscale()} />
@@ -293,7 +294,7 @@ export const Present: React.FC = () => {
           position="absolute"
           left="50%"
           bottom={0}
-          sx={{ transform: "translateX(-50%)" }}
+          sx={{ transform: "translateX(-50%)", zIndex: backgroundRemoval ? 20 : 10 }}
           display="flex"
           flexDirection="column"
           alignItems="center"

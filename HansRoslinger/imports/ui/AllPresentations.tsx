@@ -11,14 +11,15 @@ import {
   getPresentationsByUser,
   Presentation,
 } from "../api/database/presentations/presentations";
-import { getDatasetsByPresentationId } from "../api/database/dataset/dataset";
 import type { Dataset } from "../api/database/dataset/dataset";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
 import {
+  getDatasetsByPresentationId,
   createDataset,
   deleteDataset,
   ChartType,
 } from "../api/database/dataset/dataset";
+import { updateRecentPresentationId } from "../api/database/users/users";
 
 import {
   Alert,
@@ -71,7 +72,11 @@ export default function AllPresentations() {
     setSummaryDataset(null);
   }
   // Navigate to Present page with dataset ID
-  function handlePresentDataset(presentation: Presentation) {
+  async function handlePresentDataset(presentation: Presentation) {
+    const userId = getUserIDCookie();
+    if (userId && presentation._id) {
+      await updateRecentPresentationId(userId, presentation._id);
+    }
     navigate(`/present?presentationId=${presentation._id}`);
   }
   useAuthGuard();
@@ -426,9 +431,9 @@ export default function AllPresentations() {
               </Button>
               <Button
                 variant="contained"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  handlePresentDataset(selectedPresentation);
+                  await handlePresentDataset(selectedPresentation);
                 }}
               >
                 Present

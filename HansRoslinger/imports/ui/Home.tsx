@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CreateAssetModal from "./components/Assets/CreateAssetModal";
 import {
   useAssetsWithImageCount,
@@ -7,9 +7,11 @@ import {
 } from "./handlers/assets/useAssets";
 import { deleteAssetAndFiles } from "./handlers/assets/useDeleteAsset";
 import { ImageCollection, ImageDoc } from "../api/database/images/images";
+import { getRecentPresentationId } from "../api/database/users/users";
+import { getPresentationById } from "../api/database/presentations/presentations";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useNavigate } from "react-router-dom";
-import { clearAuthCookie } from "../cookies/cookies";
+import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
 import {
   Box,
   Typography,
@@ -39,6 +41,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export const Home: React.FC = () => {
   useAuthGuard();
+  const userId = getUserIDCookie();
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(true);
@@ -49,7 +52,29 @@ export const Home: React.FC = () => {
   const [imagesByAsset, setImagesByAsset] = useState<
     Record<string, ImageDoc[]>
   >({});
+
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [recentPresentationId, setRecentPresentationId] = useState<
+    string | undefined
+  >();
+  const [recentPresentationName, setRecentPresentationName] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    if (userId) {
+      getRecentPresentationId(userId).then((id) => {
+        setRecentPresentationId(id);
+        if (id) {
+          getPresentationById(id).then((presentation) => {
+            setRecentPresentationName(
+              presentation?.name ?? "Unnamed Presentation",
+            );
+          });
+        }
+      });
+    }
+  }, [userId]);
 
   const handleClick = () => {
     setOpen(!open);
@@ -297,6 +322,37 @@ export const Home: React.FC = () => {
       </Paper>
 
       <Box sx={{ display: "flex", gap: 3 }}>
+        {recentPresentationId && (
+          <Button
+            variant="contained"
+            startIcon={<MuiIcons.RocketLaunch />}
+            sx={{
+              width: "fit-content",
+              bgcolor: "primary.main",
+              color: "white",
+              px: 3,
+              py: 1.5,
+              borderRadius: "8px",
+              fontWeight: "bold",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+            onClick={() => {
+              navigate(`/present?presentationId=${recentPresentationId}`);
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Quick Present
+            </Typography>
+            {recentPresentationName && (
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                {recentPresentationName}
+              </Typography>
+            )}
+          </Button>
+        )}
         <Button
           variant="contained"
           startIcon={<AddIcon />}

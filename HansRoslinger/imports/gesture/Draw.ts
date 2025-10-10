@@ -24,7 +24,7 @@ let drawStartPosition: { x: number; y: number } | null = null;
 
 // Eraser indicator state
 let eraserIndicator: HTMLDivElement | null = null;
-const ERASER_RADIUS = 40;
+const ERASER_RADIUS = 80;
 
 // Drawing delay state
 let drawStartTime: number = 0;
@@ -37,12 +37,46 @@ const GESTURE_SWITCH_DELAY_MS = 500;
 
 // Open palm disable delay
 let openPalmStartTime: number = 0;
-const OPEN_PALM_DISABLE_DELAY_MS = 2000;
+const OPEN_PALM_DISABLE_DELAY_MS = 1000;
+
+/**
+ * Check if we're currently on the presenting page
+ */
+function isOnPresentingPage(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname === "/present";
+}
+
+/**
+ * Clean up drawing canvas and eraser when not on presenting page
+ */
+function cleanupWhenNotPresenting(): void {
+  if (!isOnPresentingPage()) {
+    console.log("Not on presenting page, cleaning up drawing canvas");
+    isDrawEnabled = false;
+    removeDrawCanvas();
+    removeEraserIndicator();
+    document?.body?.classList.remove("draw-active-outline");
+    // Reset all state
+    drawStartPosition = null;
+    lastDrawPosition = null;
+    drawStartTime = 0;
+    lastGestureType = null;
+    lastGestureSwitchTime = 0;
+    openPalmStartTime = 0;
+  }
+}
 
 /**
  * Initialize the drawing canvas overlay
  */
 function initializeDrawCanvas(): void {
+  // Only allow drawing canvas on the presenting page
+  if (!isOnPresentingPage()) {
+    console.log("Drawing canvas not allowed on this page");
+    return;
+  }
+
   if (drawCanvas) return; // Already initialized
 
   drawCanvas = document.createElement('canvas');
@@ -105,6 +139,12 @@ function removeDrawCanvas(): void {
  * Create the eraser indicator (blue circle)
  */
 function createEraserIndicator(): void {
+  // Only allow eraser indicator on the presenting page
+  if (!isOnPresentingPage()) {
+    console.log("Eraser indicator not allowed on this page");
+    return;
+  }
+
   if (eraserIndicator) return; // Already exists
 
   eraserIndicator = document.createElement('div');
@@ -327,6 +367,12 @@ export const draw = (_initial: Gesture, latestGesture: Gesture): void => {
 export function processDraw(_currentDrawPosition: { x: number; y: number }, latestGesture: Gesture): void {
   if (!isDrawEnabled || !drawContext) return;
   
+  // Check if we're still on the presenting page
+  if (!isOnPresentingPage()) {
+    cleanupWhenNotPresenting();
+    return;
+  }
+  
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(latestGesture.gestureID)) {
     // Still in delay period for gesture switching, maintain previous gesture behavior
@@ -368,6 +414,12 @@ export function processDraw(_currentDrawPosition: { x: number; y: number }, late
 export function processErase(latestGesture: Gesture): void {
   if (!isDrawEnabled || !drawContext) return;
   
+  // Check if we're still on the presenting page
+  if (!isOnPresentingPage()) {
+    cleanupWhenNotPresenting();
+    return;
+  }
+  
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(latestGesture.gestureID)) {
     // Still in delay period for gesture switching
@@ -389,6 +441,12 @@ export function processErase(latestGesture: Gesture): void {
  */
 export function showEraserPreview(latestGesture: Gesture): void {
   if (!isDrawEnabled) return;
+  
+  // Check if we're still on the presenting page
+  if (!isOnPresentingPage()) {
+    cleanupWhenNotPresenting();
+    return;
+  }
   
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(latestGesture.gestureID)) {
@@ -434,6 +492,13 @@ if (typeof window !== "undefined") {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     isDrawEnabled = !isDrawEnabled;
     if (isDrawEnabled && customEvent.detail) {
+      // Check if we're on the right page before enabling draw mode
+      if (!isOnPresentingPage()) {
+        console.log("Draw mode not allowed on this page");
+        isDrawEnabled = false;
+        return;
+      }
+
       const { x, y } = customEvent.detail;
       drawStartPosition = { x, y };
       lastDrawPosition = { x, y };
@@ -458,6 +523,36 @@ if (typeof window !== "undefined") {
       document?.body?.classList.remove("draw-active-outline");
       // DON'T remove the canvas - keep the drawing on screen
       console.log("Draw mode disabled - keeping drawing visible");
+    }
+  });
+
+  // Listen for page navigation to clean up drawing canvas
+  // This handles both browser navigation and React Router navigation
+  let currentPath = window.location.pathname;
+  
+  // Use MutationObserver to detect URL changes (works with React Router)
+  const observer = new MutationObserver(() => {
+    if (window.location.pathname !== currentPath) {
+      currentPath = window.location.pathname;
+      console.log("Page changed to:", currentPath);
+      cleanupWhenNotPresenting();
+    }
+  });
+  
+  // Start observing URL changes
+  observer.observe(document, { subtree: true, childList: true });
+  
+  // Also listen for browser navigation events
+  window.addEventListener("popstate", () => {
+    console.log("Browser navigation detected");
+    cleanupWhenNotPresenting();
+  });
+  
+  // Listen for page visibility changes (tab switches)
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      console.log("Page hidden, cleaning up drawing canvas");
+      cleanupWhenNotPresenting();
     }
   });
 }

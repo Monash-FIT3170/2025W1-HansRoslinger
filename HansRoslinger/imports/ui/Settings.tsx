@@ -29,6 +29,7 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.DOUBLE_PINCH]: "Double Pinch",
   [GestureType.TWO_FINGER_POINTING_LEFT]: "Two Fingers Pointing Left",
   [GestureType.TWO_FINGER_POINTING_RIGHT]: "Two Fingers Pointing Right",
+  [GestureType.DRAW]: "Draw",
 };
 
 const FunctionToLabel: Record<FunctionType, string> = {
@@ -40,6 +41,7 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SWITCH_CHART]: "Switch Chart",
   [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
+  [FunctionType.DRAW]: "Draw",
 };
 
 const Gestures = [
@@ -54,9 +56,10 @@ const Gestures = [
   // GestureType.DOUBLE_PINCH,
   GestureType.TWO_FINGER_POINTING_LEFT,
   GestureType.TWO_FINGER_POINTING_RIGHT,
+  GestureType.DRAW,
 ];
 
-const Functions = [FunctionType.UNUSED, FunctionType.SELECT, FunctionType.FILTER, FunctionType.CLEAR, FunctionType.ZOOM, FunctionType.CLICK, FunctionType.SWITCH_CHART, FunctionType.SWITCH_DATA];
+const Functions = [FunctionType.UNUSED, FunctionType.SELECT, FunctionType.FILTER, FunctionType.CLEAR, FunctionType.ZOOM, FunctionType.CLICK, FunctionType.SWITCH_CHART, FunctionType.SWITCH_DATA, FunctionType.DRAW];
 
 const Settings: React.FC = () => {
   const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);

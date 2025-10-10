@@ -142,18 +142,18 @@ export function useGestureDetector(
             rafIdRef.current = requestAnimationFrame(loop);
             return;
           }
-          console.debug("[Gesture] Calling recognize (IMAGE mode)");
+          // console.debug("[Gesture] Calling recognize (IMAGE mode)");
           detectedGestures = await gestureRecognizer.recognize(imageEl);
         } else {
           const ts = performance.now();
-          console.debug("[Gesture] Calling recognizeForVideo (VIDEO mode)", { ts });
+          // console.debug("[Gesture] Calling recognizeForVideo (VIDEO mode)", { ts });
           detectedGestures = await gestureRecognizer.recognizeForVideo(videoRef.current!, ts);
         }
-        console.debug("[Gesture] Recognizer result", {
-          gesturesCount: detectedGestures.gestures?.length ?? 0,
-          landmarksCount: detectedGestures.landmarks?.length ?? 0,
-          handednessCount: detectedGestures.handedness?.length ?? 0,
-        });
+        // console.debug("[Gesture] Recognizer result", {
+        //   gesturesCount: detectedGestures.gestures?.length ?? 0,
+        //   landmarksCount: detectedGestures.landmarks?.length ?? 0,
+        //   handednessCount: detectedGestures.handedness?.length ?? 0,
+        // });
         const gestures: Gesture[] = Array(detectedGestures.gestures.length);
         for (let index = 0; index < detectedGestures.gestures.length; index++) {
           const landmarks = detectedGestures.landmarks[index];
@@ -172,7 +172,9 @@ export function useGestureDetector(
             singleGestureLandmarks: landmarks,
             doubleGestureLandmarks: [],
           };
-          console.debug("[Gesture] Gesture detected", { index, rawCategory: detected.categoryName, mapped: gestureID, confidence, handedness });
+          if (detected.categoryName !== "None") {
+            console.debug("[Gesture] Gesture detected", { index, rawCategory: detected.categoryName, mapped: gestureID, confidence, handedness });
+          }
         }
         if (!(gestures.length === 0 && currentGestures.length === 0)) {
           setCurrentGestures(gestures);

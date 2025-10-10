@@ -4,8 +4,12 @@ import { Handedness } from "./types";
 
 export function recogniseCustomGesture(landmarks: NormalizedLandmark[], handedness: Handedness = Handedness.RIGHT): { gestureID: GestureType; confidence: number } | null {
   if (!landmarks || landmarks.length < 21) return null;
-
-  if (isPinchSign(landmarks)) {
+ if (isDrawGesture(landmarks)) {
+    return {
+      gestureID: GestureType.DRAW,
+      confidence: 1.0,
+    };
+  } else if (isPinchSign(landmarks)) {
     return {
       gestureID: GestureType.PINCH,
       confidence: 1.0,
@@ -132,4 +136,36 @@ export function isPinchSign(landmarks: NormalizedLandmark[]) {
   const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
 
   return isThumbIndexClose;
+}
+
+export function isDrawGesture(landmarks: NormalizedLandmark[]): boolean {
+  if (!landmarks || landmarks.length < 21) return false;
+
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const ringTip = landmarks[16];
+  const pinkyTip = landmarks[20];
+  const wrist = landmarks[0];
+
+  // Calculate distances from wrist
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  
+  // Check if thumb, index, and middle finger are close together (forming a "grip")
+  const thumbIndexDistance = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+  const thumbMiddleDistance = Math.hypot(thumbTip.x - middleTip.x, thumbTip.y - middleTip.y);
+  const indexMiddleDistance = Math.hypot(indexTip.x - middleTip.x, indexTip.y - middleTip.y);
+  
+  // All three fingers should be close together
+  const fingersClose = thumbIndexDistance < 0.08 && thumbMiddleDistance < 0.08 && indexMiddleDistance < 0.08;
+  
+  // Ring and pinky should be curled (closer to wrist)
+  const ringPip = landmarks[14];
+  const pinkyPip = landmarks[18];
+  const areOthersCurled = 
+    dist(wrist, ringTip) < dist(wrist, ringPip) && 
+    dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
+  
+  console.log(`Draw gesture check: fingersClose=${fingersClose}, areOthersCurled=${areOthersCurled}`);
+  return fingersClose && areOthersCurled;
 }

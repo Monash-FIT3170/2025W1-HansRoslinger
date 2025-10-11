@@ -28,7 +28,6 @@
     "jsonwebtoken": "^8.5.1",
     "meteor-node-stubs": "^1.2.5",
     "node-fetch": "^2.7.0",
-    "pdfjs-dist": "^5.4.149",
     "postcss": "^8.5.3",
     "postcss-load-config": "^6.0.1",
     "react": "^18.3.1",

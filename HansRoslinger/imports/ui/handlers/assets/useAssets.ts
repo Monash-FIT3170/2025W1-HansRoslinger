@@ -34,13 +34,49 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-// Convert PDF to images using pdf.js
+// Load pdf.js from CDN
+async function loadPdfJS(): Promise<any> {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  
+  // Check if already loaded
+  if ((window as any).pdfjsLib) {
+    return (window as any).pdfjsLib;
+  }
+  
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load PDF.js'));
+      document.head.appendChild(script);
+    });
+    
+    // Check if pdfjsLib is now available
+    if (!(window as any).pdfjsLib) {
+      throw new Error('PDF.js library not available after loading');
+    }
+    
+    // Set worker path
+    (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc = 
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    return (window as any).pdfjsLib;
+  } catch (error) {
+    console.error('Error loading PDF.js:', error);
+    throw error;
+  }
+}
+
+// Convert PDF to images using pdf.js from CDN
 async function convertPdfToImages(file: File): Promise<File[]> {
   try {
-    const pdfjsLib = await import('pdfjs-dist');
+    const pdfjsLib = await loadPdfJS();
     
-    if (typeof window !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    if (!pdfjsLib) {
+      throw new Error('PDF.js library failed to load');
     }
     
     const arrayBuffer = await file.arrayBuffer();
@@ -79,7 +115,6 @@ async function convertPdfToImages(file: File): Promise<File[]> {
     return imageFiles;
   } catch (error) {
     console.error('PDF conversion error:', error);
-    // FIX: Proper error handling
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     throw new Error(`Failed to convert PDF: ${errorMessage}`);
   }
@@ -114,15 +149,17 @@ export async function createAssetWithImages({
   if (!userId) {
     throw new Error("User ID is required to create an asset.");
   }
+  
   // Insert asset with userId
   const assetId = await AssetCollection.insertAsync({ name, icon, userId });
   console.log(
     "Created asset with id:",
     assetId,
-    "Uploading",
+    "Processing",
     files.length,
-    "images",
+    "files",
   );
+  
   // Wait briefly to ensure asset is available in DB (Meteor eventual consistency)
   await new Promise((res) => setTimeout(res, 300));
 
@@ -130,8 +167,13 @@ export async function createAssetWithImages({
   const allImageFiles: File[] = [];
   
   for (const file of files) {
-    const processedFiles = await processFile(file);
-    allImageFiles.push(...processedFiles);
+    try {
+      const processedFiles = await processFile(file);
+      allImageFiles.push(...processedFiles);
+    } catch (error) {
+      console.error(`Failed to process file ${file.name}:`, error);
+      throw error;
+    }
   }
   
   console.log(`Converted ${files.length} files to ${allImageFiles.length} images`);

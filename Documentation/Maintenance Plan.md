@@ -1,6 +1,6 @@
 # Hansroslinger Maintenance Plan
 
-# Aim of Plan
+# Aim
 
 The aim of this document is to outline the winding down of HanRoslinger, including
 
@@ -32,7 +32,7 @@ All features of HansRoslinger, including
 2. Infrastructure via Terraform
 3. Documentation
 
-Is maintained through the github repository `https://github.com/Monash-FIT3170/2025W1-HansRoslinger`. This repository is owned by the [Monash FIT3170 Github Organisation](https://github.com/Monash-FIT3170), therefore the biggest risk to the integrity of our codebase is whether the maintainers of the repository retain it. Therefore the first steps in maintaining the system is to ensure with the owners of the organisation that the repository will remain following the completion of the unit.
+Are maintained through the github repository `https://github.com/Monash-FIT3170/2025W1-HansRoslinger`. This repository is owned by the [Monash FIT3170 Github Organisation](https://github.com/Monash-FIT3170), therefore the biggest risk to the integrity of our codebase is whether the maintainers of the repository retain it. Therefore the first steps in maintaining the system is to ensure with the owners of the organisation that the repository will remain following the completion of the unit.
 
 In the event that the repository will not be kept, a fork of the repository can be made with minimal loss in information. The only information not retained is
 
@@ -81,7 +81,7 @@ Assuming these steps are followed, the production environment should be able to 
 
 ## hansroslinger.website Domain
 
-NEED TO UPDATE
+NEED TO GET INFORMATION FROM MAYANK
 
 # Associated Costs
 

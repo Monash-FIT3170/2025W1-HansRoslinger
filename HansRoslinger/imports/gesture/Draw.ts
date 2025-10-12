@@ -21,10 +21,13 @@ let drawCanvas: HTMLCanvasElement | null = null;
 let drawContext: CanvasRenderingContext2D | null = null;
 let lastDrawPosition: { x: number; y: number } | null = null;
 let drawStartPosition: { x: number; y: number } | null = null;
+let smoothedDrawPosition: { x: number; y: number } | null = null;
 
 // Eraser indicator state
 let eraserIndicator: HTMLDivElement | null = null;
 const ERASER_RADIUS = 80;
+const MIN_DRAW_DISTANCE_SQUARED = 4;
+const SMOOTHING_ALPHA = 0.25;
 
 // Drawing delay state
 let drawStartTime: number = 0;
@@ -64,6 +67,7 @@ function cleanupWhenNotPresenting(): void {
     lastGestureType = null;
     lastGestureSwitchTime = 0;
     openPalmStartTime = 0;
+    resetSmoothing();
   }
 }
 
@@ -216,6 +220,7 @@ function canSwitchGesture(newGestureType: GestureType): boolean {
   // If we're switching away from DRAW gesture, reset drawing position to prevent line connections
   if (lastGestureType === GestureType.DRAW && newGestureType !== GestureType.DRAW) {
     lastDrawPosition = null;
+    resetSmoothing();
     console.log("Switched away from DRAW gesture - resetting draw position to prevent line connection");
   }
   
@@ -264,41 +269,40 @@ function getDrawPosition(latestGesture: Gesture): { x: number; y: number } | nul
 }
 
 /**
- * Get the fist position for erasing (uses middle of hand)
- */
-function getFistPosition(latestGesture: Gesture): { x: number; y: number } | null {
-  try {
-    const landmarks = latestGesture.singleGestureLandmarks;
-    if (!landmarks || landmarks.length < 21) {
-      return null;
-    }
-    
-    // Use the middle of the hand (average of key landmarks) for fist position
-    const wrist = landmarks[0];
-    const middleMcp = landmarks[9]; // Middle finger base
-    const indexMcp = landmarks[5]; // Index finger base
-    
-    // Calculate center point
-    const centerX = (wrist.x + middleMcp.x + indexMcp.x) / 3;
-    const centerY = (wrist.y + middleMcp.y + indexMcp.y) / 3;
-    
-    const screenPos = gestureToScreenPosition(centerX, centerY);
-    return { x: screenPos.screenX, y: screenPos.screenY };
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Draw a line from the last position to the current position
  */
 function drawLine(currentPosition: { x: number; y: number }): void {
   if (!drawContext || !lastDrawPosition) return;
   
+  const deltaX = currentPosition.x - lastDrawPosition.x;
+  const deltaY = currentPosition.y - lastDrawPosition.y;
+  if (deltaX * deltaX + deltaY * deltaY < MIN_DRAW_DISTANCE_SQUARED) {
+    return;
+  }
+
   drawContext.beginPath();
   drawContext.moveTo(lastDrawPosition.x, lastDrawPosition.y);
   drawContext.lineTo(currentPosition.x, currentPosition.y);
   drawContext.stroke();
+}
+
+function resetSmoothing(seedPosition?: { x: number; y: number }): void {
+  smoothedDrawPosition = seedPosition ? { ...seedPosition } : null;
+}
+
+function getSmoothedPosition(position: { x: number; y: number }): { x: number; y: number } {
+  if (!smoothedDrawPosition) {
+    smoothedDrawPosition = { ...position };
+    return smoothedDrawPosition;
+  }
+
+  const smoothed = {
+    x: smoothedDrawPosition.x + (position.x - smoothedDrawPosition.x) * SMOOTHING_ALPHA,
+    y: smoothedDrawPosition.y + (position.y - smoothedDrawPosition.y) * SMOOTHING_ALPHA,
+  };
+
+  smoothedDrawPosition = smoothed;
+  return smoothed;
 }
 
 /**
@@ -391,17 +395,20 @@ export function processDraw(_currentDrawPosition: { x: number; y: number }, late
     const currentPosition = getDrawPosition(latestGesture);
     if (!currentPosition) return;
     
-    // If we have a last position and it's not null, draw a line
-    // If lastDrawPosition is null (after switching from another gesture), start a new line
-    if (lastDrawPosition) {
-      drawLine(currentPosition);
-    } else {
-      // Starting a new line - just set the position without drawing
-      console.log("Starting new line segment at:", currentPosition);
+    if (!lastDrawPosition) {
+      // Starting a new line - seed the smoothing filter and store the initial point
+      resetSmoothing(currentPosition);
+      const seededPosition = getSmoothedPosition(currentPosition);
+      lastDrawPosition = seededPosition;
+      console.log("Starting new line segment at:", seededPosition);
+      return;
     }
+
+    const smoothedPosition = getSmoothedPosition(currentPosition);
+    drawLine(smoothedPosition);
     
-    // Update the last position for the next frame
-    lastDrawPosition = currentPosition;
+    // Update the last position for the next frame using the smoothed coordinates
+    lastDrawPosition = smoothedPosition;
   }
   
   // Hide eraser indicator when actively drawing
@@ -426,14 +433,17 @@ export function processErase(latestGesture: Gesture): void {
     return;
   }
   
-  const fistPosition = getFistPosition(latestGesture);
-  if (!fistPosition) return;
+  const pointerPosition = getDrawPosition(latestGesture);
+  if (!pointerPosition) {
+    hideEraserIndicator();
+    return;
+  }
   
-  // Show the eraser indicator at the fist position
-  updateEraserIndicator(fistPosition);
+  // Show the eraser indicator centred on the pointer finger tip
+  updateEraserIndicator(pointerPosition);
   
-  // Erase the area
-  eraseArea(fistPosition, ERASER_RADIUS);
+  // Erase the area around the pointer finger tip
+  eraseArea(pointerPosition, ERASER_RADIUS);
 }
 
 /**
@@ -464,19 +474,16 @@ export function showEraserPreview(latestGesture: Gesture): void {
 
   // Simple check: if gesture is not a clear draw gesture, hide the indicator
   // This prevents the blue circle from showing when just moving hands around
-  if (latestGesture.gestureID === GestureType.DRAW || 
-      latestGesture.gestureID === GestureType.CLOSED_FIST ||
-      latestGesture.gestureID === GestureType.UNIDENTIFIED) {
-    const fistPosition = getFistPosition(latestGesture);
-    if (fistPosition) {
-      updateEraserIndicator(fistPosition);
-    } else {
-      hideEraserIndicator();
+  if (latestGesture.gestureID === GestureType.POINTING_UP || latestGesture.gestureID === GestureType.DRAW) {
+    const pointerPosition = getDrawPosition(latestGesture);
+    if (pointerPosition) {
+      updateEraserIndicator(pointerPosition);
+      return;
     }
-  } else {
-    // For other clear gestures (open palm, pointing, etc.), hide the indicator
-    hideEraserIndicator();
   }
+
+  // For other gestures (open palm, fist, etc.), hide the indicator
+  hideEraserIndicator();
 }
 
 /**
@@ -499,9 +506,10 @@ if (typeof window !== "undefined") {
         return;
       }
 
-      const { x, y } = customEvent.detail;
-      drawStartPosition = { x, y };
-      lastDrawPosition = { x, y };
+  const { x, y } = customEvent.detail;
+  drawStartPosition = { x, y };
+  resetSmoothing({ x, y });
+  lastDrawPosition = getSmoothedPosition({ x, y });
       drawStartTime = Date.now(); // Set the start time for the delay
       // Reset gesture tracking
       lastGestureType = null;
@@ -512,8 +520,9 @@ if (typeof window !== "undefined") {
       createEraserIndicator(); // Create the eraser indicator
       document?.body?.classList.add("draw-active-outline");
     } else {
-      drawStartPosition = null;
-      lastDrawPosition = null;
+  drawStartPosition = null;
+  lastDrawPosition = null;
+  resetSmoothing();
       drawStartTime = 0; // Reset start time
       // Reset gesture tracking
       lastGestureType = null;

@@ -113,9 +113,12 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
   } else if (isDrawEnabled) {
     console.log(`draw mode enabled`);
     // In draw mode, handle special gestures
-    if (mapping[label] === FunctionType.FILTER) {
-      // Closed fist erases the area under the fist
+    if (latestGesture.gestureID === GestureType.POINTING_UP) {
+      // Pointing finger acts as an eraser
       processErase(latestGesture);
+    } else if (mapping[label] === FunctionType.FILTER) {
+      // Closed fist exits draw mode
+      draw(initialGesture, latestGesture);
     } else if (mapping[label] === FunctionType.CLEAR) {
       // Open palm cancels draw mode
       draw(initialGesture, latestGesture);

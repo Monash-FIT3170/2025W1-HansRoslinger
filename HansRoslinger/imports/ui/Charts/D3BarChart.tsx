@@ -11,6 +11,7 @@ import {
   BAR_OPACITY,
 } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
+import GestureHintsOverlay from "../../gesture/GestureHintsOverlay";
 
 interface D3BarChartProps {
   dataset: Dataset;
@@ -244,6 +245,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       .data(filteredData)
       .join("rect")
       .attr("class", "bar")
+      .attr("data-gesture-role", "bar")
       .attr("x", (d) => xScale(d.label) || 0)
       .attr("y", (d) => yScale(d.value))
       .attr("width", xScale.bandwidth())
@@ -317,5 +319,15 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     setZoomScale(1);
   }, [dataset]);
 
-  return <div ref={chartRef} className="w-full h-full" />;
+  return (
+      <div id="bar-chart-root" ref={chartRef} className="w-full h-full relative" style={{ position: "relative" }}>
+        <GestureHintsOverlay chartRootId="bar-chart-root"
+          delayMs={1200}
+          repeatDelayMs={1500}
+          fallback="bottom-left"
+          maxShown={3}
+        />
+      </div>
+    );
+
 };

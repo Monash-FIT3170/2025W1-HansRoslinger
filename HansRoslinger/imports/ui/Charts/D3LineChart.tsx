@@ -12,6 +12,8 @@ import {
   POINT_RADIUS,
 } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
+import GestureHintsOverlay from "../../gesture/GestureHintsOverlay";
+
 
 interface D3LineChartProps {
   dataset: Dataset;
@@ -303,6 +305,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .data(customData.filter((d) => highlightedDots.has(d.label)))
       .join("text")
       .attr("class", "dot-label")
+      .attr("data-gesture-role", "bar")
       .attr("x", (d) => xScale(d.label)!)
       .attr("y", (d) => yScale(d.value) - POINT_RADIUS * fontScale - 8)
       .attr("text-anchor", "middle")
@@ -347,5 +350,15 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     setZoomScale(1);
   }, [dataset]);
 
-  return <div ref={chartRef} className="w-full h-full" />;
+  return (
+    <div id="line-chart-root" ref={chartRef} className="w-full h-full relative" style={{ position: "relative" }}>
+      <GestureHintsOverlay chartRootId="line-chart-root"
+        delayMs={1200}
+        repeatDelayMs={1500}
+        fallback="bottom-left"
+        maxShown={3}
+      />
+    </div>
+  );
+
 };

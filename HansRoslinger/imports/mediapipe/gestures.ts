@@ -13,6 +13,22 @@ import {
   IDtoEnum,
 } from "../gesture/gesture";
 import GestureHandler from "../gesture/GestureHandler";
+import { getPointerScreenXY } from "../gesture/gesture";
+
+const __lastXYByHand: Record<string, { x: number; y: number; t: number }> = {};
+
+function __inferRoleAtPoint(x: number, y: number): "bar" | "axis" | "chart" | "none" {
+  const el = document.elementFromPoint(x, y);
+  if (!el) return "none";
+  if (el.getAttribute("data-gesture-role") === "bar" || el.hasAttribute("data-gesture-hints")) return "bar";
+  if (el.getAttribute("data-gesture-role") === "axis") return "axis";
+  const root = document.getElementById("chart-root");
+  if (root) {
+    const r = root.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return "chart";
+  }
+  return "none";
+}
 
 export const gestureDetector = (
   videoRef: MutableRefObject<Webcam | null>,
@@ -86,7 +102,7 @@ export const gestureDetector = (
 
     // Wait for recognizer to be ready
     if (!gestureRecognizer) {
-      return () => {};
+      return () => { };
     }
 
     const loop = async () => {
@@ -144,6 +160,60 @@ export const gestureDetector = (
               doubleGestureLandmarks: [],
             };
           }
+
+          try {
+            const hands = Array.isArray(gestures) ? gestures : [];
+            const numHands = hands.length || 0;
+
+            // Optional: compute two-hand distance in px once per frame
+            let twoHandDist = 0;
+            if (numHands >= 2) {
+              const a = getPointerScreenXY(hands[0]);
+              const b = getPointerScreenXY(hands[1]);
+              if (a && b) {
+                const dx = a.x - b.x, dy = a.y - b.y;
+                twoHandDist = Math.sqrt(dx * dx + dy * dy);
+              }
+              (window as any).__twoHandDistance = twoHandDist; // overlay uses this if present
+            }
+
+            for (const g of hands) {
+              const xy = getPointerScreenXY(g);
+              if (!xy) continue;
+
+              // 1) Keep overlay position following the hand
+              window.dispatchEvent(new CustomEvent('gesture:pointer', { detail: { x: xy.x, y: xy.y } }));
+
+              // 2) Estimate speed (px/ms) for dwell vs motion
+              const id = `${g.handedness || 'H'}-${g.gestureID || 'G'}`;
+              const now = performance.now();
+              let speed = 0;
+              const prev = __lastXYByHand[id];
+              if (prev) {
+                const dt = Math.max(1, now - prev.t);
+                const dx = xy.x - prev.x;
+                const dy = xy.y - prev.y;
+                speed = Math.sqrt(dx * dx + dy * dy) / dt;
+              }
+              __lastXYByHand[id] = { x: xy.x, y: xy.y, t: now };
+
+              // 3) Where is the hand? (bar/axis/chart/none)
+              const role = __inferRoleAtPoint(xy.x, xy.y);
+
+              // 4) Emit cheap features so the overlay can rank likely actions
+              const detail = {
+                x: xy.x,
+                y: xy.y,
+                numHands,
+                pinch: Boolean((g as any).isPinching), // ok if always false
+                speed,
+                handsDistance: twoHandDist,
+                overElementRole: role as "bar" | "axis" | "chart" | "none",
+              };
+              window.dispatchEvent(new CustomEvent('gesture:preintent', { detail }));
+            }
+          } catch { }
+
 
           if (!(gestures.length === 0 && currentGestures.length === 0)) {
             setCurrentGestures(gestures);

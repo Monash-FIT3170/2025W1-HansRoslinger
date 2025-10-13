@@ -6,6 +6,7 @@ import {
   handleGestureToFunc,
 } from "./gesture";
 import { useRef } from "react";
+import { getPointerScreenXY } from "./gesture"; // adjust path if needed
 
 let isZoomEnabled = false;
 
@@ -50,6 +51,10 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
       };
       // Instant hover: if this is POINTING_UP, run immediately and do not touch timers
       if (gesture.gestureID === GestureType.POINTING_UP) {
+        const xy = getPointerScreenXY(gesture);
+        if (xy) {
+          window.dispatchEvent(new CustomEvent('gesture:pointer', { detail: { x: xy.x, y: xy.y } }));
+        }
         handleGestureToFunc(gesture.gestureID, gesture, gesture, map);
         return;
       }

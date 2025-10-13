@@ -49,7 +49,7 @@ export const IDtoEnum: Record<string, GestureType> = {
 
 type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
 export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
-  [FunctionType.UNUSED]: (() => {}) as GestureHandlerFn,
+  [FunctionType.UNUSED]: (() => { }) as GestureHandlerFn,
   [FunctionType.SELECT]: select as GestureHandlerFn,
   [FunctionType.FILTER]: filter as GestureHandlerFn,
   [FunctionType.CLEAR]: clear as GestureHandlerFn,
@@ -58,6 +58,18 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
   [FunctionType.CLICK]: click as GestureHandlerFn,
 };
+
+export function getPointerScreenXY(gesture: any): { x: number; y: number } | null {
+  try {
+    if (!gesture?.singleGestureLandmarks || gesture.singleGestureLandmarks.length < 9) return null;
+    const tip = gesture.singleGestureLandmarks[8]; // index fingertip
+    const { screenX, screenY } = gestureToScreenPosition(tip.x, tip.y, tip.z);
+    return { x: screenX, y: screenY };
+  } catch {
+    return null;
+  }
+}
+
 
 enum Handedness {
   LEFT = "Left",
@@ -97,6 +109,17 @@ if (typeof window !== "undefined") {
 
 const constantMapping: Record<GestureType, FunctionType> = {
   [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
+  [GestureType.CLOSED_FIST]: FunctionType.UNUSED,
+  [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
+  [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
+  [GestureType.OPEN_PALM]: FunctionType.UNUSED,
+  [GestureType.POINTING_UP]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.VICTORY]: FunctionType.UNUSED,
+  [GestureType.PINCH]: FunctionType.UNUSED,
+  [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.UNUSED,
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.UNUSED
 };
 
 const defaultMapping: Record<GestureType, FunctionType> = {
@@ -140,6 +163,7 @@ const handleGestureToFunc = (
         `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
       );
       handler(initialGesture, latestGesture);
+      window.dispatchEvent(new CustomEvent('gesture:action', { detail: { ok: true } }));
     } else if (functionType === FunctionType.UNUSED) {
       const defaultFunction = constantMapping[label];
       const defaultHandler = EnumToFunc[defaultFunction];

@@ -81,7 +81,12 @@ Assuming these steps are followed, the production environment should be able to 
 
 ## hansroslinger.website Domain
 
-NEED TO GET INFORMATION FROM MAYANK
+There are currently 2 ways to access the production deployment of CloudRun
+
+* Through the automatically generated CloudRun URL `https://hans-roslinger-961228355326.us-central1.run.app`
+* Through the custom domain `https://hansroslinger.website/`
+
+The CloudRun URL is persistent as long as the CloudRun is deployed via the [Github Actions](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/deploy.yaml), however the custom domain is an ongoing subscription. The current lease period for the domain is 1 year, in order to maintain the domain after this, it will need to be renewed via [namecheap.com](namecheap.com).
 
 # Associated Costs
 
@@ -106,3 +111,9 @@ Below I have outlined each service which is in use by our production deployment,
 | Service     | Cost per Unit                                                                                                                  | Accumulated Cost Given Current Use              |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
 | Mongo Atlas | **Free Tier**<br />$0 per hour for up to 512MB<br /><br />\$0.011 per hour for up to 5GB<br />\$0.08 per hour up to 10GB | \$0 as we have not exceeded the 512MB free tier |
+
+## Custom Domain
+
+| Service                                    | Cost per Unit                                                   | Accumulated Cost Given Current Use               |
+| ------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------ |
+| hansroslinger.website domain via NameCheap | $2.99 for the first year<br /><br />\$13.99 each following year | $2.99 for the first year ownership of the domain |

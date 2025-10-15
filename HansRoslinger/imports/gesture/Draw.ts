@@ -28,6 +28,8 @@ let eraserIndicator: HTMLDivElement | null = null;
 const ERASER_RADIUS = 80;
 const MIN_DRAW_DISTANCE_SQUARED = 4;
 const SMOOTHING_ALPHA = 0.25;
+let lastConfirmedDrawTimestamp: number = 0;
+const DRAW_CONTINUATION_GRACE_MS = 400;
 
 // Drawing delay state
 let drawStartTime: number = 0;
@@ -68,6 +70,7 @@ function cleanupWhenNotPresenting(): void {
     lastGestureSwitchTime = 0;
     openPalmStartTime = 0;
     resetSmoothing();
+    lastConfirmedDrawTimestamp = 0;
   }
 }
 
@@ -206,6 +209,14 @@ function removeEraserIndicator(): void {
  */
 function canSwitchGesture(newGestureType: GestureType): boolean {
   const currentTime = Date.now();
+  const previousGestureType = lastGestureType;
+
+  // Always allow returning to the DRAW gesture to keep strokes continuous
+  if (newGestureType === GestureType.DRAW) {
+    lastGestureType = newGestureType;
+    lastGestureSwitchTime = currentTime;
+    return true;
+  }
   
   // If it's the same gesture type, no delay needed
   if (lastGestureType === newGestureType) {
@@ -218,7 +229,7 @@ function canSwitchGesture(newGestureType: GestureType): boolean {
   }
   
   // If we're switching away from DRAW gesture, reset drawing position to prevent line connections
-  if (lastGestureType === GestureType.DRAW && newGestureType !== GestureType.DRAW) {
+  if (previousGestureType === GestureType.DRAW) {
     lastDrawPosition = null;
     resetSmoothing();
     console.log("Switched away from DRAW gesture - resetting draw position to prevent line connection");
@@ -376,47 +387,62 @@ export function processDraw(_currentDrawPosition: { x: number; y: number }, late
     cleanupWhenNotPresenting();
     return;
   }
-  
+
+  const currentTime = Date.now();
+  const normalizedGestureType =
+    latestGesture.gestureID === GestureType.UNIDENTIFIED ? GestureType.DRAW : latestGesture.gestureID;
+
   // Check if we can switch to this gesture (with delay)
-  if (!canSwitchGesture(latestGesture.gestureID)) {
+  if (!canSwitchGesture(normalizedGestureType)) {
     // Still in delay period for gesture switching, maintain previous gesture behavior
     return;
   }
-  
-  // Only draw if the current gesture is specifically the DRAW gesture
-  if (latestGesture.gestureID === GestureType.DRAW) {
-    // Check if enough time has passed since draw mode started
-    const currentTime = Date.now();
-    if (currentTime - drawStartTime < DRAW_DELAY_MS) {
-      // Still in delay period, don't draw yet
+
+  const isStrictDrawGesture = latestGesture.gestureID === GestureType.DRAW;
+  const isGraceCandidate = latestGesture.gestureID === GestureType.UNIDENTIFIED;
+
+  if (isStrictDrawGesture) {
+    lastConfirmedDrawTimestamp = currentTime;
+  } else if (isGraceCandidate) {
+    if (currentTime - lastConfirmedDrawTimestamp > DRAW_CONTINUATION_GRACE_MS) {
       return;
     }
-
-    const currentPosition = getDrawPosition(latestGesture);
-    if (!currentPosition) return;
-    
-    if (!lastDrawPosition) {
-      // Starting a new line - seed the smoothing filter and store the initial point
-      resetSmoothing(currentPosition);
-      const seededPosition = getSmoothedPosition(currentPosition);
-      lastDrawPosition = seededPosition;
-      console.log("Starting new line segment at:", seededPosition);
-      return;
-    }
-
-    const smoothedPosition = getSmoothedPosition(currentPosition);
-    drawLine(smoothedPosition);
-    
-    // Update the last position for the next frame using the smoothed coordinates
-    lastDrawPosition = smoothedPosition;
+  } else {
+    return;
   }
-  
+
+  // Check if enough time has passed since draw mode started
+  if (currentTime - drawStartTime < DRAW_DELAY_MS) {
+    // Still in delay period, don't draw yet
+    return;
+  }
+
+  const currentPosition = getDrawPosition(latestGesture);
+  if (!currentPosition) return;
+
+  if (!lastDrawPosition) {
+    // Starting a new line - seed the smoothing filter and store the initial point
+    resetSmoothing(currentPosition);
+    const seededPosition = getSmoothedPosition(currentPosition);
+    lastDrawPosition = seededPosition;
+    lastConfirmedDrawTimestamp = currentTime;
+    console.log("Starting new line segment at:", seededPosition);
+    return;
+  }
+
+  const smoothedPosition = getSmoothedPosition(currentPosition);
+  drawLine(smoothedPosition);
+
+  // Update the last position for the next frame using the smoothed coordinates
+  lastDrawPosition = smoothedPosition;
+  lastConfirmedDrawTimestamp = currentTime;
+
   // Hide eraser indicator when actively drawing
   hideEraserIndicator();
 }
 
 /**
- * Process erasing with fist gesture
+ * Process erasing when the pointing gesture is active
  */
 export function processErase(latestGesture: Gesture): void {
   if (!isDrawEnabled || !drawContext) return;
@@ -506,10 +532,11 @@ if (typeof window !== "undefined") {
         return;
       }
 
-  const { x, y } = customEvent.detail;
-  drawStartPosition = { x, y };
-  resetSmoothing({ x, y });
-  lastDrawPosition = getSmoothedPosition({ x, y });
+      const { x, y } = customEvent.detail;
+      drawStartPosition = { x, y };
+      resetSmoothing({ x, y });
+      lastDrawPosition = getSmoothedPosition({ x, y });
+      lastConfirmedDrawTimestamp = 0;
       drawStartTime = Date.now(); // Set the start time for the delay
       // Reset gesture tracking
       lastGestureType = null;
@@ -520,9 +547,10 @@ if (typeof window !== "undefined") {
       createEraserIndicator(); // Create the eraser indicator
       document?.body?.classList.add("draw-active-outline");
     } else {
-  drawStartPosition = null;
-  lastDrawPosition = null;
-  resetSmoothing();
+      drawStartPosition = null;
+      lastDrawPosition = null;
+      resetSmoothing();
+      lastConfirmedDrawTimestamp = 0;
       drawStartTime = 0; // Reset start time
       // Reset gesture tracking
       lastGestureType = null;

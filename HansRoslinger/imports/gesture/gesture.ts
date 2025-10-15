@@ -122,8 +122,10 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
     } else if (mapping[label] === FunctionType.CLEAR) {
       // Open palm cancels draw mode
       draw(initialGesture, latestGesture);
-    } else if (latestGesture.gestureID === GestureType.DRAW) {
-      // Only DRAW gesture actually draws
+    } else if (
+      latestGesture.gestureID === GestureType.DRAW
+    ) {
+      // Continue drawing for confirmed or briefly unidentified frames
       processDraw(drawStartPosition!, latestGesture);
     } else {
       // For any other gesture, hide the eraser indicator since we're not in erase mode

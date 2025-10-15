@@ -1,11 +1,14 @@
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { Gesture, GestureType } from "../gesture/gesture";
+import { isDrawModeEnabled } from "../gesture/Draw";
 import { Handedness } from "./types";
 
 export function recogniseCustomGesture(landmarks: NormalizedLandmark[], handedness: Handedness = Handedness.RIGHT): { gestureID: GestureType; confidence: number } | null {
   if (!landmarks || landmarks.length < 21) return null;
 
-  if (isDrawGesture(landmarks)) {
+  const drawEnabled = isDrawModeEnabled();
+
+  if (isDrawGesture(landmarks, drawEnabled)) {
     return {
       gestureID: GestureType.DRAW,
       confidence: 1.0,
@@ -128,7 +131,7 @@ export function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
   return isLeftPinch && isRightPinch;
 }
 
-export function isDrawGesture(landmarks: NormalizedLandmark[]): boolean {
+export function isDrawGesture(landmarks: NormalizedLandmark[], isDrawModeActive: boolean = false): boolean {
   if (!landmarks || landmarks.length < 21) return false;
 
   const thumbTip = landmarks[4];
@@ -152,17 +155,20 @@ export function isDrawGesture(landmarks: NormalizedLandmark[]): boolean {
     dist(wrist, ringTip) < dist(wrist, ringPip) &&
     dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
 
+  const distanceMultiplier = isDrawModeActive ? 1.2 : 1;
+  const loosenedRingGap = isDrawModeActive ? 0.05 : 0.06;
+
   const fingersClose =
-    thumbIndexDistance < 0.03 &&
-    thumbMiddleDistance < 0.035 &&
-    indexMiddleDistance < 0.025 &&
-    indexRingDistance > 0.06;
+    thumbIndexDistance < 0.03 * distanceMultiplier &&
+    thumbMiddleDistance < 0.035 * distanceMultiplier &&
+    indexMiddleDistance < 0.025 * distanceMultiplier &&
+    indexRingDistance > loosenedRingGap;
 
   console.log(`thumb-index distance: ${thumbIndexDistance.toFixed(4)}`);
   console.log(`thumb-middle distance: ${thumbMiddleDistance.toFixed(4)}`);
   console.log(`index-middle distance: ${indexMiddleDistance.toFixed(4)}`);
   console.log(`index-ring distance: ${indexRingDistance.toFixed(4)}`);
-  console.log(`Draw gesture check: fingersClose=${fingersClose}, areOthersCurled=${areOthersCurled}`);
+  console.log(`Draw gesture check: fingersClose=${fingersClose}, areOthersCurled=${areOthersCurled}, drawMode=${isDrawModeActive}`);
 
   return fingersClose && areOthersCurled;
 }

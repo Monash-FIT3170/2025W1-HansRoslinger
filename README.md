@@ -17,13 +17,27 @@
 | Bhanu Wijekoon     | bwij0005@student.moanash.edu      | bhanu_wij@hotmail.com                 |
 | Agamjot Singh      | asin0114@student.monash.edu       | contactagam004@gmail.com              |
 
-## How to run HansRoslinger
+## What is HansRoslinger?
+HansRoslinger is a modern gesture-based presentation application designed to replace the boring, old powerpoint slide with an engaging presentation experience. Instead of clicking from one slide to another, HansRoslinger allows presenters to interact with their data in real-time, allowing for a more engaging audience experience.
+
+## How does HansRoslinger work?
+HansRoslinger is a Meteor.js application with a NoSQL MongoDB database. React is used as a frontend framework and Meteor.js is used to handle middleware and backend capabilities, providing pub/sub capabilities and MongoDB integration.
+
+HansRoslinger uses Mediapipe API (https://ai.google.dev/edge/mediapipe/solutions/guide), specifically its gesture-recognition technology to detect and classify gestures through a video feed, allowing this software to reflect changes to a presentation/dataset based on these gestures. This processing is client-side, meaning that frontend work comprises most of this application with limited backend services to handle requirements such as authentication and database management.
+
+## What is this repository?
+This is a mono-repository containing both the frontend and backend for the HansRoslinger application. This includes the development local MongoDB server which is managed by Meteor.js. The production MongoDB database is hosted on MongoDB Atlas. 
+
+## How to run HansRoslinger for development
 1. Ensure you are in the right directory:
 `cd .\HansRoslinger` (assuming you are at the root directory of the repository)
 2. Start the code:
 `meteor`
 
 This will start a server at `http://localhost:3000`
+
+## Deployment
+Our application is deployed using Google Cloud Services in the form of a Cloud Run using request based billing. For more information, see `Documentation/Handover Document.md`.
 
 ## Links to external infrastructure
 

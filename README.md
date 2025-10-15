@@ -1,17 +1,22 @@
 # 2025W1-HansRoslinger
 
-## Table of Contents
+# Table of Contents
+### Overview
 - [Team Members](#team-members)
 - [Overview](#what-is-hansroslinger)
 - [How It Works](#how-does-hansroslinger-work)
 - [What is this repository](#what-is-this-repository)
 - [Repository Structure](#repository-structure)
+- [Tech Stack](#tech-stack)
+
+### Development
 - [Getting Started](#how-to-run-hansroslinger-for-development)
 - [Deployment](#deployment)
 - [Links to external infrastructure](#links-to-external-infrastructure)
 - [Handover Document](#handover-document)
 - [License](#license)
 
+# Overview
 ## Team Members
 
 | Name               | Student Email                     | Personal Email                        |
@@ -57,6 +62,20 @@ This is a mono-repository containing both the frontend and backend for the HansR
 |    └── package-lock.json   # Application dependency management
 ├── terraform/              # Terraform for Infrastructure-As-Code
 └── Dockerfile              # Dockerfile to compose docker image for deployment
+
+## Tech Stack
+**Frontend:** React, Mediapipe  
+**Backend:** Meteor.js (Node.js)  
+**Database:** MongoDB (Local + Atlas)  
+**Hosting:** Google Cloud Run  
+**Other Tools:** Docker (optional), GitHub Actions (if used for CI/CD)
+
+# Development
+## Prerequisites
+- Node.js (v18 or higher) - (`https://nodejs.org/en/download`)
+- Meteor.js (latest) - (`https://v2-docs.meteor.com/install.html`)
+- MongoDB Shell (MongoSh) - (`https://www.mongodb.com/docs/mongodb-shell/install/`)
+- A webcam (for gesture recognition)
 
 ## How to run HansRoslinger for development
 1. Ensure you are in the right directory:

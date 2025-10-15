@@ -1,6 +1,18 @@
 # 2025W1-HansRoslinger
 
-## Members
+## Table of Contents
+- [Team Members](#team-members)
+- [Overview](#what-is-hansroslinger)
+- [How It Works](#how-does-hansroslinger-work)
+- [What is this repository](#what-is-this-repository)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#how-to-run-hansroslinger-for-development)
+- [Deployment](#deployment)
+- [Links to external infrastructure](#links-to-external-infrastructure)
+- [Handover Document](#handover-document)
+- [License](#license)
+
+## Team Members
 
 | Name               | Student Email                     | Personal Email                        |
 |--------------------|-----------------------------------|---------------------------------------|
@@ -27,6 +39,24 @@ HansRoslinger uses Mediapipe API (https://ai.google.dev/edge/mediapipe/solutions
 
 ## What is this repository?
 This is a mono-repository containing both the frontend and backend for the HansRoslinger application. This includes the development local MongoDB server which is managed by Meteor.js. The production MongoDB database is hosted on MongoDB Atlas. 
+
+## Repository Structure
+2025W1-HansRoslinger/
+├── .github/                 # Github configuration (Github Actions - CI/CD Pipelines)
+├── .vscode/                 # VSCode configuration
+├── Documentation/           # Documentation for HansRoslinger
+├── HansRoslinger/          # Main application code
+|    ├─ .meteor/            # Meteor config
+|    ├─ client/             # Client side code
+|    ├─ GCP                 # Google Cloud Provider configuration
+|    ├─ imports             # Imported content
+|    ├─ public              # Public assets
+|    ├─ server              # Server side code
+|    ├─ tests               # Application tests - Unit tests and Integration tests
+|    ├─ package.json        # Application dependency management
+|    └── package-lock.json   # Application dependency management
+├── terraform/              # Terraform for Infrastructure-As-Code
+└── Dockerfile              # Dockerfile to compose docker image for deployment
 
 ## How to run HansRoslinger for development
 1. Ensure you are in the right directory:
@@ -55,3 +85,6 @@ Please refer to the following documents if you would like to view it
 - [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.pdf)
 
 Please note that the markdown document may not render the images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with images.
+
+## License
+This repository is licensed under the MIT License. See `LICENSE`.

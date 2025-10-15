@@ -35,28 +35,14 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 // Create asset and upload images
-export async function createAssetWithImages({
-  name,
-  icon,
-  files,
-}: {
-  name: string;
-  icon: string;
-  files: File[];
-}) {
+export async function createAssetWithImages({ name, icon, files }: { name: string; icon: string; files: File[] }) {
   const userId = getUserIDCookie();
   if (!userId) {
     throw new Error("User ID is required to create an asset.");
   }
   // Insert asset with userId
   const assetId = await AssetCollection.insertAsync({ name, icon, userId });
-  console.log(
-    "Created asset with id:",
-    assetId,
-    "Uploading",
-    files.length,
-    "images",
-  );
+  console.log("Created asset with id:", assetId, "Uploading", files.length, "images");
   // Wait briefly to ensure asset is available in DB (Meteor eventual consistency)
   await new Promise((res) => setTimeout(res, 300));
 

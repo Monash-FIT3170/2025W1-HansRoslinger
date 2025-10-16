@@ -15,7 +15,7 @@ HansRoslinger is a gestured-based presentation tool that allows individuals to c
 The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
 </p>
 
 HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the Cloud Run URL

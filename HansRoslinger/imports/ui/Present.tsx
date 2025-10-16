@@ -229,13 +229,19 @@ export const Present: React.FC = () => {
     loadSettings().then(setGestureSettings);
   }, []);
 
-  if (loadStateFlag) {
-    loadState()
-    // Apply State
-  } else {
-    // Collect state
-    saveState(state)
-  }
+  useEffect(() => {
+    const onUndo = () => {
+      var state = loadState()
+      // Apply state
+      console.log("Loading state")
+    };
+    window.addEventListener("undo", onUndo);
+    return () => window.removeEventListener("undo", onUndo);
+  }, []);
+
+  setInterval(saveState, 1000, {
+    
+  })
   
 
   

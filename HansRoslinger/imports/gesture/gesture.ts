@@ -22,6 +22,7 @@ import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 import { click } from "./Click";
+import { Undo } from "@mui/icons-material";
 
 enum GestureType {
   CLOSED_FIST,
@@ -47,6 +48,7 @@ enum FunctionType {
   SWITCH_CHART,
   SWITCH_DATA,
   CLICK,
+  UNDO
 }
 
 export const IDtoEnum: Record<string, GestureType> = {
@@ -74,6 +76,7 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
   [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
   [FunctionType.CLICK]: click as GestureHandlerFn,
+  [FunctionType.UNDO]: Undo as GestureHandlerFn
 };
 
 enum Handedness {
@@ -122,7 +125,7 @@ const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
   [GestureType.POINTING_UP]: FunctionType.SELECT,
-  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.THUMB_DOWN]: FunctionType.UNDO,
   [GestureType.THUMB_UP]: FunctionType.UNUSED,
   [GestureType.VICTORY]: FunctionType.UNUSED,
   [GestureType.PINCH]: FunctionType.CLICK,

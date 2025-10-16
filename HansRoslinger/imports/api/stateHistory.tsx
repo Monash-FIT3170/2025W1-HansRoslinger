@@ -27,6 +27,7 @@ function loadState() {
 }
 
 function saveState(state: any) {
+    console.log("Saving state")
     if(loadIndex > 0 && Date.now() - lastLoadTime > loadLimit) {
         // Reset
         saveIndex = 0

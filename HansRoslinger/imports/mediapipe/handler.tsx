@@ -24,7 +24,7 @@ if (typeof window !== "undefined") {
   window.addEventListener("chart:togglezoom", () => {
     isZoomEnabled = !isZoomEnabled;
   });
-  
+
   window.addEventListener("chart:toggledraw", () => {
     isDrawEnabled = !isDrawEnabled;
   });

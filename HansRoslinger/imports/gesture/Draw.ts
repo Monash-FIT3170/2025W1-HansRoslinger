@@ -4,7 +4,7 @@
  * This file implements drawing functionality that allows users to draw red lines
  * on the screen using hand gestures. The drawing mode is activated by the DRAW gesture
  * (thumb, pointer, and middle finger together) and deactivated by a closed fist.
- * 
+ *
  * The drawing functionality:
  * - Creates a canvas overlay on top of the current content
  * - Tracks finger position and draws red lines
@@ -86,33 +86,33 @@ function initializeDrawCanvas(): void {
 
   if (drawCanvas) return; // Already initialized
 
-  drawCanvas = document.createElement('canvas');
-  drawCanvas.id = 'gesture-draw-canvas';
-  drawCanvas.style.position = 'fixed';
-  drawCanvas.style.top = '0';
-  drawCanvas.style.left = '0';
-  drawCanvas.style.width = '100vw';
-  drawCanvas.style.height = '100vh';
-  drawCanvas.style.pointerEvents = 'none'; // Allow clicks to pass through
-  drawCanvas.style.zIndex = '9999'; // High z-index to appear on top
-  drawCanvas.style.backgroundColor = 'transparent';
-  
+  drawCanvas = document.createElement("canvas");
+  drawCanvas.id = "gesture-draw-canvas";
+  drawCanvas.style.position = "fixed";
+  drawCanvas.style.top = "0";
+  drawCanvas.style.left = "0";
+  drawCanvas.style.width = "100vw";
+  drawCanvas.style.height = "100vh";
+  drawCanvas.style.pointerEvents = "none"; // Allow clicks to pass through
+  drawCanvas.style.zIndex = "9999"; // High z-index to appear on top
+  drawCanvas.style.backgroundColor = "transparent";
+
   // Set canvas size to match viewport
   drawCanvas.width = window.innerWidth;
   drawCanvas.height = window.innerHeight;
-  
+
   document.body.appendChild(drawCanvas);
-  
-  drawContext = drawCanvas.getContext('2d');
+
+  drawContext = drawCanvas.getContext("2d");
   if (drawContext) {
-    drawContext.strokeStyle = '#ff0000'; // Red color
+    drawContext.strokeStyle = "#ff0000"; // Red color
     drawContext.lineWidth = 3;
-    drawContext.lineCap = 'round';
-    drawContext.lineJoin = 'round';
+    drawContext.lineCap = "round";
+    drawContext.lineJoin = "round";
   }
 
   // Handle window resize
-  window.addEventListener('resize', resizeDrawCanvas);
+  window.addEventListener("resize", resizeDrawCanvas);
 }
 
 /**
@@ -120,14 +120,14 @@ function initializeDrawCanvas(): void {
  */
 function resizeDrawCanvas(): void {
   if (!drawCanvas || !drawContext) return;
-  
+
   drawCanvas.width = window.innerWidth;
   drawCanvas.height = window.innerHeight;
-  
-  drawContext.strokeStyle = '#ff0000';
+
+  drawContext.strokeStyle = "#ff0000";
   drawContext.lineWidth = 3;
-  drawContext.lineCap = 'round';
-  drawContext.lineJoin = 'round';
+  drawContext.lineCap = "round";
+  drawContext.lineJoin = "round";
 }
 
 /**
@@ -139,7 +139,7 @@ function removeDrawCanvas(): void {
   }
   drawCanvas = null;
   drawContext = null;
-  window.removeEventListener('resize', resizeDrawCanvas);
+  window.removeEventListener("resize", resizeDrawCanvas);
 }
 
 /**
@@ -154,18 +154,18 @@ function createEraserIndicator(): void {
 
   if (eraserIndicator) return; // Already exists
 
-  eraserIndicator = document.createElement('div');
-  eraserIndicator.id = 'gesture-eraser-indicator';
-  eraserIndicator.style.position = 'fixed';
+  eraserIndicator = document.createElement("div");
+  eraserIndicator.id = "gesture-eraser-indicator";
+  eraserIndicator.style.position = "fixed";
   eraserIndicator.style.width = `${ERASER_RADIUS * 2}px`;
   eraserIndicator.style.height = `${ERASER_RADIUS * 2}px`;
-  eraserIndicator.style.borderRadius = '50%';
-  eraserIndicator.style.backgroundColor = 'rgba(0, 123, 255, 0.3)'; // Transparent blue
-  eraserIndicator.style.border = '2px solid rgba(0, 123, 255, 0.6)';
-  eraserIndicator.style.pointerEvents = 'none';
-  eraserIndicator.style.zIndex = '10000'; // Above everything
-  eraserIndicator.style.display = 'none'; // Hidden by default
-  eraserIndicator.style.transform = 'translate(-50%, -50%)'; // Center on position
+  eraserIndicator.style.borderRadius = "50%";
+  eraserIndicator.style.backgroundColor = "rgba(0, 123, 255, 0.3)"; // Transparent blue
+  eraserIndicator.style.border = "2px solid rgba(0, 123, 255, 0.6)";
+  eraserIndicator.style.pointerEvents = "none";
+  eraserIndicator.style.zIndex = "10000"; // Above everything
+  eraserIndicator.style.display = "none"; // Hidden by default
+  eraserIndicator.style.transform = "translate(-50%, -50%)"; // Center on position
 
   document.body.appendChild(eraserIndicator);
 }
@@ -181,7 +181,7 @@ function updateEraserIndicator(position: { x: number; y: number }): void {
   if (eraserIndicator) {
     eraserIndicator.style.left = `${position.x}px`;
     eraserIndicator.style.top = `${position.y}px`;
-    eraserIndicator.style.display = 'block';
+    eraserIndicator.style.display = "block";
   }
 }
 
@@ -190,7 +190,7 @@ function updateEraserIndicator(position: { x: number; y: number }): void {
  */
 function hideEraserIndicator(): void {
   if (eraserIndicator) {
-    eraserIndicator.style.display = 'none';
+    eraserIndicator.style.display = "none";
   }
 }
 
@@ -217,24 +217,24 @@ function canSwitchGesture(newGestureType: GestureType): boolean {
     lastGestureSwitchTime = currentTime;
     return true;
   }
-  
+
   // If it's the same gesture type, no delay needed
   if (lastGestureType === newGestureType) {
     return true;
   }
-  
+
   // If it's a different gesture, check if enough time has passed
   if (lastGestureType !== null && currentTime - lastGestureSwitchTime < GESTURE_SWITCH_DELAY_MS) {
     return false;
   }
-  
+
   // If we're switching away from DRAW gesture, reset drawing position to prevent line connections
   if (previousGestureType === GestureType.DRAW) {
     lastDrawPosition = null;
     resetSmoothing();
     console.log("Switched away from DRAW gesture - resetting draw position to prevent line connection");
   }
-  
+
   // Update the gesture tracking
   lastGestureType = newGestureType;
   lastGestureSwitchTime = currentTime;
@@ -246,7 +246,7 @@ function canSwitchGesture(newGestureType: GestureType): boolean {
  */
 function checkOpenPalmDisable(gestureType: GestureType): boolean {
   const currentTime = Date.now();
-  
+
   if (gestureType === GestureType.OPEN_PALM) {
     if (openPalmStartTime === 0) {
       // First time detecting open palm, start the timer
@@ -268,11 +268,11 @@ function getDrawPosition(latestGesture: Gesture): { x: number; y: number } | nul
     if (!landmarks || landmarks.length < 9) {
       return null;
     }
-    
+
     // Use index finger tip (landmark 8) for drawing position
     const indexTip = landmarks[8];
     const screenPos = gestureToScreenPosition(indexTip.x, indexTip.y);
-    
+
     return { x: screenPos.screenX, y: screenPos.screenY };
   } catch {
     return null;
@@ -284,7 +284,7 @@ function getDrawPosition(latestGesture: Gesture): { x: number; y: number } | nul
  */
 function drawLine(currentPosition: { x: number; y: number }): void {
   if (!drawContext || !lastDrawPosition) return;
-  
+
   const deltaX = currentPosition.x - lastDrawPosition.x;
   const deltaY = currentPosition.y - lastDrawPosition.y;
   if (deltaX * deltaX + deltaY * deltaY < MIN_DRAW_DISTANCE_SQUARED) {
@@ -321,9 +321,9 @@ function getSmoothedPosition(position: { x: number; y: number }): { x: number; y
  */
 function eraseArea(position: { x: number; y: number }, radius: number = ERASER_RADIUS): void {
   if (!drawContext) return;
-  
+
   drawContext.save();
-  drawContext.globalCompositeOperation = 'destination-out';
+  drawContext.globalCompositeOperation = "destination-out";
   drawContext.beginPath();
   drawContext.arc(position.x, position.y, radius, 0, Math.PI * 2);
   drawContext.fill();
@@ -381,7 +381,7 @@ export const draw = (_initial: Gesture, latestGesture: Gesture): void => {
  */
 export function processDraw(_currentDrawPosition: { x: number; y: number }, latestGesture: Gesture): void {
   if (!isDrawEnabled || !drawContext) return;
-  
+
   // Check if we're still on the presenting page
   if (!isOnPresentingPage()) {
     cleanupWhenNotPresenting();
@@ -389,8 +389,7 @@ export function processDraw(_currentDrawPosition: { x: number; y: number }, late
   }
 
   const currentTime = Date.now();
-  const normalizedGestureType =
-    latestGesture.gestureID === GestureType.UNIDENTIFIED ? GestureType.DRAW : latestGesture.gestureID;
+  const normalizedGestureType = latestGesture.gestureID === GestureType.UNIDENTIFIED ? GestureType.DRAW : latestGesture.gestureID;
 
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(normalizedGestureType)) {
@@ -446,28 +445,28 @@ export function processDraw(_currentDrawPosition: { x: number; y: number }, late
  */
 export function processErase(latestGesture: Gesture): void {
   if (!isDrawEnabled || !drawContext) return;
-  
+
   // Check if we're still on the presenting page
   if (!isOnPresentingPage()) {
     cleanupWhenNotPresenting();
     return;
   }
-  
+
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(latestGesture.gestureID)) {
     // Still in delay period for gesture switching
     return;
   }
-  
+
   const pointerPosition = getDrawPosition(latestGesture);
   if (!pointerPosition) {
     hideEraserIndicator();
     return;
   }
-  
+
   // Show the eraser indicator centred on the pointer finger tip
   updateEraserIndicator(pointerPosition);
-  
+
   // Erase the area around the pointer finger tip
   eraseArea(pointerPosition, ERASER_RADIUS);
 }
@@ -477,19 +476,19 @@ export function processErase(latestGesture: Gesture): void {
  */
 export function showEraserPreview(latestGesture: Gesture): void {
   if (!isDrawEnabled) return;
-  
+
   // Check if we're still on the presenting page
   if (!isOnPresentingPage()) {
     cleanupWhenNotPresenting();
     return;
   }
-  
+
   // Check if we can switch to this gesture (with delay)
   if (!canSwitchGesture(latestGesture.gestureID)) {
     // Still in delay period, don't change eraser preview
     return;
   }
-  
+
   // Only show eraser preview if the gesture looks like it could be a fist
   // Check if most fingers are curled (indicating a potential fist)
   const landmarks = latestGesture.singleGestureLandmarks;
@@ -566,7 +565,7 @@ if (typeof window !== "undefined") {
   // Listen for page navigation to clean up drawing canvas
   // This handles both browser navigation and React Router navigation
   let currentPath = window.location.pathname;
-  
+
   // Use MutationObserver to detect URL changes (works with React Router)
   const observer = new MutationObserver(() => {
     if (window.location.pathname !== currentPath) {
@@ -575,16 +574,16 @@ if (typeof window !== "undefined") {
       cleanupWhenNotPresenting();
     }
   });
-  
+
   // Start observing URL changes
   observer.observe(document, { subtree: true, childList: true });
-  
+
   // Also listen for browser navigation events
   window.addEventListener("popstate", () => {
     console.log("Browser navigation detected");
     cleanupWhenNotPresenting();
   });
-  
+
   // Listen for page visibility changes (tab switches)
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {

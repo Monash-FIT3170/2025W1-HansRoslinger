@@ -140,8 +140,7 @@ export function isDrawGesture(landmarks: NormalizedLandmark[], isDrawModeActive:
   const ringTip = landmarks[16];
   const wrist = landmarks[0];
 
-  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) =>
-    Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
   const thumbIndexDistance = dist(thumbTip, indexTip);
   const thumbMiddleDistance = dist(thumbTip, middleTip);
@@ -151,18 +150,13 @@ export function isDrawGesture(landmarks: NormalizedLandmark[], isDrawModeActive:
   const ringPip = landmarks[14];
   const pinkyTip = landmarks[20];
   const pinkyPip = landmarks[18];
-  const areOthersCurled =
-    dist(wrist, ringTip) < dist(wrist, ringPip) &&
-    dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
+  const areOthersCurled = dist(wrist, ringTip) < dist(wrist, ringPip) && dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
 
   const distanceMultiplier = isDrawModeActive ? 1.2 : 1;
   const loosenedRingGap = isDrawModeActive ? 0.05 : 0.06;
 
   const fingersClose =
-    thumbIndexDistance < 0.03 * distanceMultiplier &&
-    thumbMiddleDistance < 0.035 * distanceMultiplier &&
-    indexMiddleDistance < 0.025 * distanceMultiplier &&
-    indexRingDistance > loosenedRingGap;
+    thumbIndexDistance < 0.03 * distanceMultiplier && thumbMiddleDistance < 0.035 * distanceMultiplier && indexMiddleDistance < 0.025 * distanceMultiplier && indexRingDistance > loosenedRingGap;
 
   console.log(`thumb-index distance: ${thumbIndexDistance.toFixed(4)}`);
   console.log(`thumb-middle distance: ${thumbMiddleDistance.toFixed(4)}`);
@@ -182,17 +176,13 @@ export function isPinchSign(landmarks: NormalizedLandmark[]) {
   const middlePip = landmarks[10];
   const wrist = landmarks[0];
 
-  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) =>
-    Math.hypot(p1.x - p2.x, p1.y - p2.y);
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
   const thumbIndexDistance = dist(thumbTip, indexTip);
   const thumbMiddleDistance = dist(thumbTip, middleTip);
   const isMiddleRelaxed = dist(wrist, middleTip) < dist(wrist, middlePip);
 
-  const isPinch =
-    thumbIndexDistance < 0.03 &&
-    thumbMiddleDistance > 0.045 &&
-    isMiddleRelaxed;
+  const isPinch = thumbIndexDistance < 0.03 && thumbMiddleDistance > 0.045 && isMiddleRelaxed;
 
   console.log(`thumb-index distance: ${thumbIndexDistance.toFixed(4)}`);
   console.log(`thumb-middle distance: ${thumbMiddleDistance.toFixed(4)}`);

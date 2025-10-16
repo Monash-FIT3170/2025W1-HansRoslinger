@@ -101,7 +101,7 @@ const defaultMapping: Record<GestureType, FunctionType> = {
 
 const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture, mapping: Record<GestureType, FunctionType>): void => {
   const label = INPUT;
-  
+
   if (isZoomEnabled) {
     console.log(mapping[label], FunctionType.FILTER);
     // if gesture is closed fist, we want to end zoom
@@ -122,9 +122,7 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
     } else if (mapping[label] === FunctionType.CLEAR) {
       // Open palm cancels draw mode
       draw(initialGesture, latestGesture);
-    } else if (
-      latestGesture.gestureID === GestureType.DRAW
-    ) {
+    } else if (latestGesture.gestureID === GestureType.DRAW) {
       // Continue drawing for confirmed or briefly unidentified frames
       processDraw(drawStartPosition!, latestGesture);
     } else {

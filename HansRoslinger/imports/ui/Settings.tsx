@@ -59,7 +59,17 @@ const Gestures = [
   GestureType.DRAW,
 ];
 
-const Functions = [FunctionType.UNUSED, FunctionType.SELECT, FunctionType.FILTER, FunctionType.CLEAR, FunctionType.ZOOM, FunctionType.CLICK, FunctionType.SWITCH_CHART, FunctionType.SWITCH_DATA, FunctionType.DRAW];
+const Functions = [
+  FunctionType.UNUSED,
+  FunctionType.SELECT,
+  FunctionType.FILTER,
+  FunctionType.CLEAR,
+  FunctionType.ZOOM,
+  FunctionType.CLICK,
+  FunctionType.SWITCH_CHART,
+  FunctionType.SWITCH_DATA,
+  FunctionType.DRAW,
+];
 
 const Settings: React.FC = () => {
   const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);

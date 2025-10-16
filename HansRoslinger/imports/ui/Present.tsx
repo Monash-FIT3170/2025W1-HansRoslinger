@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
-import { Header } from "./Header";
+import { Header, toolbarButtonHeight, toolbarButtonWidth } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
 import { useDatasetNavigation, usePresentationDatasets } from "./Input/Data";
 import { Title } from "./Charts/Title";
@@ -21,6 +21,16 @@ import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 
+const functionIconMapping: Record<FunctionType, { icon: string; tooltip: string }> = {
+  [FunctionType.SELECT]: { icon: "/icons/selection.png", tooltip: "Select: Point up" },
+  [FunctionType.FILTER]: { icon: "/icons/filter.png", tooltip: "Filter: Close fist" },
+  [FunctionType.CLEAR]: { icon: "/icons/filter-clear.png", tooltip: "Clear: Open palm" },
+  [FunctionType.ZOOM]: { icon: "/icons/zoom-in.png", tooltip: "Zoom: Two-hand pinch" },
+  [FunctionType.CLICK]: { icon: "/icons/click.png", tooltip: "Click: Pinch" },
+  [FunctionType.SWITCH_CHART]: { icon: "/icons/change-type.png", tooltip: "Switch: Point left or right (2 fingers)" },
+  [FunctionType.UNUSED]: { icon: "", tooltip: "" },
+};
+
 export const Present: React.FC = () => {
   useAuthGuard();
 
@@ -30,6 +40,8 @@ export const Present: React.FC = () => {
   const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [showAssets, setShowAssets] = useState(false);
+  const [activeGesture, setActiveGesture] = useState<GestureType | null>(null);
+  const [showHints, setShowHints] = useState(false);
 
   // State for chart features
   const [showLineChart, setShowLineChart] = useState(false);
@@ -45,8 +57,7 @@ export const Present: React.FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
   const assets = useTracker(() => {
     Meteor.subscribe("assets");
-    if (!userId)
-      return [] as Array<{ _id: string; name: string; icon?: string }>;
+    if (!userId) return [] as Array<{ _id: string; name: string; icon?: string }>;
     return AssetCollection.find({ userId }, { sort: { name: 1 } }).fetch();
   }, [userId]);
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
@@ -62,10 +73,7 @@ export const Present: React.FC = () => {
         assetId: string;
         order?: number;
       }>;
-    return ImageCollection.find(
-      { assetId: currentAssetId },
-      { sort: { order: 1, fileName: 1 } },
-    ).fetch();
+    return ImageCollection.find({ assetId: currentAssetId }, { sort: { order: 1, fileName: 1 } }).fetch();
   }, [currentAssetId]);
   const currentAssetImage = assetImages[currentImageIndex] ?? null;
   // Preload current, next, and previous images for smooth navigation
@@ -74,9 +82,7 @@ export const Present: React.FC = () => {
       ? ([
           assetImages[currentImageIndex]?.url,
           assetImages[(currentImageIndex + 1) % assetImages.length]?.url,
-          assetImages[
-            (currentImageIndex - 1 + assetImages.length) % assetImages.length
-          ]?.url,
+          assetImages[(currentImageIndex - 1 + assetImages.length) % assetImages.length]?.url,
         ].filter(Boolean) as string[])
       : [],
   );
@@ -86,6 +92,22 @@ export const Present: React.FC = () => {
   useEffect(() => {
     grayscaleRef.current = grayscale;
   }, [grayscale]);
+
+  useEffect(() => {
+    let hintTimeout: NodeJS.Timeout;
+
+    // When gesture detection is on and no gesture is active, show all hints after a delay
+    if (gestureDetectionStatus && !activeGesture) {
+      hintTimeout = setTimeout(() => {
+        setShowHints(true);
+      }, 1500); // 1.5-second delay
+    } else {
+      // Hide hints immediately if gestures are off or one is active
+      setShowHints(false);
+    }
+
+    return () => clearTimeout(hintTimeout);
+  }, [activeGesture, gestureDetectionStatus]);
 
   const determineGrayscale = () => grayscaleRef.current;
 
@@ -108,15 +130,12 @@ export const Present: React.FC = () => {
     };
 
     window.addEventListener("chart:switch", handleSwitchChartOrImage);
-    return () =>
-      window.removeEventListener("chart:switch", handleSwitchChartOrImage);
+    return () => window.removeEventListener("chart:switch", handleSwitchChartOrImage);
   }, [showAssets, assetImages.length, assets.length]);
 
   // Initialize chart type
   useEffect(() => {
-    setShowLineChart(
-      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
-    );
+    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
   }, [currentDataset]);
 
   // Load the selected presentation to pick initial asset
@@ -144,9 +163,7 @@ export const Present: React.FC = () => {
   // When assets list changes and there's a selectedAssetId, sync index
   useEffect(() => {
     if (!selectedAssetId) return;
-    const idx = assets.findIndex(
-      (a: { _id: string }) => a._id === selectedAssetId,
-    );
+    const idx = assets.findIndex((a: { _id: string }) => a._id === selectedAssetId);
     if (idx >= 0) setCurrentAssetIndex(idx);
   }, [selectedAssetId, assets.length]);
 
@@ -163,9 +180,7 @@ export const Present: React.FC = () => {
     const onNextData = () => {
       if (!showAssets) return;
       if (assetImages.length <= 1) return; // nothing to go back to
-      setCurrentImageIndex(
-        (prev) => (prev - 1 + assetImages.length) % assetImages.length,
-      );
+      setCurrentImageIndex((prev) => (prev - 1 + assetImages.length) % assetImages.length);
     };
     window.addEventListener("chart:next-data", onNextData);
     return () => window.removeEventListener("chart:next-data", onNextData);
@@ -179,38 +194,40 @@ export const Present: React.FC = () => {
   const toolbarStyles = showHeader
     ? {
         position: "absolute" as const,
-        height: 520,
+        height: toolbarButtonHeight * 6 + 150,
         right: 16,
         bottom: 16,
-        width: 64,
+        width: toolbarButtonWidth + 24,
         backgroundColor: "#1f2937",
-        borderRadius: 16,
+        borderRadius: 5,
         boxShadow: 4,
         display: "flex",
         flexDirection: "column" as const,
         alignItems: "center",
         justifyContent: "flex-end",
         paddingY: 2,
-        gap: 6,
+        gap: 3,
         zIndex: 50,
+        opacity: 0.85,
       }
     : {
         position: "absolute" as const,
         bottom: 16,
         right: 16,
-        width: 64,
-        height: 64,
+        width: toolbarButtonWidth + 24,
+        height: toolbarButtonHeight + 24,
         backgroundColor: "#111827",
-        borderRadius: 12,
+        borderRadius: 5,
         boxShadow: 4,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 50,
+        opacity: 0.85,
       };
 
   const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
-    var settings = defaultMapping;
+    let settings = defaultMapping;
     const userID = getUserIDCookie();
     if (userID) {
       const user = await getUserById(userID);
@@ -222,15 +239,110 @@ export const Present: React.FC = () => {
     return settings;
   };
 
-  const [gestureSettings, setGestureSettings] =
-    useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [gestureSettings, setGestureSettings] = useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     loadSettings().then(setGestureSettings);
   }, []);
 
+  const renderedFunctions = new Set<FunctionType>();
+
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">
+      <Box
+        sx={{
+          position: "absolute",
+          top: 20,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "15px",
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          padding: "10px",
+          borderRadius: "10px",
+          zIndex: 1000,
+          opacity: gestureDetectionStatus ? 1 : 0, // Hide if gestures are disabled
+          transition: "opacity 0.3s ease-in-out",
+        }}
+      >
+        {activeGesture ? (
+          // Show single active gesture hint
+          (() => {
+            const functionType = gestureSettings[activeGesture];
+            const hint = functionIconMapping[functionType];
+            if (!hint || !hint.icon) return null;
+            return (
+              <Box component="div" sx={{ position: "relative", "&:hover .tooltip": { visibility: "visible", opacity: 1 } }}>
+                <img src={hint.icon} alt={hint.tooltip} style={{ width: 40, height: 40 }} />
+                <Box
+                  className="tooltip"
+                  sx={{
+                    visibility: "hidden",
+                    opacity: 0,
+                    transition: "opacity 0.3s",
+                    width: 160,
+                    backgroundColor: "#555",
+                    color: "#fff",
+                    textAlign: "center",
+                    borderRadius: "6px",
+                    padding: "5px 0",
+                    position: "absolute",
+                    zIndex: 1,
+                    top: "125%",
+                    left: "50%",
+                    marginLeft: "-80px",
+                  }}
+                >
+                  {hint.tooltip}
+                </Box>
+              </Box>
+            );
+          })()
+        ) : (
+          // Show all available hints (with fade-in effect)
+          <Box sx={{ display: "flex", gap: "15px", opacity: showHints ? 1 : 0, transition: "opacity 0.5s" }}>
+            {Object.values(gestureSettings)
+              .filter((functionType) => {
+                if (functionType === FunctionType.UNUSED || renderedFunctions.has(functionType)) {
+                  return false;
+                }
+                renderedFunctions.add(functionType);
+                return true;
+              })
+              .map((functionType) => {
+                const hint = functionIconMapping[functionType];
+                if (!hint || !hint.icon) return null;
+                return (
+                  <Box key={functionType} component="div" sx={{ position: "relative", "&:hover .tooltip": { visibility: "visible", opacity: 1 } }}>
+                    <img src={hint.icon} alt={hint.tooltip} style={{ width: 40, height: 40, cursor: "pointer" }} />
+                    <Box
+                      className="tooltip"
+                      sx={{
+                        visibility: "hidden",
+                        opacity: 0,
+                        transition: "opacity 0.3s",
+                        width: 160,
+                        backgroundColor: "#555",
+                        color: "#fff",
+                        textAlign: "center",
+                        borderRadius: "6px",
+                        padding: "5px 0",
+                        position: "absolute",
+                        zIndex: 1,
+                        top: "125%",
+                        left: "50%",
+                        marginLeft: "-80px",
+                      }}
+                    >
+                      {hint.tooltip}
+                    </Box>
+                  </Box>
+                );
+              })}
+          </Box>
+        )}
+      </Box>
+
       {/* Fullscreen video */}
       <Box
         position="absolute"
@@ -247,11 +359,7 @@ export const Present: React.FC = () => {
           pointerEvents: backgroundRemoval ? "none" : "auto",
         }}
       >
-        <WebcamComponent
-          gestureDetectionStatus={gestureDetectionStatus}
-          grayscale={grayscale}
-          settings={gestureSettings}
-        />
+        <WebcamComponent gestureDetectionStatus={gestureDetectionStatus} grayscale={grayscale} settings={gestureSettings} onGestureChange={setActiveGesture} />
       </Box>
 
       <Box
@@ -267,6 +375,7 @@ export const Present: React.FC = () => {
         sx={{
           visibility: !backgroundRemoval ? "hidden" : "visible",
           pointerEvents: !backgroundRemoval ? "none" : "auto",
+          zIndex: backgroundRemoval ? 30 : undefined,
         }}
       >
         <ImageSegmentation grayscale={() => determineGrayscale()} />
@@ -291,34 +400,14 @@ export const Present: React.FC = () => {
 
       {/* Charts (hidden when showing assets) */}
       {!showAssets && (
-        <Box
-          position="absolute"
-          left="50%"
-          sx={{ transform: "translateX(-50%)" }}
-          bgcolor="transparent"
-          display="flex"
-          justifyContent="center"
-          style={{ bottom: "10%", width: "95%", height: "50%" }}
-        >
-          {showLineChart ? (
-            <D3LineChart dataset={currentDataset ?? defaultDataset} />
-          ) : (
-            <D3BarChart dataset={currentDataset ?? defaultDataset} />
-          )}
+        <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: "10%", width: "95%", height: "50%" }}>
+          {showLineChart ? <D3LineChart dataset={currentDataset ?? defaultDataset} /> : <D3BarChart dataset={currentDataset ?? defaultDataset} />}
         </Box>
       )}
 
       {/* Title area */}
       {!showAssets && (
-        <Box
-          position="absolute"
-          left="50%"
-          sx={{ transform: "translateX(-50%)" }}
-          bgcolor="transparent"
-          display="flex"
-          justifyContent="center"
-          style={{ bottom: 0, width: "95%", height: "10%" }}
-        >
+        <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: 0, width: "95%", height: "10%" }}>
           <Title dataset={currentDataset ?? defaultDataset} />
         </Box>
       )}
@@ -329,7 +418,7 @@ export const Present: React.FC = () => {
           position="absolute"
           left="50%"
           bottom={0}
-          sx={{ transform: "translateX(-50%)" }}
+          sx={{ transform: "translateX(-50%)", zIndex: backgroundRemoval ? 20 : 10 }}
           display="flex"
           flexDirection="column"
           alignItems="center"
@@ -401,13 +490,19 @@ export const Present: React.FC = () => {
 
         <Button
           variant="contained"
-          size="small"
-          sx={{
-            backgroundColor: "#4b5563",
-            "&:hover": { backgroundColor: "#6b7280" },
-            textTransform: "none",
-          }}
           onClick={() => setShowHeader((h) => !h)}
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: "cyan.400",
+            color: "black",
+            "&:hover": {
+              backgroundColor: "cyan.300",
+            },
+          }}
         >
           {showHeader ? "Hide" : "Show"}
         </Button>

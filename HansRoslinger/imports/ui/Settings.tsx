@@ -14,11 +14,7 @@ import { GestureType, FunctionType, defaultMapping } from "../gesture/gesture";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuthCookie } from "../cookies/cookies";
-import {
-  getUserById,
-  getUserSettings,
-  updateUserSettings,
-} from "../api/database/users/users";
+import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
 
 const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
@@ -33,6 +29,7 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.DOUBLE_PINCH]: "Double Pinch",
   [GestureType.TWO_FINGER_POINTING_LEFT]: "Two Fingers Pointing Left",
   [GestureType.TWO_FINGER_POINTING_RIGHT]: "Two Fingers Pointing Right",
+  [GestureType.DRAW]: "Draw",
 };
 
 const FunctionToLabel: Record<FunctionType, string> = {
@@ -44,6 +41,7 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SWITCH_CHART]: "Switch Chart",
   [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
+  [FunctionType.DRAW]: "Draw",
 };
 
 const Gestures = [
@@ -58,6 +56,7 @@ const Gestures = [
   // GestureType.DOUBLE_PINCH,
   GestureType.TWO_FINGER_POINTING_LEFT,
   GestureType.TWO_FINGER_POINTING_RIGHT,
+  GestureType.DRAW,
 ];
 
 const Functions = [
@@ -69,11 +68,11 @@ const Functions = [
   FunctionType.CLICK,
   FunctionType.SWITCH_CHART,
   FunctionType.SWITCH_DATA,
+  FunctionType.DRAW,
 ];
 
 const Settings: React.FC = () => {
-  const [state, setState] =
-    useState<Record<GestureType, FunctionType>>(defaultMapping);
+  const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);
   const [error] = useState<string | null>(null);
 
   useEffect(() => {
@@ -117,15 +116,7 @@ const Settings: React.FC = () => {
     const cookie = getAuthCookie();
     if (cookie != null && cookie.userId != null) {
       const res = await updateUserSettings(cookie.userId, state);
-      console.log(
-        "Saved:" +
-          "\n" +
-          res +
-          "\n" +
-          cookie.userId +
-          "\n" +
-          JSON.stringify(state),
-      );
+      console.log("Saved:" + "\n" + res + "\n" + cookie.userId + "\n" + JSON.stringify(state));
     } else {
       alert("Not logged in");
     }
@@ -141,8 +132,7 @@ const Settings: React.FC = () => {
       sx={{
         p: 2,
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       <Box sx={{ mb: 2 }}>
@@ -150,9 +140,7 @@ const Settings: React.FC = () => {
           Settings
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Here you can configure the mapping from a gesture to a specific action
-          within HansRoslinger. If you would like to disable a gesture, set it
-          to &quot;None&quot;.
+          Here you can configure the mapping from a gesture to a specific action within HansRoslinger. If you would like to disable a gesture, set it to &quot;None&quot;.
         </Typography>
       </Box>
 
@@ -170,20 +158,11 @@ const Settings: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Gestures.filter(
-              (gesture) => gesture !== GestureType.UNIDENTIFIED,
-            ).map((gesture) => (
+            {Gestures.filter((gesture) => gesture !== GestureType.UNIDENTIFIED).map((gesture) => (
               <TableRow key={gesture}>
                 <TableCell>{GestureToLabel[gesture]}</TableCell>
                 <TableCell>
-                  <Select
-                    fullWidth
-                    size="small"
-                    value={state[gesture] ?? FunctionType.UNUSED}
-                    onChange={(e) =>
-                      handleChange(gesture, e.target.value as FunctionType)
-                    }
-                  >
+                  <Select fullWidth size="small" value={state[gesture] ?? FunctionType.UNUSED} onChange={(e) => handleChange(gesture, e.target.value as FunctionType)}>
                     {Functions.map((option) => (
                       <MenuItem key={option} value={option}>
                         {FunctionToLabel[option]}
@@ -198,20 +177,11 @@ const Settings: React.FC = () => {
       </TableContainer>
 
       <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 5 }}>
-        <Button
-          variant="outlined"
-          onClick={handleReturn}
-          sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
-        >
+        <Button variant="outlined" onClick={handleReturn} sx={{ borderRadius: 2, px: 5, minWidth: 160 }}>
           Return
         </Button>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          sx={{ borderRadius: 2, px: 5, minWidth: 160 }}
-        >
+        <Button variant="contained" color="primary" onClick={handleSave} sx={{ borderRadius: 2, px: 5, minWidth: 160 }}>
           Save
         </Button>
       </Box>

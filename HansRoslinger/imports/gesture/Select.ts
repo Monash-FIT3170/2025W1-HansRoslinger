@@ -1,4 +1,5 @@
-import { Gesture, gestureToScreenPosition } from "./gesture";
+import { Gesture } from "./gesture";
+import { gestureToScreenPosition } from "./util";
 
 // Dwell configuration for permanent selection
 const HOVER_SELECT_DELAY_MS = 500; // time hovering before permanent highlight
@@ -15,22 +16,12 @@ function isStable(a: { x: number; y: number }, b: { x: number; y: number }) {
 }
 
 export const select = (_: Gesture, latestGesture: Gesture): void => {
-  if (
-    !latestGesture.singleGestureLandmarks ||
-    latestGesture.singleGestureLandmarks.length < 9
-  ) {
-    console.warn(
-      "[select] Not enough landmarks to select (need at least 9)",
-      latestGesture.singleGestureLandmarks,
-    );
+  if (!latestGesture.singleGestureLandmarks || latestGesture.singleGestureLandmarks.length < 9) {
+    console.warn("[select] Not enough landmarks to select (need at least 9)", latestGesture.singleGestureLandmarks);
     return;
   }
   const pointerLandmark = latestGesture.singleGestureLandmarks[8];
-  const screenPosition = gestureToScreenPosition(
-    pointerLandmark.x,
-    pointerLandmark.y,
-    pointerLandmark.z,
-  );
+  const screenPosition = gestureToScreenPosition(pointerLandmark.x, pointerLandmark.y, pointerLandmark.z);
 
   // console.log(`Pointing Up Gesture detected! Screen Position: ${screenPosition.screenX}, ${screenPosition.screenY}`,);
 
@@ -50,10 +41,7 @@ export const select = (_: Gesture, latestGesture: Gesture): void => {
   }
 
   // Finger is stable; check if dwell time exceeded and not yet sent
-  if (
-    !sentPermanentForThisHover &&
-    now - hoverStartAt >= HOVER_SELECT_DELAY_MS
-  ) {
+  if (!sentPermanentForThisHover && now - hoverStartAt >= HOVER_SELECT_DELAY_MS) {
     window.dispatchEvent(new CustomEvent("chart:highlight", { detail: pos }));
     sentPermanentForThisHover = true;
   }

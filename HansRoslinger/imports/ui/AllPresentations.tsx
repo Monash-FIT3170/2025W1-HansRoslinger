@@ -2,23 +2,13 @@ import React, { useState, useEffect } from "react";
 import Toolbar from "./components/Toolbar/Toolbar";
 import Modal from "./components/Modal/Modal";
 import { Meteor } from "meteor/meteor";
-import { useNavigate } from "react-router-dom";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { useAssetsWithImageCount } from "./handlers/assets/useAssets";
-import {
-  doesPresentationExist,
-  createPresentation,
-  getPresentationsByUser,
-  Presentation,
-} from "../api/database/presentations/presentations";
+import { doesPresentationExist, createPresentation, getPresentationsByUser, Presentation } from "../api/database/presentations/presentations";
 import { getDatasetsByPresentationId } from "../api/database/dataset/dataset";
 import type { Dataset } from "../api/database/dataset/dataset";
 import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
-import {
-  createDataset,
-  deleteDataset,
-  ChartType,
-} from "../api/database/dataset/dataset";
+import { createDataset, deleteDataset, ChartType } from "../api/database/dataset/dataset";
 
 import {
   Alert,
@@ -42,57 +32,57 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Asset } from "../api/database/assets/assets";
+import { updateRecentPresentationId } from "../api/database/users/users";
+import { useNavigate } from "react-router";
 
 export default function AllPresentations() {
-  // State for dataset summary modal
+  // Dataset summary modal
   const [showDatasetSummary, setShowDatasetSummary] = useState(false);
   const [summaryDataset, setSummaryDataset] = useState<Dataset | null>(null);
-  // Show summary modal for a dataset
   function handleShowDatasetSummary(dataset: Dataset) {
     setSummaryDataset(dataset);
     setShowDatasetSummary(true);
   }
-
   async function handleDeleteDataset() {
     if (!summaryDataset || !summaryDataset._id) return;
     try {
       await deleteDataset(summaryDataset._id);
       setShowDatasetSummary(false);
       setSummaryDataset(null);
-      // Refresh datasets for the selected presentation
       if (selectedPresentation) await loadDatasets(selectedPresentation._id!);
     } catch {
-      // Optionally handle error
+      /* ignore */
     }
   }
-
   function handleCloseDatasetSummary() {
     setShowDatasetSummary(false);
     setSummaryDataset(null);
   }
   // Navigate to Present page with dataset ID
-  function handlePresentDataset(presentation: Presentation) {
+  async function handlePresentDataset(presentation: Presentation) {
+    const userId = getUserIDCookie();
+    if (userId && presentation._id) {
+      await updateRecentPresentationId(userId, presentation._id);
+    }
     navigate(`/present?presentationId=${presentation._id}`);
   }
   useAuthGuard();
+
   const [showModal, setShowModal] = useState(false);
   const [presentationName, setPresentationName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [presentations, setPresentations] = useState<Presentation[]>([]);
-  const [selectedPresentation, setSelectedPresentation] =
-    useState<Presentation | null>(null);
+  const [selectedPresentation, setSelectedPresentation] = useState<Presentation | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<string>("");
-  // Get all assets for dropdown (only those owned by the user)
+
   const assets: Asset[] = useAssetsWithImageCount();
 
-  // Dataset modal state
+  // Dataset modal
   const [showDatasetModal, setShowDatasetModal] = useState(false);
   const [datasetCSV, setDatasetCSV] = useState("");
   const [datasetTitle, setDatasetTitle] = useState("");
-  const [datasetChartType, setDatasetChartType] = useState<ChartType>(
-    ChartType.BAR,
-  );
+  const [datasetChartType, setDatasetChartType] = useState<ChartType>(ChartType.BAR);
   const [datasetMessage, setDatasetMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -101,10 +91,7 @@ export default function AllPresentations() {
     clearAuthCookie();
     navigate("/", { replace: true });
   };
-
-  const handleHome = () => {
-    navigate("/home");
-  };
+  const handleHome = () => navigate("/home");
 
   const loadPresentations = async () => {
     const userId = getUserIDCookie();
@@ -149,17 +136,13 @@ export default function AllPresentations() {
     setMessage(null);
   }
 
-  // Loads datasets for a given presentation ID
   async function loadDatasets(presentationId: string) {
     const result = await getDatasetsByPresentationId(presentationId);
     setDatasets(result);
   }
 
-  // Open modal and load datasets for the selected presentation
   async function openPresentationModal(presentation: Presentation) {
     setSelectedPresentation(presentation);
-    // Prefer the canonical field assetID, but fall back to legacy assetId if present
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const legacy = (presentation as any).assetId as string | undefined;
     setSelectedAssetId(presentation.assetID || legacy || "");
     await loadDatasets(presentation._id!);
@@ -170,7 +153,6 @@ export default function AllPresentations() {
     setSelectedAssetId("");
   }
 
-  // --- Dataset Modal Logic ---
   function openDatasetModal() {
     setShowDatasetModal(true);
     setDatasetCSV("");
@@ -186,7 +168,6 @@ export default function AllPresentations() {
     setDatasetMessage(null);
   }
 
-  // Update handleCreateDataset to refresh the datasets after adding a dataset
   async function handleCreateDataset() {
     setDatasetMessage(null);
     if (!selectedPresentation) {
@@ -198,10 +179,9 @@ export default function AllPresentations() {
       return;
     }
     if (!datasetCSV.trim()) {
-      setDatasetMessage("Please paste your CSV data.");
+      setDatasetMessage("Please paste or upload your CSV data.");
       return;
     }
-    // Parse CSV: each line "label,value"
     const lines = datasetCSV
       .split("\n")
       .map((line) => line.trim())
@@ -229,9 +209,7 @@ export default function AllPresentations() {
       });
       setDatasetMessage("Dataset created!");
       closeDatasetModal();
-      // Reload datasets for the selected presentation
       await loadDatasets(selectedPresentation._id!);
-      // Optionally, reload all presentations
       loadPresentations();
     } catch {
       setDatasetMessage("Failed to create dataset.");
@@ -246,8 +224,7 @@ export default function AllPresentations() {
         alignItems: "center",
         justifyContent: "flex-start",
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f8fafc 60%, #f0fdfa 100%)",
       }}
     >
       {/* Toolbar */}
@@ -267,12 +244,11 @@ export default function AllPresentations() {
           </Stack>
         }
       />
+
       {/* Create Presentation Modal */}
       <Modal isOpen={showModal} onClose={clearModel} maxwidth={"550px"}>
         <Stack spacing={2}>
-          <Typography variant="h5">
-            Enter the name of your new presentation
-          </Typography>
+          <Typography variant="h5">Enter the name of your new presentation</Typography>
           <Stack
             direction="row"
             spacing={2}
@@ -281,50 +257,25 @@ export default function AllPresentations() {
               alignItems: "center",
             }}
           >
-            <TextField
-              label="Presentation Name"
-              value={presentationName}
-              onChange={(e) => setPresentationName(e.target.value)}
-            />
+            <TextField label="Presentation Name" value={presentationName} onChange={(e) => setPresentationName(e.target.value)} />
             {message && <Alert severity="info">{message}</Alert>}
-            <Button
-              variant="contained"
-              onClick={handleCreate}
-              disabled={!presentationName.trim()}
-            >
+            <Button variant="contained" onClick={handleCreate} disabled={!presentationName.trim()}>
               Create
             </Button>
           </Stack>
         </Stack>
       </Modal>
-      {/* Presentation Tiles */}
-      <Box
-        sx={{
-          width: 1,
-          px: 8,
-          py: 4,
-        }}
-      >
-        <Typography
-          variant="h2"
-          sx={{
-            mb: 3,
-            textAlign: "center",
-          }}
-        >
+
+      {/* Presentation List */}
+      <Box sx={{ width: 1, px: 8, py: 4 }}>
+        <Typography variant="h2" sx={{ mb: 3, textAlign: "center" }}>
           All Presentations
         </Typography>
         <Grid container spacing={9} sx={{ width: 1 }}>
           {presentations.map((presentation) => (
             <Grid size={4} key={presentation._id}>
               <Card>
-                <CardActionArea
-                  key={presentation._id}
-                  onClick={async () =>
-                    await openPresentationModal(presentation)
-                  }
-                  sx={{ height: "100%", display: "flex", p: 5 }}
-                >
+                <CardActionArea key={presentation._id} onClick={async () => await openPresentationModal(presentation)} sx={{ height: "100%", display: "flex", p: 5 }}>
                   <CardContent
                     sx={{
                       textAlign: "center",
@@ -339,10 +290,7 @@ export default function AllPresentations() {
                       {presentation.name}
                     </Typography>
                     <Typography variant="h6" color="text.secondary">
-                      Added:{" "}
-                      {presentation.createdAt
-                        ? new Date(presentation.createdAt).toLocaleDateString()
-                        : ""}
+                      Added: {presentation.createdAt ? new Date(presentation.createdAt).toLocaleDateString() : ""}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -351,12 +299,9 @@ export default function AllPresentations() {
           ))}
         </Grid>
       </Box>
+
       {/* Presentation Details Modal */}
-      <Modal
-        isOpen={!!selectedPresentation}
-        onClose={closePresentationModal}
-        maxwidth={"60vw"}
-      >
+      <Modal isOpen={!!selectedPresentation} onClose={closePresentationModal} maxwidth={"60vw"}>
         {selectedPresentation && (
           <>
             <Box sx={{ textAlign: "center", mb: 2 }}>
@@ -364,20 +309,10 @@ export default function AllPresentations() {
                 {selectedPresentation.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Added:{" "}
-                {selectedPresentation.createdAt
-                  ? new Date(
-                      selectedPresentation.createdAt,
-                    ).toLocaleDateString()
-                  : ""}
+                Added: {selectedPresentation.createdAt ? new Date(selectedPresentation.createdAt).toLocaleDateString() : ""}
               </Typography>
             </Box>
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              justifyContent="center"
-            >
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
               <Select
                 value={selectedAssetId}
                 onChange={async (e) => {
@@ -385,20 +320,14 @@ export default function AllPresentations() {
                   setSelectedAssetId(assetId);
                   if (selectedPresentation && selectedPresentation._id) {
                     // Update the presentation's assetID (canonical field)
-                    await Meteor.callAsync(
-                      "presentations.update",
-                      selectedPresentation._id,
-                      { assetID: assetId },
-                    );
+                    await Meteor.callAsync("presentations.update", selectedPresentation._id, {
+                      assetID: assetId,
+                    });
                     // Update all datasets for this presentation to set assetId
                     if (datasets && datasets.length > 0) {
                       for (const dataset of datasets) {
                         if (dataset._id) {
-                          await Meteor.callAsync(
-                            "datasets.update",
-                            dataset._id,
-                            { assetId },
-                          );
+                          await Meteor.callAsync("datasets.update", dataset._id, { assetId });
                         }
                       }
                     }
@@ -426,44 +355,30 @@ export default function AllPresentations() {
               </Button>
               <Button
                 variant="contained"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  handlePresentDataset(selectedPresentation);
+                  await handlePresentDataset(selectedPresentation);
                 }}
               >
                 Present
               </Button>
             </Stack>
-            {/* DATASET TILES */}
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                mt: 2,
-              }}
-            >
+
+            {/* Datasets */}
+            <Grid container spacing={2} sx={{ mt: 2 }}>
               {datasets && datasets.length > 0 ? (
                 datasets.map((dataset: Dataset, idx: number) => (
                   <Grid size={6} key={dataset._id || idx}>
                     <Card>
-                      <CardActionArea
-                        onClick={() => handleShowDatasetSummary(dataset)}
-                        sx={{ p: 2 }}
-                      >
+                      <CardActionArea onClick={() => handleShowDatasetSummary(dataset)} sx={{ p: 2 }}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             {dataset.title}
                           </Typography>
-                          <Typography variant="subtitle2">
-                            {dataset.preferredChartType === ChartType.BAR
-                              ? "Bar chart"
-                              : "Line chart"}
-                          </Typography>
+                          <Typography variant="subtitle2">{dataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
                           <Typography variant="body2" color="text.secondary">
                             {dataset.data ? dataset.data.length : 0} data point
-                            {dataset.data && dataset.data.length !== 1
-                              ? "s"
-                              : ""}
+                            {dataset.data && dataset.data.length !== 1 ? "s" : ""}
                           </Typography>
                         </Box>
                       </CardActionArea>
@@ -479,12 +394,9 @@ export default function AllPresentations() {
           </>
         )}
       </Modal>
+
       {/* Dataset Summary Modal */}
-      <Modal
-        isOpen={showDatasetSummary && !!summaryDataset}
-        onClose={handleCloseDatasetSummary}
-        maxwidth={"50vw"}
-      >
+      <Modal isOpen={showDatasetSummary && !!summaryDataset} onClose={handleCloseDatasetSummary} maxwidth={"50vw"}>
         {summaryDataset && (
           <Stack spacing={2}>
             <Box sx={{ textAlign: "center" }}>
@@ -494,17 +406,10 @@ export default function AllPresentations() {
               <Typography variant="h6" color="text.secondary">
                 {summaryDataset.title}
               </Typography>
-              <Typography variant="subtitle2">
-                {summaryDataset.preferredChartType === ChartType.BAR
-                  ? "Bar chart"
-                  : "Line chart"}
-              </Typography>
+              <Typography variant="subtitle2">{summaryDataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
               <Typography variant="body2" color="text.secondary">
-                {summaryDataset.data ? summaryDataset.data.length : 0} data
-                point
-                {summaryDataset.data && summaryDataset.data.length !== 1
-                  ? "s"
-                  : ""}
+                {summaryDataset.data ? summaryDataset.data.length : 0} data point
+                {summaryDataset.data && summaryDataset.data.length !== 1 ? "s" : ""}
               </Typography>
             </Box>
             <Typography variant="h5">
@@ -512,13 +417,7 @@ export default function AllPresentations() {
             </Typography>
             <Stack>
               {summaryDataset.data && summaryDataset.data.length > 0 ? (
-                <TableContainer
-                  component={Paper}
-                  sx={{
-                    maxHeight: "40vh",
-                    overflow: "auto",
-                  }}
-                >
+                <TableContainer component={Paper} sx={{ maxHeight: "40vh", overflow: "auto" }}>
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -544,39 +443,69 @@ export default function AllPresentations() {
           </Stack>
         )}
       </Modal>
-      {/* Add Dataset Modal */}
-      <Modal
-        isOpen={showDatasetModal}
-        onClose={closeDatasetModal}
-        maxwidth={"40vw"}
-      >
+
+      {/* Add Dataset Modal (with drag & drop) */}
+      <Modal isOpen={showDatasetModal} onClose={closeDatasetModal} maxwidth={"40vw"}>
         <Stack spacing={2}>
           <Typography variant="h3">Add Dataset</Typography>
-          <TextField
-            label="Dataset Title"
-            variant="outlined"
-            value={datasetTitle}
-            onChange={(e) => setDatasetTitle(e.target.value)}
-          />
-          <Select
-            value={datasetChartType}
-            onChange={(e) => setDatasetChartType(e.target.value as ChartType)}
-          >
+
+          <TextField label="Dataset Title" variant="outlined" value={datasetTitle} onChange={(e) => setDatasetTitle(e.target.value)} />
+
+          <Select value={datasetChartType} onChange={(e) => setDatasetChartType(e.target.value as ChartType)}>
             <MenuItem value={ChartType.BAR}>Bar</MenuItem>
             <MenuItem value={ChartType.LINE}>Line</MenuItem>
           </Select>
-          <TextField
-            label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`}
-            value={datasetCSV}
-            onChange={(e) => setDatasetCSV(e.target.value)}
-            multiline
-            maxRows={6}
-          />
-          {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
-          <Button
-            onClick={handleCreateDataset}
-            disabled={!datasetTitle.trim() || !datasetCSV.trim()}
+
+          {/* Drag & Drop Zone */}
+          <Box
+            sx={{
+              border: "2px dashed #90caf9",
+              borderRadius: 2,
+              p: 3,
+              textAlign: "center",
+              cursor: "pointer",
+              backgroundColor: "#f0f8ff",
+              "&:hover": { backgroundColor: "#e3f2fd" },
+            }}
+            onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = ".csv";
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    setDatasetCSV(event.target?.result as string);
+                  };
+                  reader.readAsText(file);
+                }
+              };
+              input.click();
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const file = e.dataTransfer.files[0];
+              if (file && file.name.endsWith(".csv")) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  setDatasetCSV(event.target?.result as string);
+                };
+                reader.readAsText(file);
+              } else {
+                setDatasetMessage("Please drop a valid .csv file.");
+              }
+            }}
           >
+            <Typography variant="body1">Drag & drop your CSV file here, or click to upload.</Typography>
+          </Box>
+
+          <TextField label={`Paste CSV here (label,value)\nExample:\nApples,10\nBananas,20`} value={datasetCSV} onChange={(e) => setDatasetCSV(e.target.value)} multiline maxRows={6} />
+
+          {datasetMessage && <Alert severity="info">{datasetMessage}</Alert>}
+
+          <Button onClick={handleCreateDataset} disabled={!datasetTitle.trim() || !datasetCSV.trim()}>
             Create Dataset
           </Button>
         </Stack>

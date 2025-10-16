@@ -1,0 +1,41 @@
+name: Integration Tests
+
+on:
+  # pull_request:
+  #   branches:
+  #     - "**"
+  workflow_dispatch:
+    
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HansRoslinger
+    env:
+      METEOR_ALLOW_SUPERUSER: "1"
+      TAILWIND_DISABLE_LIGHTNINGCSS: "1"
+      TAILWIND_DISABLE_OPTIMIZE: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install system dependencies
+        run: bash ../.github/workflows/scripts/install-system-deps.sh
+
+      - name: Install Meteor CLI
+        run: |
+          curl https://install.meteor.com/ | sh
+          echo "$HOME/.meteor" >> "$GITHUB_PATH"
+
+      - name: Install NPM dependencies
+        run: meteor npm install
+
+      - name: Run integration tests
+        run: npm run test-app:once

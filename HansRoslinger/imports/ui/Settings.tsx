@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { getAuthCookie } from "../cookies/cookies";
 import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
 
-const GestureToLabel: Record<GestureType, string> = {
+export const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
   [GestureType.THUMB_DOWN]: "Thumb Down",
   [GestureType.POINTING_UP]: "Pointing Up",
@@ -32,7 +32,7 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.DRAW]: "Draw",
 };
 
-const FunctionToLabel: Record<FunctionType, string> = {
+export const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SELECT]: "Select",
   [FunctionType.CLEAR]: "Clear",
   [FunctionType.FILTER]: "Filter",
@@ -42,6 +42,18 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SWITCH_DATA]: "Switch Data",
   [FunctionType.UNUSED]: "None",
   [FunctionType.DRAW]: "Draw",
+};
+
+export const FunctionToIconSources: Record<FunctionType, string> = {
+  [FunctionType.SELECT]: "/icons/selection.png",
+  [FunctionType.FILTER]: "/icons/filter.png",
+  [FunctionType.CLEAR]: "/icons/filter-clear.png",
+  [FunctionType.ZOOM]: "/icons/zoom-in.png",
+  [FunctionType.CLICK]: "/icons/click.png",
+  [FunctionType.SWITCH_CHART]: "/icons/change-type.png",
+  [FunctionType.SWITCH_DATA]: "/icons/change-data.png",
+  [FunctionType.UNUSED]: "",
+  [FunctionType.DRAW]: "/icons/draw.png",
 };
 
 const Gestures = [

@@ -8,9 +8,10 @@ interface WebcamComponentProps {
   grayscale: boolean;
   gestureDetectionStatus: boolean;
   settings: Record<GestureType, FunctionType>;
+  onGestureChange?: (gesture: GestureType | null) => void;
 }
 
-export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, gestureDetectionStatus, settings }) => {
+export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, gestureDetectionStatus, settings, onGestureChange }) => {
   const webcamRef = useRef<Webcam | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   // Store recognizer in state so component re-renders when it's ready
@@ -51,7 +52,31 @@ export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, ges
   }
 
   // Call the gesture detector hook unconditionally to preserve hook order
-  useGestureDetector(recognizer, videoElRef, imageRef, gestureDetectionStatus, settings, "VIDEO");
+  const { currentGestures } = useGestureDetector(recognizer, videoElRef, imageRef, gestureDetectionStatus, settings, "VIDEO");
+
+  useEffect(() => {
+    if (!onGestureChange) {
+      return;
+    }
+
+    if (!gestureDetectionStatus) {
+      onGestureChange(null);
+      return;
+    }
+
+    if (!currentGestures.length) {
+      onGestureChange(null);
+      return;
+    }
+
+    const prioritized = currentGestures
+      .filter((gesture) => gesture.gestureID !== GestureType.UNIDENTIFIED)
+      .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
+
+    const nextGesture = (prioritized[0] ?? currentGestures[0])?.gestureID ?? null;
+
+    onGestureChange(nextGesture);
+  }, [currentGestures, gestureDetectionStatus, onGestureChange]);
 
   return (
     <div className={`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? "grayscale" : ""}`}>

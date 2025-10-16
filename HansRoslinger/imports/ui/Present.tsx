@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { useSearchParams } from "react-router-dom";
@@ -20,16 +20,7 @@ import { useImagePreload } from "./handlers/image/useImagePreload";
 import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
-
-const functionIconMapping: Record<FunctionType, { icon: string; tooltip: string }> = {
-  [FunctionType.SELECT]: { icon: "/icons/selection.png", tooltip: "Select: Point up" },
-  [FunctionType.FILTER]: { icon: "/icons/filter.png", tooltip: "Filter: Close fist" },
-  [FunctionType.CLEAR]: { icon: "/icons/filter-clear.png", tooltip: "Clear: Open palm" },
-  [FunctionType.ZOOM]: { icon: "/icons/zoom-in.png", tooltip: "Zoom: Two-hand pinch" },
-  [FunctionType.CLICK]: { icon: "/icons/click.png", tooltip: "Click: Pinch" },
-  [FunctionType.SWITCH_CHART]: { icon: "/icons/change-type.png", tooltip: "Switch: Point left or right (2 fingers)" },
-  [FunctionType.UNUSED]: { icon: "", tooltip: "" },
-};
+import { FunctionToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -94,19 +85,28 @@ export const Present: React.FC = () => {
   }, [grayscale]);
 
   useEffect(() => {
-    let hintTimeout: NodeJS.Timeout;
+    let hintTimeout: NodeJS.Timeout | null = null;
 
-    // When gesture detection is on and no gesture is active, show all hints after a delay
-    if (gestureDetectionStatus && !activeGesture) {
-      hintTimeout = setTimeout(() => {
-        setShowHints(true);
-      }, 1500); // 1.5-second delay
-    } else {
-      // Hide hints immediately if gestures are off or one is active
+    if (!gestureDetectionStatus) {
       setShowHints(false);
+      return;
     }
 
-    return () => clearTimeout(hintTimeout);
+    if (activeGesture) {
+      setShowHints(true);
+      return;
+    }
+
+    setShowHints(false);
+    hintTimeout = setTimeout(() => {
+      setShowHints(true);
+    }, 1500);
+
+    return () => {
+      if (hintTimeout) {
+        clearTimeout(hintTimeout);
+      }
+    };
   }, [activeGesture, gestureDetectionStatus]);
 
   const determineGrayscale = () => grayscaleRef.current;
@@ -245,7 +245,33 @@ export const Present: React.FC = () => {
     loadSettings().then(setGestureSettings);
   }, []);
 
-  const renderedFunctions = new Set<FunctionType>();
+  const hintFunctions = useMemo(() => {
+    const uniqueFunctions = new Set<FunctionType>();
+    Object.values(gestureSettings).forEach((functionType) => {
+      if (functionType !== FunctionType.UNUSED) {
+        uniqueFunctions.add(functionType);
+      }
+    });
+    return Array.from(uniqueFunctions);
+  }, [gestureSettings]);
+
+  const getGestureAssignedToFunction = (functionType: FunctionType): GestureType | null => {
+    for (const [gestureKey, assignedFunction] of Object.entries(gestureSettings)) {
+      if (assignedFunction === functionType) {
+        return Number(gestureKey) as GestureType;
+      }
+    }
+    return null;
+  };
+
+  const formatTooltip = (functionType: FunctionType, gesture: GestureType | null): string => {
+    const functionLabel = FunctionToLabel[functionType] ?? "Configured";
+    if (gesture === null) {
+      return `${functionLabel}: Unassigned`;
+    }
+    const gestureLabel = GestureToLabel[gesture] ?? "Custom";
+    return `${functionLabel}: ${gestureLabel}`;
+  };
 
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">
@@ -261,19 +287,49 @@ export const Present: React.FC = () => {
           padding: "10px",
           borderRadius: "10px",
           zIndex: 1000,
-          opacity: gestureDetectionStatus ? 1 : 0, // Hide if gestures are disabled
+          opacity: gestureDetectionStatus ? 1 : 0,
           transition: "opacity 0.3s ease-in-out",
         }}
       >
-        {activeGesture ? (
-          // Show single active gesture hint
-          (() => {
-            const functionType = gestureSettings[activeGesture];
-            const hint = functionIconMapping[functionType];
-            if (!hint || !hint.icon) return null;
+        <Box
+          sx={{
+            display: "flex",
+            gap: "15px",
+            opacity: gestureDetectionStatus && (showHints || !!activeGesture) ? 1 : 0,
+            transition: "opacity 0.5s",
+          }}
+        >
+          {hintFunctions.map((functionType) => {
+            const iconSource = FunctionToIconSources[functionType];
+            if (!iconSource) return null;
+            const gesture = getGestureAssignedToFunction(functionType);
+            const tooltip = formatTooltip(functionType, gesture);
+            const isActive = !!activeGesture && gesture === activeGesture;
             return (
-              <Box component="div" sx={{ position: "relative", "&:hover .tooltip": { visibility: "visible", opacity: 1 } }}>
-                <img src={hint.icon} alt={hint.tooltip} style={{ width: 40, height: 40 }} />
+              <Box
+                key={functionType}
+                component="div"
+                sx={{
+                  position: "relative",
+                  borderRadius: "50%",
+                  padding: "6px",
+                  backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                  border: isActive ? "2px solid #3b82f6" : "2px solid transparent",
+                  boxShadow: isActive ? "0 0 12px rgba(59, 130, 246, 0.6)" : "none",
+                  transition: "all 0.25s ease-in-out",
+                  "&:hover .tooltip": { visibility: "visible", opacity: 1 },
+                }}
+              >
+                <img
+                  src={iconSource}
+                  alt={tooltip}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    cursor: "pointer",
+                    filter: isActive ? "saturate(1.5)" : undefined,
+                  }}
+                />
                 <Box
                   className="tooltip"
                   sx={{
@@ -293,54 +349,12 @@ export const Present: React.FC = () => {
                     marginLeft: "-80px",
                   }}
                 >
-                  {hint.tooltip}
+                  {tooltip}
                 </Box>
               </Box>
             );
-          })()
-        ) : (
-          // Show all available hints (with fade-in effect)
-          <Box sx={{ display: "flex", gap: "15px", opacity: showHints ? 1 : 0, transition: "opacity 0.5s" }}>
-            {Object.values(gestureSettings)
-              .filter((functionType) => {
-                if (functionType === FunctionType.UNUSED || renderedFunctions.has(functionType)) {
-                  return false;
-                }
-                renderedFunctions.add(functionType);
-                return true;
-              })
-              .map((functionType) => {
-                const hint = functionIconMapping[functionType];
-                if (!hint || !hint.icon) return null;
-                return (
-                  <Box key={functionType} component="div" sx={{ position: "relative", "&:hover .tooltip": { visibility: "visible", opacity: 1 } }}>
-                    <img src={hint.icon} alt={hint.tooltip} style={{ width: 40, height: 40, cursor: "pointer" }} />
-                    <Box
-                      className="tooltip"
-                      sx={{
-                        visibility: "hidden",
-                        opacity: 0,
-                        transition: "opacity 0.3s",
-                        width: 160,
-                        backgroundColor: "#555",
-                        color: "#fff",
-                        textAlign: "center",
-                        borderRadius: "6px",
-                        padding: "5px 0",
-                        position: "absolute",
-                        zIndex: 1,
-                        top: "125%",
-                        left: "50%",
-                        marginLeft: "-80px",
-                      }}
-                    >
-                      {hint.tooltip}
-                    </Box>
-                  </Box>
-                );
-              })}
-          </Box>
-        )}
+          })}
+        </Box>
       </Box>
 
       {/* Fullscreen video */}

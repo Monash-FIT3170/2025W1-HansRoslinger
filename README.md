@@ -46,6 +46,7 @@ HansRoslinger uses Mediapipe API (https://ai.google.dev/edge/mediapipe/solutions
 This is a mono-repository containing both the frontend and backend for the HansRoslinger application. This includes the development local MongoDB server which is managed by Meteor.js. The production MongoDB database is hosted on MongoDB Atlas. 
 
 ## Repository Structure
+```
 2025W1-HansRoslinger/
 ├── .github/                 # Github configuration (Github Actions - CI/CD Pipelines)
 ├── .vscode/                 # VSCode configuration
@@ -62,7 +63,7 @@ This is a mono-repository containing both the frontend and backend for the HansR
 |    └── package-lock.json   # Application dependency management
 ├── terraform/              # Terraform for Infrastructure-As-Code
 └── Dockerfile              # Dockerfile to compose docker image for deployment
-
+```
 ## Tech Stack
 **Frontend:** React, Mediapipe  
 **Backend:** Meteor.js (Node.js)  

@@ -18,15 +18,15 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
   const [files, setFiles] = useState<File[]>([]);
 
   const onDrop = (acceptedFiles: File[]) => {
-    console.log('Files dropped/selected:', acceptedFiles);
+    console.log("Files dropped/selected:", acceptedFiles);
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 
+    accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".gif", ".bmp", ".webp"],
-      "application/pdf": [".pdf"]
+      "application/pdf": [".pdf"],
     },
     multiple: true,
   });
@@ -58,7 +58,7 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
           </MenuItem>
         ))}
       </TextField>
-      
+
       <Box
         {...getRootProps()}
         sx={{
@@ -67,18 +67,14 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
           textAlign: "center",
           my: 2,
           cursor: "pointer",
-          backgroundColor: isDragActive ? '#f0f0f0' : 'transparent',
+          backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
         }}
       >
         <input {...getInputProps()} />
         {isDragActive ? (
           <Typography>Drop the files here ...</Typography>
         ) : (
-          <Typography>
-            {files.length === 0
-              ? "Drag & drop images or PDFs here, or click to select"
-              : `${files.length} file(s) selected`}
-          </Typography>
+          <Typography>{files.length === 0 ? "Drag & drop images or PDFs here, or click to select" : `${files.length} file(s) selected`}</Typography>
         )}
       </Box>
 
@@ -91,24 +87,18 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
             <Box
               key={index}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 p: 1,
-                border: '1px solid #eee',
+                border: "1px solid #eee",
                 borderRadius: 1,
                 mb: 1,
-                backgroundColor: '#f9f9f9'
+                backgroundColor: "#f9f9f9",
               }}
             >
-              <Typography variant="body2">
-                {file.name}
-              </Typography>
-              <IconButton
-                size="small"
-                onClick={() => removeFile(index)}
-                sx={{ ml: 1 }}
-              >
+              <Typography variant="body2">{file.name}</Typography>
+              <IconButton size="small" onClick={() => removeFile(index)} sx={{ ml: 1 }}>
                 <MuiIcons.Delete />
               </IconButton>
             </Box>
@@ -116,17 +106,11 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
         </Box>
       )}
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleCreate}
-        disabled={!name || files.length === 0}
-        fullWidth
-      >
+      <Button variant="contained" color="primary" onClick={handleCreate} disabled={!name || files.length === 0} fullWidth>
         Create
       </Button>
 
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
         Supported files: Images (JPEG, PNG, GIF, BMP, WebP) and PDF documents
       </Typography>
     </Modal>

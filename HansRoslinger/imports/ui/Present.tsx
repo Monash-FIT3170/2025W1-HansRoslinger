@@ -295,7 +295,7 @@ export const Present: React.FC = () => {
           sx={{
             display: "flex",
             gap: "15px",
-            opacity: gestureDetectionStatus && (showHints || !!activeGesture) ? 1 : 0,
+            opacity: gestureDetectionStatus && (showHints || activeGesture !== null) ? 1 : 0,
             transition: "opacity 0.5s",
           }}
         >
@@ -304,7 +304,7 @@ export const Present: React.FC = () => {
             if (!iconSource) return null;
             const gesture = getGestureAssignedToFunction(functionType);
             const tooltip = formatTooltip(functionType, gesture);
-            const isActive = !!activeGesture && gesture === activeGesture;
+            const isActive = activeGesture !== null && gesture === activeGesture;
             return (
               <Box
                 key={functionType}

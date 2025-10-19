@@ -20,7 +20,7 @@ import { useImagePreload } from "./handlers/image/useImagePreload";
 import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
-import { FunctionToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
+import { FunctionToIconSources, GestureToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -300,9 +300,11 @@ export const Present: React.FC = () => {
           }}
         >
           {hintFunctions.map((functionType) => {
-            const iconSource = FunctionToIconSources[functionType];
-            if (!iconSource) return null;
+            const functionIconSource = FunctionToIconSources[functionType];
+            if (!functionIconSource) return null;
             const gesture = getGestureAssignedToFunction(functionType);
+            if (!gesture) return null;
+            const gestureIconSource = GestureToIconSources[gesture];
             const tooltip = formatTooltip(functionType, gesture);
             const isActive = activeGesture !== null && gesture === activeGesture;
             return (
@@ -321,7 +323,7 @@ export const Present: React.FC = () => {
                 }}
               >
                 <img
-                  src={iconSource}
+                  src={functionIconSource}
                   alt={tooltip}
                   style={{
                     width: 40,
@@ -350,6 +352,11 @@ export const Present: React.FC = () => {
                   }}
                 >
                   {tooltip}
+                  <img
+                    src={gestureIconSource} // <-- the image you want to show on hover
+                    alt="gesture icon"
+                    style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#cececeff"}}
+                    />
                 </Box>
               </Box>
             );

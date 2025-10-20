@@ -22,7 +22,7 @@ import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 import { click } from "./Click";
-import { Undo } from "@mui/icons-material";
+import { Undo } from "./Undo";
 
 enum GestureType {
   CLOSED_FIST,

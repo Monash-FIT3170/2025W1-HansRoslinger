@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+// @ts-ignore
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { useSearchParams } from "react-router-dom";
@@ -20,39 +21,44 @@ import { useImagePreload } from "./handlers/image/useImagePreload";
 import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
+import {saveState, loadState} from "../api/stateHistory"
 
-export const Present: React.FC = () => {
+export var Present: React.FC = () => {
   useAuthGuard();
-
+  
   // State of tooling features
-  const [grayscale, setGrayscale] = useState(false);
-  const [backgroundRemoval, setBackgroundRemoval] = useState(false);
-  const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
-  const [showHeader, setShowHeader] = useState(true);
-  const [showAssets, setShowAssets] = useState(false);
-
+  var [grayscale, setGrayscale] = useState(false);
+  var [backgroundRemoval, setBackgroundRemoval] = useState(false);
+  var [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
+  var [showHeader, setShowHeader] = useState(true);
+  var [showAssets, setShowAssets] = useState(false);
+  
   // State for chart features
-  const [showLineChart, setShowLineChart] = useState(false);
-  const { imageScale, isZoomEnabled, zoomStartPosition } = useImageAssetZoom();
+  var [showLineChart, setShowLineChart] = useState(false);
+  const { imageScale, setImageScale, isZoomEnabled, setIsZoomEnabled, zoomStartPosition, setZoomStartPosition } = useImageAssetZoom();
 
-  const [searchParams] = useSearchParams();
-  const projectId = searchParams.get("presentationId") ?? "";
-  const datasets = usePresentationDatasets(projectId);
-  const { currentDataset } = useDatasetNavigation(datasets);
 
+  var [searchParams] = useSearchParams();
+  var projectId = searchParams.get("presentationId") ?? "";
+  var datasets = usePresentationDatasets(projectId);
+  var { currentDataset } = useDatasetNavigation(datasets);
+
+  
   // Asset mode state
-  const userId = getUserIDCookie();
-  const [selectedAssetId, setSelectedAssetId] = useState<string>("");
-  const assets = useTracker(() => {
+  var userId = getUserIDCookie();
+  var [selectedAssetId, setSelectedAssetId] = useState<string>("");
+  var assets = useTracker(() => {
     Meteor.subscribe("assets");
     if (!userId)
       return [] as Array<{ _id: string; name: string; icon?: string }>;
     return AssetCollection.find({ userId }, { sort: { name: 1 } }).fetch();
   }, [userId]);
-  const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
-  const currentAssetId = assets[currentAssetIndex]?._id ?? selectedAssetId;
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const assetImages = useTracker(() => {
+  var [currentAssetIndex, setCurrentAssetIndex] = useState(0);
+  var currentAssetId = assets[currentAssetIndex]?._id ?? selectedAssetId;
+  var [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  
+  var assetImages = useTracker(() => {
     Meteor.subscribe("images");
     if (!currentAssetId)
       return [] as Array<{
@@ -67,7 +73,126 @@ export const Present: React.FC = () => {
       { sort: { order: 1, fileName: 1 } },
     ).fetch();
   }, [currentAssetId]);
-  const currentAssetImage = assetImages[currentImageIndex] ?? null;
+  var currentAssetImage = assetImages[currentImageIndex] ?? null;
+  
+  const stateRef = useRef({
+  grayscale,
+  backgroundRemoval,
+  showHeader,
+  showAssets,
+  showLineChart,
+  imageScale,
+  isZoomEnabled,
+  zoomStartPosition,
+  selectedAssetId,
+  currentAssetIndex,
+  currentAssetId,
+  currentImageIndex,
+});
+
+useEffect(() => {
+  stateRef.current = {
+    grayscale,
+    backgroundRemoval,
+    showHeader,
+    showAssets,
+    showLineChart,
+    imageScale,
+    isZoomEnabled,
+    zoomStartPosition,
+    selectedAssetId,
+    currentAssetIndex,
+    currentAssetId,
+    currentImageIndex,
+  };
+}, [
+  grayscale,
+  backgroundRemoval,
+  showHeader,
+  showAssets,
+  showLineChart,
+  imageScale,
+  isZoomEnabled,
+  zoomStartPosition,
+  selectedAssetId,
+  currentAssetIndex,
+  currentAssetId,
+  currentImageIndex,
+]);
+
+const lastSaveTimeRef = useRef(0);
+
+useEffect(() => {
+  const SAVE_DELAY = 1000;
+
+  const saveIfNeeded = () => {
+    const now = Date.now();
+    if (now - lastSaveTimeRef.current < SAVE_DELAY) return;
+
+    saveState({imageScale: { ...imageScale },
+  zoomStartPosition: zoomStartPosition ? { ...zoomStartPosition } : null,});
+    lastSaveTimeRef.current = now;
+  };
+
+  saveIfNeeded();
+
+}, [
+  grayscale,
+  backgroundRemoval,
+  showHeader,
+  showAssets,
+  showLineChart,
+  imageScale,
+  isZoomEnabled,
+  zoomStartPosition,
+  selectedAssetId,
+  currentAssetIndex,
+  currentAssetId,
+  currentImageIndex,
+]);
+
+
+
+// Undo handler
+useEffect(() => {
+  const onUndo = () => {
+    const state = loadState();
+    if (!state) return;
+
+    // Restore basic toggles
+    setGrayscale(state.grayscale ?? false);
+    setBackgroundRemoval(state.backgroundRemoval ?? false);
+    setShowHeader(state.showHeader ?? true);
+    setShowAssets(state.showAssets ?? false);
+    setShowLineChart(state.showLineChart ?? false);
+
+    // Restore selected asset
+    if (state.selectedAssetId) {
+      const idx = assets.findIndex(a => a._id === state.selectedAssetId);
+      if (idx >= 0) {
+        setCurrentAssetIndex(idx);
+        setSelectedAssetId(state.selectedAssetId);
+      } else {
+        // fallback if asset not found
+        setCurrentAssetIndex(0);
+        setSelectedAssetId("");
+      }
+    }
+
+    // Restore image index safely
+    setCurrentImageIndex(Math.min(state.currentImageIndex ?? 0, assetImages.length - 1));
+
+    // Restore zoom
+    if (state.imageScale && setImageScale) setImageScale({ ...state.imageScale });
+    if (state.isZoomEnabled !== undefined && setIsZoomEnabled) setIsZoomEnabled(state.isZoomEnabled);
+    if (state.zoomStartPosition && setZoomStartPosition) setZoomStartPosition({ ...state.zoomStartPosition });
+  };
+
+  window.addEventListener("undo", onUndo);
+  return () => window.removeEventListener("undo", onUndo);
+  }, [assets, assetImages.length, setImageScale, setIsZoomEnabled, setZoomStartPosition]);
+
+
   // Preload current, next, and previous images for smooth navigation
   useImagePreload(
     assetImages.length
@@ -81,19 +206,19 @@ export const Present: React.FC = () => {
       : [],
   );
 
-  const grayscaleRef = useRef(grayscale);
+  var grayscaleRef = useRef(grayscale);
 
   useEffect(() => {
     grayscaleRef.current = grayscale;
   }, [grayscale]);
 
-  const determineGrayscale = () => grayscaleRef.current;
+  var determineGrayscale = () => grayscaleRef.current;
 
   // Zoom toggle handled in useImageAssetZoom
 
   // Handle chart switch or image switch (in SA mode)
   useEffect(() => {
-    const handleSwitchChartOrImage = () => {
+    var handleSwitchChartOrImage = () => {
       if (showAssets) {
         if (assetImages.length > 1) {
           setCurrentImageIndex((prev) => (prev + 1) % assetImages.length);
@@ -124,14 +249,14 @@ export const Present: React.FC = () => {
     let active = true;
     (async () => {
       if (!projectId) return;
-      const pres = await getPresentationById(projectId);
+      var pres = await getPresentationById(projectId);
       if (active) {
-        const p = pres as typeof pres & { assetId?: string };
-        const id = (p?.assetID ?? p?.assetId) || "";
+        var p = pres as typeof pres & { assetId?: string };
+        var id = (p?.assetID ?? p?.assetId) || "";
         setSelectedAssetId(id || "");
         // If assets are loaded, position index to the selected asset
         if (id) {
-          const idx = assets.findIndex((a: { _id: string }) => a._id === id);
+          var idx = assets.findIndex((a: { _id: string }) => a._id === id);
           if (idx >= 0) setCurrentAssetIndex(idx);
         }
       }
@@ -144,7 +269,7 @@ export const Present: React.FC = () => {
   // When assets list changes and there's a selectedAssetId, sync index
   useEffect(() => {
     if (!selectedAssetId) return;
-    const idx = assets.findIndex(
+    var idx = assets.findIndex(
       (a: { _id: string }) => a._id === selectedAssetId,
     );
     if (idx >= 0) setCurrentAssetIndex(idx);
@@ -160,7 +285,7 @@ export const Present: React.FC = () => {
 
   // Gesture: in SA mode, SWITCH_DATA (chart:next-data) should go to previous image
   useEffect(() => {
-    const onNextData = () => {
+    var onNextData = () => {
       if (!showAssets) return;
       if (assetImages.length <= 1) return; // nothing to go back to
       setCurrentImageIndex(
@@ -174,9 +299,9 @@ export const Present: React.FC = () => {
   // Zoom effect handled in hook; we simply render the scale when assets are visible
 
   // Handler for GS button, now passed to Header
-  const toggleGrayscale = () => setGrayscale((b) => !b);
+  var toggleGrayscale = () => setGrayscale((b) => !b);
 
-  const toolbarStyles = showHeader
+  var toolbarStyles = showHeader
     ? {
         position: "absolute" as const,
         height: 520,
@@ -209,11 +334,11 @@ export const Present: React.FC = () => {
         zIndex: 50,
       };
 
-  const loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
+  var loadSettings = async (): Promise<Record<GestureType, FunctionType>> => {
     var settings = defaultMapping;
-    const userID = getUserIDCookie();
+    var userID = getUserIDCookie();
     if (userID) {
-      const user = await getUserById(userID);
+      var user = await getUserById(userID);
       if (user) {
         settings = await getUserSettings(user.email);
       }
@@ -222,29 +347,12 @@ export const Present: React.FC = () => {
     return settings;
   };
 
-  const [gestureSettings, setGestureSettings] =
+  var [gestureSettings, setGestureSettings] =
     useState<Record<GestureType, FunctionType>>(defaultMapping);
 
   useEffect(() => {
     loadSettings().then(setGestureSettings);
   }, []);
-
-  useEffect(() => {
-    const onUndo = () => {
-      var state = loadState()
-      // Apply state
-      console.log("Loading state")
-    };
-    window.addEventListener("undo", onUndo);
-    return () => window.removeEventListener("undo", onUndo);
-  }, []);
-
-  setInterval(saveState, 1000, {
-    
-  })
-  
-
-  
 
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">

@@ -306,7 +306,7 @@ export const Present: React.FC = () => {
             opacity: gestureDetectionStatus && (showHints || activeGesture !== null) ? 1 : 0,
             transition: "opacity 0.5s",
           }}
-        > 
+        >
           {hintFunctions.map((functionType) => {
             const functionIconSource = FunctionToIconSources[functionType];
             if (!functionIconSource) return null;
@@ -363,8 +363,8 @@ export const Present: React.FC = () => {
                   <img
                     src={gestureIconSource} // <-- the image you want to show on hover
                     alt="gesture icon"
-                    style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#cececeff"}}
-                    />
+                    style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#cececeff" }}
+                  />
                 </Box>
               </Box>
             );

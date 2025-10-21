@@ -73,18 +73,14 @@ export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, ges
     // Check for double-handed pinch first (highest priority)
     const leftGesture = currentGestures.find((g) => g?.handedness === Handedness.LEFT);
     const rightGesture = currentGestures.find((g) => g?.handedness === Handedness.RIGHT);
-    
-    if (leftGesture && rightGesture && 
-        leftGesture.gestureID === GestureType.PINCH && 
-        rightGesture.gestureID === GestureType.PINCH) {
+
+    if (leftGesture && rightGesture && leftGesture.gestureID === GestureType.PINCH && rightGesture.gestureID === GestureType.PINCH) {
       onGestureChange(GestureType.DOUBLE_PINCH);
       return;
     }
 
     // Otherwise, prioritize by confidence
-    const prioritized = currentGestures
-      .filter((gesture) => gesture.gestureID !== GestureType.UNIDENTIFIED)
-      .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
+    const prioritized = currentGestures.filter((gesture) => gesture.gestureID !== GestureType.UNIDENTIFIED).sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
 
     const nextGesture = (prioritized[0] ?? currentGestures[0])?.gestureID ?? null;
 

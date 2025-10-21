@@ -56,7 +56,7 @@ export const FunctionToIconSources: Record<FunctionType, string> = {
   [FunctionType.DRAW]: "/icons/draw.png",
 };
 
-export const GestureToIconSources: Record<GestureType , string> = {
+export const GestureToIconSources: Record<GestureType, string> = {
   [GestureType.CLOSED_FIST]: "/icons/closed_fist.png",
   [GestureType.I_LOVE_YOU]: "/icons/love.png",
   [GestureType.UNIDENTIFIED]: "",

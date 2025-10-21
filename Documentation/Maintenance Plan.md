@@ -10,7 +10,7 @@ The aim of this document is to outline the winding down of HanRoslinger, includi
 
 # What is HansRoslinger?
 
-HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
+HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and Images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
 
 The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
 
@@ -48,11 +48,11 @@ The production version of HansRoslinger, defined as the CloudRun deployment acce
 - Maximilian Craig
 - Tejeshvi Sagwal
 - Liam Chui
-  In order to manage CloudRun deployments, Google Buckets, and Artifact Registry images.
+  In order to manage CloudRun deployments, Google Buckets, and Artifact Registry Images.
 
 ### Expectation following the conclusion of the unit
 
-It is not expected that Mayank will continue to maintain the Google Cloud Project, as doing so incurs costs associated with storing images in the bucket, and handling CloudRun instances. Therefore an alternative solution needs to be put in place in order to provide the opportunity for a new party to inherit and manage the Google Cloud Project and it's associated services.
+It is not expected that Mayank will continue to maintain the Google Cloud Project, as doing so incurs costs associated with storing Images in the bucket, and handling CloudRun instances. Therefore an alternative solution needs to be put in place in order to provide the opportunity for a new party to inherit and manage the Google Cloud Project and it's associated services.
 
 ### Terraform Infrastructure
 
@@ -62,7 +62,7 @@ In the event that Mayank is no longer able to host the HansRoslinger services vi
 
 1. Update the `project_id` in `np.tfvars` to the new desired project, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/terraform/tfvars/np.tfvars#L1). This relates to infrastructure used for local development and testing.
 2. Update the `project_id` in `prod.tfvars` to the new desired project, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/terraform/tfvars/prod.tfvars). This relates to infrastructure used for production environments
-3. Update the `project_id` found within the `bucket.ts` in the HansRoslinger application, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/HansRoslinger/GCP/bucket.ts#L3). This used by the application to source the correct project to push images to
+3. Update the `project_id` found within the `bucket.ts` in the HansRoslinger application, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/HansRoslinger/GCP/bucket.ts#L3). This used by the application to source the correct project to push Images to
 4. Update `GCLOUD_PROJECT_ID` in action secrets, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/settings/secrets/actions). This is utilised by the workflows that deploy our production CloudRun.
 5. Update the `GCP_SA_KEY` in action secrets, [source](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/settings/secrets/actions). This is utilised by the workflow in order to authenticate the SA to deploy the CloudRun services. Information on creating a service account key can be found [here](https://cloud.google.com/iam/docs/keys-create-delete)
 

@@ -1,7 +1,7 @@
 # 2025W1-HansRoslinger
 
 <p align="center">
-  <img src="Documentation/images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
+  <img src="Documentation/Images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
 </p>
 
 # Table of Contents
@@ -123,7 +123,7 @@ Please refer to the following documents if you would like to view it
 - [Markdown Document](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.md)
 - [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.pdf)
 
-Please note that the markdown document may not render the images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with images.
+Please note that the markdown document may not render the Images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with Images.
 
 ## License
 

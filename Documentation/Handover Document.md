@@ -4,7 +4,7 @@
 
 
 <p align="center">
-  <img src="images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
+  <img src="Images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
 </p>
 
 
@@ -41,12 +41,12 @@ This document also contains further information on the installations required to
 
 # What is HansRoslinger?
 
-HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
+HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and Images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
 
 The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
 </p>
 
 HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the Cloud Run URL 
@@ -59,12 +59,12 @@ Please note that the production version is currently deployed in the us-central1
 
 # Repository Structure
 
-- **Documentation/** — Project docs (CI/CD, tutorials, troubleshooting) and supporting images.
+- **Documentation/** — Project docs (CI/CD, tutorials, troubleshooting) and supporting Images.
 - **HansRoslinger/** — Meteor + React application source (client, server, shared imports, public assets, GCP helpers, tests).
 - **terraform/** — Infrastructure as code for GCP (root configs, reusable module, per-env tfvars, state files).
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038225446.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038225446.png" alt="alt text" width="500"/>
 </p>
 
 ## HansRoslinger/ Structure
@@ -72,12 +72,12 @@ Please note that the production version is currently deployed in the us-central1
 - **client/** — React/Meteor client entry and global HTML/CSS; bootstraps the UI.
 - **server/** — Meteor server startup, methods, publications, and integrations.
 - **imports/** — Shared app code: UI components/pages, handlers, gestures, and data layer.
-- **public/** — Static assets served as-is (e.g., images/HandoverDocumenticons).
+- **public/** — Static assets served as-is (e.g., Images/HandoverDocumenticons).
 - **GCP/** — Google Cloud helpers/config (e.g., bucket utilities).
 - **tests/** — App tests and helpers.
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038239010.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038239010.png" alt="alt text" width="500"/>
 </p>
 
 ---
@@ -184,11 +184,11 @@ You can look into how this MongoDB Atlas database is connected to meteor through
 
 ### Google Cloud Bucket
 
-All images uploaded by the user to HansRoslinger is stored in a google cloud bucket. Buckets allows for cheap and robust uploading of images, witih links to the files being stored as documents in the MongoDB Database.
+All Images uploaded by the user to HansRoslinger is stored in a google cloud bucket. Buckets allows for cheap and robust uploading of Images, witih links to the files being stored as documents in the MongoDB Database.
 
 The buckets are available [here](https://console.cloud.google.com/storage/browser?referrer=search&invt=Ab6sAg&project=hansroslinger-468011&prefix=&forceOnBucketsSortingFiltering=true&bucketType=live)
 
-![1757038278174](images/HandoverDocument/1757038278174.png)
+![1757038278174](Images/HandoverDocument/1757038278174.png)
 
 ## Github/CICD
 
@@ -205,7 +205,7 @@ CICD Workflows are found under [.github](https://github.com/Monash-FIT3170/2025W
 We also have configured a [pull request template](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md) in order to standardise the process of creating a pull request
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038949103.png" alt="alt text" width="400"/>
+  <img src="Images/HandoverDocument/1757038949103.png" alt="alt text" width="400"/>
 </p>
 
 ---
@@ -248,7 +248,7 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 > **TXT record:** Stores google site verification
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038674391.png" alt="alt text" width="700"/>
+  <img src="Images/HandoverDocument/1757038674391.png" alt="alt text" width="700"/>
 </p>
 
 <p align="center"><i>A and AAAA Records</i></p>
@@ -257,7 +257,7 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 <br>
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038704021.png" alt="alt text" width="700"/>
+  <img src="Images/HandoverDocument/1757038704021.png" alt="alt text" width="700"/>
 </p>
 <p align="center"><i>TXT Records Records</i></p>
 

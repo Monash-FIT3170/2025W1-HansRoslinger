@@ -22,11 +22,11 @@ Docker can be used for fast, consistent delivery of applications and is useful f
 
 **Docker Desktop** is a desktop application allowing users to use Docker with an application and interface.
 
-**Docker daemon** (dockerd) listens for Docker API requests and manages Docker objects such as images, containers, networks and volumes.
+**Docker daemon** (dockerd) listens for Docker API requests and manages Docker objects such as Images, containers, networks and volumes.
 
 **Docker client** (docker) is the primary method of interaction with Docker.
 
-When using docker, you create and use images, containers, networks, volumes, plugins and other objects. Images are read-only templates with instructions for creating a Docker container. Images are derived from other images with additional customizations. Containers are a runnable instance of an image.
+When using docker, you create and use Images, containers, networks, volumes, plugins and other objects. Images are read-only templates with instructions for creating a Docker container. Images are derived from other Images with additional customizations. Containers are a runnable instance of an image.
 
 ## **Installation**
 
@@ -119,4 +119,4 @@ The following are some webpages with more details about specific docker function
 ## Troubleshooting 
 If you come across any issues when attempting to work with docker files, please refer to these common docker issues.
 1. Make sure your docker is running
-2. Check you have available storage on docker desktop, if so you might need to delete some duplicate images/containers
+2. Check you have available storage on docker desktop, if so you might need to delete some duplicate Images/containers

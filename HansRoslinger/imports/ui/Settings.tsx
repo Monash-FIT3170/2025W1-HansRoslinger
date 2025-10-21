@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { getAuthCookie } from "../cookies/cookies";
 import { getUserById, getUserSettings, updateUserSettings } from "../api/database/users/users";
 
-const GestureToLabel: Record<GestureType, string> = {
+export const GestureToLabel: Record<GestureType, string> = {
   [GestureType.THUMB_UP]: "Thumb Up",
   [GestureType.THUMB_DOWN]: "Thumb Down",
   [GestureType.POINTING_UP]: "Pointing Up",
@@ -32,7 +32,7 @@ const GestureToLabel: Record<GestureType, string> = {
   [GestureType.DRAW]: "Draw",
 };
 
-const FunctionToLabel: Record<FunctionType, string> = {
+export const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.SELECT]: "Select",
   [FunctionType.CLEAR]: "Clear",
   [FunctionType.FILTER]: "Filter",
@@ -44,6 +44,34 @@ const FunctionToLabel: Record<FunctionType, string> = {
   [FunctionType.DRAW]: "Draw",
 };
 
+export const FunctionToIconSources: Record<FunctionType, string> = {
+  [FunctionType.SELECT]: "/icons/selection.png",
+  [FunctionType.FILTER]: "/icons/filter.png",
+  [FunctionType.CLEAR]: "/icons/filter-clear.png",
+  [FunctionType.ZOOM]: "/icons/zoom-in.png",
+  [FunctionType.CLICK]: "/icons/click.png",
+  [FunctionType.SWITCH_CHART]: "/icons/change-type.png",
+  [FunctionType.SWITCH_DATA]: "/icons/change-data.png",
+  [FunctionType.UNUSED]: "",
+  [FunctionType.DRAW]: "/icons/draw.png",
+};
+
+export const GestureToIconSources: Record<GestureType , string> = {
+  [GestureType.CLOSED_FIST]: "/icons/closed_fist.png",
+  [GestureType.I_LOVE_YOU]: "/icons/love.png",
+  [GestureType.UNIDENTIFIED]: "",
+  [GestureType.OPEN_PALM]: "/icons/open_palm.png",
+  [GestureType.POINTING_UP]: "/icons/point_up.png",
+  [GestureType.THUMB_DOWN]: "/icons/thumbs_down.png",
+  [GestureType.THUMB_UP]: "/icons/thumbs_up.png",
+  [GestureType.VICTORY]: "/icons/victory.png",
+  [GestureType.PINCH]: "/icons/pinch.png",
+  [GestureType.DOUBLE_PINCH]: "/icons/double_pinch.png",
+  [GestureType.TWO_FINGER_POINTING_LEFT]: "/icons/two_point_L.png",
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: "/icons/two_point_R.png",
+  [GestureType.DRAW]: "/icons/draw_gesture.png",
+};
+
 const Gestures = [
   GestureType.CLOSED_FIST,
   GestureType.I_LOVE_YOU,
@@ -53,7 +81,7 @@ const Gestures = [
   GestureType.THUMB_UP,
   GestureType.VICTORY,
   GestureType.PINCH,
-  // GestureType.DOUBLE_PINCH,
+  GestureType.DOUBLE_PINCH,
   GestureType.TWO_FINGER_POINTING_LEFT,
   GestureType.TWO_FINGER_POINTING_RIGHT,
   GestureType.DRAW,

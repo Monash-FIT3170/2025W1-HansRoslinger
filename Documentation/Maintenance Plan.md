@@ -1,5 +1,13 @@
-# Hansroslinger Maintenance Plan
+<p align="center">
+  <img src="Images/MaintenancePlan/logo.png" alt="HansRoslinger Logo" width="400"/>
+</p>
 
+<h1 align="center">HansRoslinger Maintenance Plan</h1>
+
+<br/>
+<br/>
+
+---
 # Aim
 
 The aim of this document is to outline the winding down of HanRoslinger, including
@@ -27,7 +35,7 @@ Please note that the production version is currently deployed in the us-central1
 # Maintaining the current state of the codebase
 
 <p align="center">
-  <img src="image/MaintenancePlan/1761082567024.png" alt="repository image" width="500"/>
+  <img src="Images/MaintenancePlan/1761082567024.png" alt="repository image" width="500"/>
   <br>
   <em>Repository Homepage</em>
 </p>
@@ -50,7 +58,7 @@ In the event that the repository will not be kept, a fork of the repository can 
 ## Google Cloud Platform
 
 <p align="center">
-  <img src="image/MaintenancePlan/google cloud platform.png" alt="Google Cloud Platform" width="200"/>
+  <img src="Images/MaintenancePlan/google cloud platform.png" alt="Google Cloud Platform" width="200"/>
 </p>
 
 The production version of HansRoslinger, defined as the CloudRun deployment accessible by the domain `hansroslinger.website` is deployed entirely using the Google Cloud Platform, which is owned by `Mayank Bajpai`, with partial permissions provided to
@@ -68,7 +76,7 @@ It is not expected that Mayank will continue to maintain the Google Cloud Projec
 ### Terraform Infrastructure
 
 <p align="center">
-  <img src="image/MaintenancePlan/terraform-iconpng.png" alt="Terraform" width="100"/>
+  <img src="Images/MaintenancePlan/terraform-iconpng.png" alt="Terraform" width="100"/>
 </p>
 
 Throughout the development of HansRoslinger, all required Google Cloud infrastructure has been provisioned and deployed via Terraform. [More information regarding terraform can be found here](https://developer.hashicorp.com/terraform/intro).
@@ -86,7 +94,7 @@ Assuming that all other service names remain the same (this is a valid configura
 ## Mongo Atlas Database
 
 <p align="center">
-  <img src="image/MaintenancePlan/mongodb atlas.png" alt="MongoDB Atlas" width="200"/>
+  <img src="Images/MaintenancePlan/mongodb atlas.png" alt="MongoDB Atlas" width="200"/>
 </p>
 
 HansRoslingers production environments make use of a `Mongo Atlas Database` in order to store all the required user metadata. This is owned by Mayank, with permissions granted to Maximilian Craig to view and manage resources within the database.

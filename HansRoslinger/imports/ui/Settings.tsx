@@ -81,7 +81,7 @@ const Gestures = [
   GestureType.THUMB_UP,
   GestureType.VICTORY,
   GestureType.PINCH,
-  GestureType.DOUBLE_PINCH,
+  // GestureType.DOUBLE_PINCH,
   GestureType.TWO_FINGER_POINTING_LEFT,
   GestureType.TWO_FINGER_POINTING_RIGHT,
   GestureType.DRAW,

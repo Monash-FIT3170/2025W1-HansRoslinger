@@ -22,7 +22,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
     let webcamRunning: boolean = false;
     // const videoHeight: string = "360px";
     // const videoWidth: string = "480px";
-    let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
+    let runningMode: "IMAGE";
     // const resultWidthHeigth = 256;
     let rafID: number | null = null;
 
@@ -40,7 +40,7 @@ export const ImageSegmentation: React.FC<ImageSegmentationProps> = ({ grayscale 
 
       imageSegmenter = await ImageSegmenter.createFromOptions(audio, {
         baseOptions: {
-          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite",
           delegate: "GPU",
         },
         runningMode: runningMode,

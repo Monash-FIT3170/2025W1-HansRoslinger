@@ -21,6 +21,7 @@ import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 import { FunctionToIconSources, GestureToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
+import { active } from "d3";
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -256,7 +257,14 @@ export const Present: React.FC = () => {
   }, [gestureSettings]);
 
   const getGestureAssignedToFunction = (functionType: FunctionType): GestureType | null => {
+    // First try to find in user's gesture settings
     for (const [gestureKey, assignedFunction] of Object.entries(gestureSettings)) {
+      if (assignedFunction === functionType) {
+        return Number(gestureKey) as GestureType;
+      }
+    }
+    // If not found, fall back to default mapping
+    for (const [gestureKey, assignedFunction] of Object.entries(defaultMapping)) {
       if (assignedFunction === functionType) {
         return Number(gestureKey) as GestureType;
       }
@@ -298,7 +306,7 @@ export const Present: React.FC = () => {
             opacity: gestureDetectionStatus && (showHints || activeGesture !== null) ? 1 : 0,
             transition: "opacity 0.5s",
           }}
-        >
+        > 
           {hintFunctions.map((functionType) => {
             const functionIconSource = FunctionToIconSources[functionType];
             if (!functionIconSource) return null;

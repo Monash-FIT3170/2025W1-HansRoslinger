@@ -4,8 +4,18 @@
 
 <h1 align="center">HansRoslinger Maintenance Plan</h1>
 
+<h2 align="center">Milestone 4</h2>
+
+<h3 align="center">
+  Jiale Hu, Max Craig, Mayank Bajpai, Ranusha Liyanage, Shehara Hewawasam, Nathan Michailidis, Harkirat Singh, Tejeshvi Sagwal, Connor Macdougall, Liam Chui, Bhanu Wijekoon, Agamjot Singh
+</h3>
+
+
+
 <br/>
 <br/>
+
+<div style="page-break-before: always;"></div>
 
 # Aim
 
@@ -32,6 +42,8 @@ HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the
 
 Please note that the production version is currently deployed in the us-central1 zone, this is because only US regions support domain mapping, which allowed us to use the custom URL. Doing the same with an Australia based region is possible however would incur additional costs
 
+<div style="page-break-before: always;"></div>
+
 # Maintaining the current state of the codebase
 
 <p align="center">
@@ -52,6 +64,8 @@ In the event that the repository will not be kept, a fork of the repository can 
 
 1. Issues and Pull Requests (This will be mitigated by closing, merging or transferring over to the forked repository)
 2. Branch protection rules and CI/CD settings (this is minimal within the repository and can be manually transferred over or configured as desired by the new owner)
+
+<div style="page-break-before: always;"></div>
 
 # State of the production system
 
@@ -114,6 +128,8 @@ There are currently 2 ways to access the production deployment of CloudRun
 * Through the custom domain `https://hansroslinger.website/`
 
 The CloudRun URL is persistent as long as the CloudRun is deployed via the [Github Actions](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/workflows/deploy.yaml), however the custom domain is an ongoing subscription. The current lease period for the domain is 1 year, in order to maintain the domain after this, it will need to be renewed via [namecheap.com](namecheap.com).
+
+<div style="page-break-before: always;"></div>
 
 # Associated Costs
 

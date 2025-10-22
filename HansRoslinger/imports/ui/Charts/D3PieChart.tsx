@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import {
-  DEFAULT_COLOUR,
   SELECT_COLOUR,
   MARGIN,
   AXIS_COLOR,
   AXIS_FONT_SIZE,
-  AXIS_TEXT_SHADOW,
+  BAR_OPACITY,
 } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
@@ -22,9 +21,100 @@ interface D3PieChartProps {
 export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
   const data: PieSliceData[] = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
-  const [highlightedSlice, setHighlightedSlice] = useState<string | null>(null);
+  const [highlightedSlices, setHighlightedSlices] = useState<Set<string>>(new Set());
+  const [filteredData, setFilteredData] = useState(data);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  const hoverClearTimeout = useRef<number | null>(null);
 
-  // ... (handleHighlight, handleClear, etc. - these parts remain the same)
+  // Transient hover: highlight while finger is over a slice
+  const handleHover = (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    const { x, y } = customEvent.detail;
+
+    if (!chartRef.current) return;
+
+    const svg = d3.select(chartRef.current).select("svg");
+    const slices = svg.selectAll<SVGPathElement, d3.PieArcDatum<PieSliceData>>("path.arc");
+
+    let hovered: string | null = null;
+    slices.each(function (d) {
+      const bbox = this.getBoundingClientRect();
+      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+        hovered = d.data.label;
+      }
+    });
+
+    setHoverLabel(hovered);
+    if (hoverClearTimeout.current) window.clearTimeout(hoverClearTimeout.current);
+    hoverClearTimeout.current = window.setTimeout(() => setHoverLabel(null), 120);
+  };
+
+  // Permanent highlight: toggle selection of slices
+  const handleHighlight = (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    const { x, y } = customEvent.detail;
+
+    if (!chartRef.current) return;
+
+    const svg = d3.select(chartRef.current).select("svg");
+    const slices = svg.selectAll<SVGPathElement, d3.PieArcDatum<PieSliceData>>("path.arc");
+
+    let targetLabel: string | null = null;
+    slices.each(function (d) {
+      const bbox = this.getBoundingClientRect();
+      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+        targetLabel = d.data.label;
+      }
+    });
+
+    if (targetLabel) {
+      setHighlightedSlices((prev) => {
+        const next = new Set(prev);
+        if (next.has(targetLabel!)) {
+          next.delete(targetLabel!);
+        } else {
+          next.add(targetLabel!);
+        }
+        return next;
+      });
+    }
+  };
+
+  // Clear filters or highlighted slices
+  const handleClear = () => {
+    const isFiltered = filteredData.length !== data.length;
+
+    if (isFiltered) {
+      setFilteredData(data);
+      setZoomScale(1);
+    } else if (highlightedSlices.size > 0) {
+      setHighlightedSlices(new Set());
+    }
+  };
+
+  // Filter to show only highlighted slices
+  const handleFilter = () => {
+    if (highlightedSlices.size > 0) {
+      setFilteredData(data.filter((d) => highlightedSlices.has(d.label)));
+    }
+  };
+
+  // Zoom functionality
+  const handleZoom = (event: Event) => {
+    const customEvent = event as CustomEvent<{
+      scaleX: number;
+      scaleY: number;
+    }>;
+    const { scaleX } = customEvent.detail;
+
+    const chartWidth = chartRef.current?.getBoundingClientRect().width || 1;
+    const windowWidth = window.innerWidth;
+    const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
+
+    const clampedScale = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
+    setZoomScale(clampedScale);
+  };
 
   const renderChart = () => {
     if (!chartRef.current) return;
@@ -67,7 +157,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
 
 
     // --- Logic for EMPTY DATA ---
-    if (data.length === 0 || d3.sum(data, d => d.value) === 0) {
+    if (filteredData.length === 0 || d3.sum(filteredData, d => d.value) === 0) {
         // Draw a placeholder grey circle (analogous to empty axes)
         g.append("circle")
             .attr("cx", 0)
@@ -94,7 +184,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     // 2. Color Scale
     const color = d3
       .scaleOrdinal<string, string>()
-      .domain(data.map((d) => d.label))
+      .domain(filteredData.map((d) => d.label))
       .range(d3.schemeCategory10);
 
     // 3. Define D3 Pie Layout
@@ -103,7 +193,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .sort(null)
       .value((d) => d.value);
 
-    const arcs = pie(data);
+    const arcs = pie(filteredData);
 
     // 4. Define Arc Generators
     const arc = d3
@@ -123,17 +213,13 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .attr("class", "arc")
       .attr("d", arc)
       .attr("fill", (d) => {
-        const isHighlighted = d.data.label === highlightedSlice;
-        return isHighlighted ? SELECT_COLOUR : color(d.data.label);
+        const isHighlighted = highlightedSlices.has(d.data.label);
+        const isHovered = d.data.label === hoverLabel;
+        return isHighlighted || isHovered ? SELECT_COLOUR : color(d.data.label);
       })
+      .attr("opacity", BAR_OPACITY) // Make it semi-transparent like bar chart
       .attr("stroke", "white")
-      .style("stroke-width", "2px")
-      .on("mouseover", (event, d) => {
-        setHighlightedSlice(d.data.label);
-      })
-      .on("mouseout", () => {
-        setHighlightedSlice(null);
-      });
+      .style("stroke-width", "2px");
 
     // 6. Add Labels (Percentage and Label)
     g.selectAll(".arc-label")
@@ -148,7 +234,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .style("font-weight", "bold")
       .style("text-shadow", "0 0 3px black")
       .text((d) => {
-        const total = d3.sum(data, (d) => d.value);
+        const total = d3.sum(filteredData, (d) => d.value);
         const percentage = ((d.data.value / total) * 100).toFixed(1);
 
         if (d.endAngle - d.startAngle > 0.35) {
@@ -156,18 +242,36 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
         }
         return "";
       });
+    
+    // Apply zoom scale
+    svg.attr("transform", `scale(${zoomScale})`);
   };
 
-  // ... (Effect Hooks remain the same)
-  
   useEffect(() => {
     renderChart();
     window.addEventListener("resize", renderChart);
-    
+    window.addEventListener("chart:hover", handleHover as EventListener);
+    window.addEventListener("chart:highlight", handleHighlight as EventListener);
+    window.addEventListener("chart:clear", handleClear as EventListener);
+    window.addEventListener("chart:filter", handleFilter as EventListener);
+    window.addEventListener("chart:zoom", handleZoom as EventListener);
+
     return () => {
       window.removeEventListener("resize", renderChart);
+      window.removeEventListener("chart:hover", handleHover as EventListener);
+      window.removeEventListener("chart:highlight", handleHighlight as EventListener);
+      window.removeEventListener("chart:clear", handleClear as EventListener);
+      window.removeEventListener("chart:filter", handleFilter as EventListener);
+      window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
-  }, [data, highlightedSlice, dataset]); 
+  }, [filteredData, highlightedSlices, hoverLabel, zoomScale]);
+
+  // Reset filters when dataset changes
+  useEffect(() => {
+    setFilteredData(data);
+    setHighlightedSlices(new Set());
+    setZoomScale(1);
+  }, [dataset]);
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

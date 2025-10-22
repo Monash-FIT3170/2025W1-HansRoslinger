@@ -165,6 +165,8 @@ export const Present: React.FC = () => {
       setCurrentChartView(CurrentChartView.LINE);
     } else if (preferredType === ChartType.BAR) {
       setCurrentChartView(CurrentChartView.BAR);
+    } else if (preferredType === ChartType.PIE) {
+      setCurrentChartView(CurrentChartView.PIE);
     } else {
       // Default to LINE if no preference
       setCurrentChartView(CurrentChartView.LINE);

@@ -8,6 +8,7 @@ let saveIndex = 0;
 
 function saveState(state: any) {
     const now = Date.now();
+    loadIndex = 0;
 
     if (now - lastSaveTime < loadDelay) {
         console.log("Too soon to save state");

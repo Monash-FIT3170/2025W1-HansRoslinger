@@ -76,6 +76,13 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
         return;
       }
 
+      if (
+        gesture.gestureID === GestureType.THUMB_DOWN
+      ) {
+        handleGestureToFunc(gesture.gestureID, gesture, gesture, map);
+        return;
+      }
+
       const requiredDelay = state.firedOnce
         ? REPEAT_ACTIVATION_DELAY_MS
         : FIRST_ACTIVATION_DELAY_MS;

@@ -7,6 +7,7 @@ import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 import { WebcamComponent } from "./Video/webcam";
 import { Header } from "./Header";
+import { useLayoutEffect } from "react";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
 import { useDatasetNavigation, usePresentationDatasets } from "./Input/Data";
 import { Title } from "./Charts/Title";
@@ -120,78 +121,56 @@ useEffect(() => {
   currentImageIndex,
 ]);
 
-const lastSaveTimeRef = useRef(0);
+  const lastSaveTimeRef = useRef(0);
 
-useEffect(() => {
   const SAVE_DELAY = 1000;
 
   const saveIfNeeded = () => {
     const now = Date.now();
     if (now - lastSaveTimeRef.current < SAVE_DELAY) return;
 
-    saveState({imageScale: { ...imageScale },
-  zoomStartPosition: zoomStartPosition ? { ...zoomStartPosition } : null,});
+    saveState(stateRef.current);
     lastSaveTimeRef.current = now;
   };
 
-  saveIfNeeded();
+  useEffect(() => {
+    const interval = setInterval(saveIfNeeded, 100);
+    return () => clearInterval(interval);
+  }, []);
 
-}, [
-  grayscale,
-  backgroundRemoval,
-  showHeader,
-  showAssets,
-  showLineChart,
-  imageScale,
-  isZoomEnabled,
-  zoomStartPosition,
-  selectedAssetId,
-  currentAssetIndex,
-  currentAssetId,
-  currentImageIndex,
-]);
-
-
-
-// Undo handler
-useEffect(() => {
-  const onUndo = () => {
-    const state = loadState();
-    if (!state) return;
-
-    // Restore basic toggles
-    setGrayscale(state.grayscale ?? false);
+  useLayoutEffect(() => {
+    const onUndo = () => {
+      console.log("Undo gesture detected!");
+      const state = loadState();
+      if (!state) return;
+      setGrayscale(state.grayscale ?? false);
     setBackgroundRemoval(state.backgroundRemoval ?? false);
     setShowHeader(state.showHeader ?? true);
     setShowAssets(state.showAssets ?? false);
     setShowLineChart(state.showLineChart ?? false);
 
-    // Restore selected asset
     if (state.selectedAssetId) {
+      // @ts-ignore
       const idx = assets.findIndex(a => a._id === state.selectedAssetId);
       if (idx >= 0) {
         setCurrentAssetIndex(idx);
         setSelectedAssetId(state.selectedAssetId);
       } else {
-        // fallback if asset not found
         setCurrentAssetIndex(0);
         setSelectedAssetId("");
       }
     }
-
-    // Restore image index safely
+    
     setCurrentImageIndex(Math.min(state.currentImageIndex ?? 0, assetImages.length - 1));
 
-    // Restore zoom
     if (state.imageScale && setImageScale) setImageScale({ ...state.imageScale });
     if (state.isZoomEnabled !== undefined && setIsZoomEnabled) setIsZoomEnabled(state.isZoomEnabled);
     if (state.zoomStartPosition && setZoomStartPosition) setZoomStartPosition({ ...state.zoomStartPosition });
-  };
+    };
 
-  window.addEventListener("undo", onUndo);
-  return () => window.removeEventListener("undo", onUndo);
-  }, [assets, assetImages.length, setImageScale, setIsZoomEnabled, setZoomStartPosition]);
-
+    window.addEventListener("undo", onUndo);
+    return () => window.removeEventListener("undo", onUndo);
+  }, []);
 
   // Preload current, next, and previous images for smooth navigation
   useImagePreload(

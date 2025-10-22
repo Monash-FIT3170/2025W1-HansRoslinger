@@ -4,6 +4,8 @@ import { Meteor } from "meteor/meteor";
 import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
+// IMPORT THE NEW PIE CHART COMPONENT
+import { D3PieChart } from "./Charts/D3PieChart"; 
 import { WebcamComponent } from "./Video/webcam";
 import { Header, toolbarButtonHeight, toolbarButtonWidth } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
@@ -21,7 +23,13 @@ import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 import { FunctionToIconSources, GestureToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
-import { active } from "d3";
+
+// Define chart views (add PIE)
+enum CurrentChartView {
+  LINE = 'LINE',
+  BAR = 'BAR',
+  PIE = 'PIE',
+}
 
 export const Present: React.FC = () => {
   useAuthGuard();
@@ -36,7 +44,6 @@ export const Present: React.FC = () => {
   const [showHints, setShowHints] = useState(false);
 
   // State for chart features
-  const [showLineChart, setShowLineChart] = useState(false);
   const { imageScale, isZoomEnabled, zoomStartPosition } = useImageAssetZoom();
 
   const [searchParams] = useSearchParams();
@@ -111,6 +118,22 @@ export const Present: React.FC = () => {
   }, [activeGesture, gestureDetectionStatus]);
 
   const determineGrayscale = () => grayscaleRef.current;
+  
+  // State for current chart view
+  const [currentChartView, setCurrentChartView] = useState<CurrentChartView>(CurrentChartView.LINE);
+  
+  // Helper to determine the next chart view (cycle: LINE -> BAR -> PIE -> LINE)
+  const getNextChartView = (current: CurrentChartView): CurrentChartView => {
+    switch (current) {
+      case CurrentChartView.LINE:
+        return CurrentChartView.BAR;
+      case CurrentChartView.BAR:
+        return CurrentChartView.PIE;
+      case CurrentChartView.PIE:
+      default:
+        return CurrentChartView.LINE;
+    }
+  };
 
   // Zoom toggle handled in useImageAssetZoom
 
@@ -127,16 +150,27 @@ export const Present: React.FC = () => {
         }
         return;
       }
-      setShowLineChart((prev) => !prev);
+      // Cycle through chart views: LINE -> BAR -> PIE -> LINE
+      setCurrentChartView((prev) => getNextChartView(prev));
     };
 
     window.addEventListener("chart:switch", handleSwitchChartOrImage);
     return () => window.removeEventListener("chart:switch", handleSwitchChartOrImage);
   }, [showAssets, assetImages.length, assets.length]);
 
-  // Initialize chart type
+  // Initialize chart type based on dataset preference
   useEffect(() => {
-    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
+    const preferredType = (currentDataset ?? defaultDataset).preferredChartType;
+    if (preferredType === ChartType.LINE) {
+      setCurrentChartView(CurrentChartView.LINE);
+    } else if (preferredType === ChartType.BAR) {
+      setCurrentChartView(CurrentChartView.BAR);
+    } else if (preferredType === ChartType.PIE) {
+      setCurrentChartView(CurrentChartView.PIE);
+    } else {
+      // Default to LINE if no preference
+      setCurrentChartView(CurrentChartView.LINE);
+    }
   }, [currentDataset]);
 
   // Load the selected presentation to pick initial asset
@@ -279,6 +313,24 @@ export const Present: React.FC = () => {
     }
     const gestureLabel = GestureToLabel[gesture] ?? "Custom";
     return `${functionLabel}: ${gestureLabel}`;
+  };
+
+  // --- RENDER FUNCTION ---
+  
+  // Function to render the correct chart component
+  const renderChart = () => {
+    const dataset = currentDataset ?? defaultDataset;
+
+    switch (currentChartView) {
+      case CurrentChartView.LINE:
+        return <D3LineChart dataset={dataset} />;
+      case CurrentChartView.BAR:
+        return <D3BarChart dataset={dataset} />;
+      case CurrentChartView.PIE:
+        return <D3PieChart dataset={dataset} />; 
+      default:
+        return <D3BarChart dataset={dataset} />; // Fallback
+    }
   };
 
   return (
@@ -430,7 +482,7 @@ export const Present: React.FC = () => {
       {/* Charts (hidden when showing assets) */}
       {!showAssets && (
         <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: "10%", width: "95%", height: "50%" }}>
-          {showLineChart ? <D3LineChart dataset={currentDataset ?? defaultDataset} /> : <D3BarChart dataset={currentDataset ?? defaultDataset} />}
+          {renderChart()}
         </Box>
       )}
 
@@ -508,8 +560,8 @@ export const Present: React.FC = () => {
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
             onToggleGrayscale={toggleGrayscale}
-            showLineChart={showLineChart}
-            onToggleChart={() => setShowLineChart((c) => !c)}
+            showLineChart={currentChartView === CurrentChartView.LINE}
+            onToggleChart={() => setCurrentChartView((prev) => getNextChartView(prev))}
             backgroundRemoval={backgroundRemoval}
             grayscale={grayscale}
             showAssets={showAssets}

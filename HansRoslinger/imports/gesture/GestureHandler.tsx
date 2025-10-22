@@ -5,6 +5,8 @@ import {
   Handedness,
   handleGestureToFunc,
 } from "./gesture";
+import { detectTwoFingersUp } from "./gesture";
+import { twoFingersLog } from "./TwoFingers";
 import { useRef } from "react";
 
 let isZoomEnabled = false;
@@ -31,8 +33,13 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
 
   const HandleGesture = (gesture: Gesture) => {
     const map = mapping;
-    const now: number = Date.now();
+    
     // Keep state consistent: clear conflicting slots when switching
+    if (detectTwoFingersUp(gesture)) {
+        twoFingersLog(gesture, gesture);
+        return;
+      }
+    const now: number = Date.now();
     if (gesture.handedness === Handedness.BOTH) {
       activeGestures.current[Handedness.LEFT] = null;
       activeGestures.current[Handedness.RIGHT] = null;
@@ -75,7 +82,7 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
         // Keep the most recent gesture data for any handler needing latest landmarks
         state.gesture = gesture;
       }
-    }
+    } 
   };
 
   return { HandleGesture };

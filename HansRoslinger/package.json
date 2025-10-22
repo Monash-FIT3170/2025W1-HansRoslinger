@@ -13,7 +13,7 @@
     "@emotion/styled": "^11.14.1",
     "@google-cloud/storage": "^7.17.0",
     "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
-    "@mui/icons-material": "^7.3.1",
+    "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.2.0",
     "@tailwindcss/postcss": "^4.1.6",
     "@types/node-fetch": "^2.6.13",

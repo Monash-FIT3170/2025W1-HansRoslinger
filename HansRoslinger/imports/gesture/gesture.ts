@@ -5,6 +5,7 @@ import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
 import { click } from "./Click";
+import { twoFingersLog } from "./TwoFinger";
 
 enum GestureType {
   CLOSED_FIST,
@@ -19,6 +20,7 @@ enum GestureType {
   DOUBLE_PINCH,
   TWO_FINGER_POINTING_LEFT,
   TWO_FINGER_POINTING_RIGHT,
+  TWO_FINGERS_UP
 }
 
 enum FunctionType {
@@ -30,6 +32,7 @@ enum FunctionType {
   SWITCH_CHART,
   SWITCH_DATA,
   CLICK,
+  TWO_FINGERS,
 }
 
 export const IDtoEnum: Record<string, GestureType> = {
@@ -45,6 +48,7 @@ export const IDtoEnum: Record<string, GestureType> = {
   Double_Pinch: GestureType.DOUBLE_PINCH,
   Two_Finger_Pointing_Left: GestureType.TWO_FINGER_POINTING_LEFT,
   Two_Finger_Pointing_Right: GestureType.TWO_FINGER_POINTING_RIGHT,
+  Two_Fingers_Up: GestureType.TWO_FINGERS_UP,
 };
 
 type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
@@ -57,6 +61,7 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
   [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
   [FunctionType.CLICK]: click as GestureHandlerFn,
+  [FunctionType.TWO_FINGERS]: twoFingersLog as GestureHandlerFn,
 };
 
 enum Handedness {
@@ -192,4 +197,21 @@ export const gestureToScreenPosition = (
   }
 
   return { screenX, screenY };
+};
+
+
+export const detectTwoFingersUp = (gesture: Gesture): boolean => {
+  if (!gesture.singleGestureLandmarks || gesture.singleGestureLandmarks.length < 21)
+    return false;
+
+  const lm = gesture.singleGestureLandmarks;
+
+  const indexTipUp = lm[8].y < lm[6].y; // tip above PIP
+  const middleTipUp = lm[12].y < lm[10].y;
+
+  // Ensure ring and pinky fingers are down
+  const ringDown = lm[16].y > lm[14].y;
+  const pinkyDown = lm[20].y > lm[18].y;
+
+  return indexTipUp && middleTipUp && ringDown && pinkyDown;
 };

@@ -1,63 +1,81 @@
 // api/PieChart/pieChart.ts
-export type Slice = { label: string; value: number };
 
-const makeColors = (n: number) =>
-  Array.from({ length: n }, (_, i) => {
-    const hue = (i * 137.508) % 360; // golden-angle spacing
-    return `hsl(${hue} 80% 55% / 0.85)`;
-  });
+// The original 20 values generated for the line chart
+const generateRandomValues = (count: number) =>
+  Array.from({ length: count }, () => Math.floor(Math.random() * 100) + 10);
 
-export const generatePieChartData = (slices?: Slice[]) => {
-  const demo =
-    slices && slices.length
-      ? slices
-      : [
-          { label: "Apples", value: 40 },
-          { label: "Bananas", value: 25 },
-          { label: "Cherries", value: 20 },
-          { label: "Dates", value: 15 },
-        ];
+/**
+ * Generates aggregated data suitable for a Pie chart.
+ * Groups 20 random values into 4 categories.
+ */
+export const generatePieChartData = () => {
+  const allValues = generateRandomValues(20);
 
-  const clean = demo
-    .map(s => ({ label: String(s.label || "").trim(), value: Number(s.value) }))
-    .filter(s => s.label && Number.isFinite(s.value) && s.value > 0);
+  // Aggregation Logic: Sum the values into 4 groups of 5
+  const categoryLabels = ["Q1 Sales", "Q2 Sales", "Q3 Sales", "Q4 Sales"];
+  const categoryValues = [0, 0, 0, 0];
 
-  const labels = clean.map(d => d.label);
-  const values = clean.map(d => d.value);
-  const backgroundColor = makeColors(values.length);
+  for (let i = 0; i < allValues.length; i++) {
+    const categoryIndex = Math.floor(i / 5);
+    categoryValues[categoryIndex] += allValues[i];
+  }
+
+  // Define a distinct color array for each slice
+  const backgroundColors = [
+    "rgba(255, 99, 132, 0.8)", // Red
+    "rgba(54, 162, 235, 0.8)", // Blue
+    "rgba(255, 206, 86, 0.8)", // Yellow
+    "rgba(75, 192, 192, 0.8)", // Green
+  ];
 
   return {
-    labels,
+    labels: categoryLabels,
     datasets: [
       {
-        label: "User Data",
-        data: values,
-        backgroundColor,
-        borderWidth: 1,
+        label: "Aggregated Sales Total",
+        data: categoryValues,
+        backgroundColor: backgroundColors, // Array of colors for slices
+        hoverOffset: 15, // Adds a slight pop-out effect on hover
       },
     ],
   };
 };
 
-export const pieOptions = {
+export const options = {
   responsive: true,
   plugins: {
-    legend: { position: "top" as const },
+    legend: {
+      // Placing the legend to the right is common for pie charts
+      position: "right" as const, 
+      labels: {
+        // Use the colors from the dataset as the legend boxes
+        usePointStyle: true, 
+      }
+    },
     title: {
       display: true,
-      text: "User Pie Chart",
+      text: "Quarterly Data Distribution", // Updated title
+      font: {
+        size: 16
+      }
     },
+    // Optional: Add tooltips to show the percentage for each slice
     tooltip: {
-      callbacks: {
-        label: (ctx: any) => {
-          const value = Number(ctx.parsed);
-          const ds = ctx.dataset?.data as number[] | undefined;
-          const total =
-            ds?.reduce((s: number, v: number) => s + (Number(v) || 0), 0) || 0;
-          const pct = total > 0 ? ((value / total) * 100).toFixed(2) : "0.00";
-          return `${ctx.label}: ${value} (${pct}%)`;
-        },
-      },
-    },
+        callbacks: {
+            label: function(context: any) {
+                let label = context.label || '';
+                if (label) {
+                    label += ': ';
+                }
+                if (context.parsed !== null) {
+                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                    const currentValue = context.parsed;
+                    const percentage = ((currentValue/total) * 100).toFixed(1) + '%';
+                    label += `${currentValue.toFixed(0)} (${percentage})`;
+                }
+                return label;
+            }
+        }
+    }
   },
 };

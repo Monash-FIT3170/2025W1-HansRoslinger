@@ -24,9 +24,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const [highlightedSlice, setHighlightedSlice] = useState<string | null>(null);
 
-  // Remaining state and interaction handlers (handleHighlight, handleClear, etc.) 
-  // are omitted here for brevity but should be kept the same as in the previous response.
-  // ...
+  // ... (handleHighlight, handleClear, etc. - these parts remain the same)
 
   const renderChart = () => {
     if (!chartRef.current) return;
@@ -55,19 +53,20 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
     
-    // 8. Add Title (Moved to top so it's always drawn)
-    const titleText = (dataset.title || "Data Distribution (Pie Chart)");
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", MARGIN.top / 2)
-        .attr("text-anchor", "middle")
-        .attr("fill", AXIS_COLOR)
-        .style("font-size", "1.4em")
-        .style("font-weight", "bold")
-        .text(titleText);
+    // 🚨 REMOVE THIS BLOCK to remove the top title
+    // 8. Add Title (This was the block creating the top title)
+    // const titleText = (dataset.title || "Data Distribution (Pie Chart)");
+    // svg.append("text")
+    //     .attr("x", width / 2)
+    //     .attr("y", MARGIN.top / 2)
+    //     .attr("text-anchor", "middle")
+    //     .attr("fill", AXIS_COLOR)
+    //     .style("font-size", "1.4em")
+    //     .style("font-weight", "bold")
+    //     .text(titleText);
 
 
-    // --- 🚨 NEW LOGIC FOR EMPTY DATA 🚨 ---
+    // --- Logic for EMPTY DATA ---
     if (data.length === 0 || d3.sum(data, d => d.value) === 0) {
         // Draw a placeholder grey circle (analogous to empty axes)
         g.append("circle")
@@ -87,7 +86,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
             .style("font-size", AXIS_FONT_SIZE)
             .text("No Data Available");
 
-        return; // Exit the function, skipping the pie chart rendering logic
+        return; 
     }
     // --- END EMPTY DATA LOGIC ---
 
@@ -161,19 +160,14 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
 
   // ... (Effect Hooks remain the same)
   
-  // The state and effects need to be defined outside of renderChart for React to work
   useEffect(() => {
-    // ... (rest of the useEffect hook for rendering and listeners)
     renderChart();
     window.addEventListener("resize", renderChart);
-    // ... (event listeners)
     
     return () => {
-      // ... (cleanup)
       window.removeEventListener("resize", renderChart);
-      // ... (cleanup listeners)
     };
-  }, [data, highlightedSlice, dataset]); // Simplified dependencies for example
+  }, [data, highlightedSlice, dataset]); 
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

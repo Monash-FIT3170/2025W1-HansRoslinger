@@ -15,7 +15,7 @@ import { clearAuthCookie, getUserIDCookie } from "../cookies/cookies";
 import {
   createDataset,
   deleteDataset,
-  ChartType,
+  ChartType, // ChartType now includes PIE
 } from "../api/database/dataset/dataset";
 
 export default function AllPresentations() {
@@ -414,6 +414,8 @@ export default function AllPresentations() {
         >
           <option value={ChartType.BAR}>Bar</option>
           <option value={ChartType.LINE}>Line</option>
+          {/* 🚨 ADDED PIE CHART OPTION HERE */}
+          <option value={ChartType.PIE}>Pie</option>
         </select>
         <textarea
           className="border p-2 w-full mb-4"

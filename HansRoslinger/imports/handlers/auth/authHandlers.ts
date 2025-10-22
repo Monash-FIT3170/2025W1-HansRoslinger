@@ -1,18 +1,10 @@
-import {
-  correctLogin,
-  createUser,
-  doesUserExist,
-  getUserByEmail,
-} from "../../api/database/users/users";
-import {
-  validateEmail,
-  validatePassword,
-  hashPassword,
-} from "../../api/database/users/util";
+import { correctLogin, createUser, doesUserExist, getUserByEmail } from "../../api/database/users/users";
+import { validateEmail, validatePassword, hashPassword } from "../../api/database/users/util";
 import jwt from "jsonwebtoken";
 const { sign } = jwt;
 import type { User } from "../../api/database/users/users";
 import { generateJWT } from "./authToken";
+import { FunctionType, GestureType, defaultMapping } from "/imports/gesture/gesture";
 
 export const loginUser = async (email: string, password: string) => {
   if (!email || !password) {
@@ -58,6 +50,7 @@ export const registerUser = async (email: string, password: string) => {
       email: email,
       password: hashedPassword,
       createdAt: new Date(),
+      settings: defaultMapping,
     });
 
     // Generate JWT valid for 1 day

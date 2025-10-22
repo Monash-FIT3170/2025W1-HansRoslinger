@@ -1,19 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  GestureType,
-  FunctionType,
-  EnumToFunc,
-  defaultMapping,
-} from "imports/gesture/gesture";
+import { GestureType, FunctionType, EnumToFunc, defaultMapping } from "imports/gesture/gesture";
 import { setCookie, getCookie } from "imports/settings/cookies";
 
 // Use the same action types as your existing defaultMapping
 type GestureFunctionMapping = Record<GestureType, FunctionType>;
 
 export const useGestureSettings = () => {
-  const [mappings, setMappings] =
-    useState<GestureFunctionMapping>(defaultMapping);
+  const [mappings, setMappings] = useState<GestureFunctionMapping>(defaultMapping);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from cookie on mount
@@ -28,9 +22,7 @@ export const useGestureSettings = () => {
           // Convert string keys back to enums
           Object.entries(parsed).forEach(([gestureKey, functionKey]) => {
             const gestureType = parseInt(gestureKey) as GestureType;
-            const functionType = parseInt(
-              functionKey as string,
-            ) as FunctionType;
+            const functionType = parseInt(functionKey as string) as FunctionType;
 
             if (gestureType in GestureType && functionType in FunctionType) {
               loadedMappings[gestureType] = functionType;
@@ -73,12 +65,8 @@ export const useGestureSettings = () => {
     updateMapping,
     saveSettings,
     isInitialized,
-    gestureTypes: Object.values(GestureType).filter(
-      (v) => typeof v === "number",
-    ) as GestureType[],
-    functionTypes: Object.values(FunctionType).filter(
-      (v) => typeof v === "number",
-    ) as FunctionType[],
+    gestureTypes: Object.values(GestureType).filter((v) => typeof v === "number") as GestureType[],
+    functionTypes: Object.values(FunctionType).filter((v) => typeof v === "number") as FunctionType[],
     getHandler: (gestureType: GestureType) => EnumToFunc[mappings[gestureType]],
   };
 };

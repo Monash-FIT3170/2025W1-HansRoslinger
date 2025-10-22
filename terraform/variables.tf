@@ -14,3 +14,14 @@ variable "repository_name" {
   type        = string
   default     = "my-artifact-repo"
 }
+
+variable "bucket_name" {
+  description = "The name of the GCS bucket"
+  type        = string
+}
+
+variable "bucket_location" {
+  description = "The location for the GCS bucket (defaults to region if not set)"
+  type        = string
+  default     = null
+}

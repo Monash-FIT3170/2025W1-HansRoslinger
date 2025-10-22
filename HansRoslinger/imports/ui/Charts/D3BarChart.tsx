@@ -1,15 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import {
-  DEFAULT_COLOUR,
-  SELECT_COLOUR,
-  MARGIN,
-  AXIS_COLOR,
-  AXIS_FONT_SIZE,
-  AXIS_TEXT_SHADOW,
-  AXIS_LINE_SHADOW,
-  BAR_OPACITY,
-} from "./constants";
+import { DEFAULT_COLOUR, SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, AXIS_TEXT_SHADOW, AXIS_LINE_SHADOW, BAR_OPACITY } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
 interface D3BarChartProps {
@@ -19,14 +10,14 @@ interface D3BarChartProps {
 export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
-  const [highlightedBars, setHighlightedBars] = useState<Set<string>>(
-    new Set(),
-  );
+  const [highlightedBars, setHighlightedBars] = useState<Set<string>>(new Set());
   const [filteredData, setFilteredData] = useState(data);
   const [zoomScale, setZoomScale] = useState(1);
+  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  const hoverClearTimeout = useRef<number | null>(null);
 
-  // this handles highlighting a particular bar when the gesture is hovering over it
-  const handleHighlight = (event: Event) => {
+  // Transient hover: highlight while finger is over a bar
+  const handleHover = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     const { x, y } = customEvent.detail;
 
@@ -34,31 +25,51 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     if (!chartRef.current) return;
 
     const svg = d3.select(chartRef.current).select("svg");
-    const bars = svg.selectAll<
-      SVGRectElement,
-      { label: string; value: number }
-    >("rect.bar");
+    const bars = svg.selectAll<SVGRectElement, { label: string; value: number }>("rect.bar");
 
-    // this is the complicated logic that checks the position of the pointer finter and checks whether it is over any particular bar chart
+    let hovered: string | null = null;
+    // check if finger is over any bar
     bars.each(function (d) {
       const bbox = this.getBoundingClientRect();
-      if (
-        x >= bbox.left &&
-        x <= bbox.right &&
-        y >= bbox.top &&
-        y <= bbox.bottom
-      ) {
-        setHighlightedBars((prev) => {
-          const next = new Set(prev);
-          if (next.has(d.label)) {
-            next.delete(d.label);
-          } else {
-            next.add(d.label);
-          }
-          return next;
-        });
+      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+        hovered = d.label;
       }
     });
+
+    setHoverLabel(hovered);
+    if (hoverClearTimeout.current) window.clearTimeout(hoverClearTimeout.current);
+    hoverClearTimeout.current = window.setTimeout(() => setHoverLabel(null), 120);
+  };
+
+  // Permanent highlight: set the bar under the finger as selected (no toggle)
+  const handleHighlight = (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    const { x, y } = customEvent.detail;
+
+    if (!chartRef.current) return;
+
+    const svg = d3.select(chartRef.current).select("svg");
+    const bars = svg.selectAll<SVGRectElement, { label: string; value: number }>("rect.bar");
+
+    let targetLabel: string | null = null;
+    bars.each(function (d) {
+      const bbox = this.getBoundingClientRect();
+      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+        targetLabel = d.label;
+      }
+    });
+
+    if (targetLabel) {
+      setHighlightedBars((prev) => {
+        const next = new Set(prev);
+        if (next.has(targetLabel!)) {
+          next.delete(targetLabel!);
+        } else {
+          next.add(targetLabel!);
+        }
+        return next;
+      });
+    }
   };
 
   // this handles clearing filters which are applied to the bar chart
@@ -94,10 +105,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
     // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
-    const clampedScaleX = Math.max(
-      0.5,
-      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
-    );
+    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
     // the user can at most show 10% of the graph of 100% of the graph
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
@@ -123,13 +131,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
         // the max zoom should still ensure all of the highlighted bars are visible
         visible = Math.max(visible, maxIndex - minIndex + 1);
 
-        start = Math.max(
-          0,
-          Math.min(
-            total - visible,
-            Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2),
-          ),
-        );
+        start = Math.max(0, Math.min(total - visible, Math.floor((minIndex + maxIndex) / 2) - Math.floor(visible / 2)));
 
         if (start > minIndex) start = minIndex;
         if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
@@ -192,10 +194,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       .style("font-size", AXIS_FONT_SIZE)
       .style("text-shadow", AXIS_TEXT_SHADOW);
 
-    svg
-      .selectAll("path, line")
-      .attr("stroke", AXIS_COLOR)
-      .style("filter", AXIS_LINE_SHADOW);
+    svg.selectAll("path, line").attr("stroke", AXIS_COLOR).style("filter", AXIS_LINE_SHADOW);
 
     svg
       .selectAll(".bar")
@@ -206,9 +205,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
       .attr("y", (d) => yScale(d.value))
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => height - MARGIN.bottom - yScale(d.value))
-      .attr("fill", (d) =>
-        highlightedBars.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
-      )
+      .attr("fill", (d) => (highlightedBars.has(d.label) ? SELECT_COLOUR : hoverLabel === d.label ? SELECT_COLOUR : DEFAULT_COLOUR))
       .style("opacity", BAR_OPACITY);
 
     svg
@@ -242,10 +239,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
   useEffect(() => {
     renderChart();
     window.addEventListener("resize", renderChart);
-    window.addEventListener(
-      "chart:highlight",
-      handleHighlight as EventListener,
-    );
+    window.addEventListener("chart:hover", handleHover as EventListener);
+    window.addEventListener("chart:highlight", handleHighlight as EventListener);
     window.addEventListener("chart:clear", handleClear as EventListener);
     window.addEventListener("chart:filter", handleFilter as EventListener);
     window.addEventListener("chart:zoom", handleZoom as EventListener);
@@ -253,14 +248,12 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     return () => {
       window.removeEventListener("resize", renderChart);
       window.removeEventListener("chart:clear", handleClear as EventListener);
-      window.removeEventListener(
-        "chart:highlight",
-        handleHighlight as EventListener,
-      );
+      window.removeEventListener("chart:hover", handleHover as EventListener);
+      window.removeEventListener("chart:highlight", handleHighlight as EventListener);
       window.removeEventListener("chart:filter", handleFilter as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
     };
-  }, [data, filteredData, highlightedBars, zoomScale]);
+  }, [data, filteredData, highlightedBars, hoverLabel, zoomScale]);
 
   // The filters should be reset when the dataset changes
   useEffect(() => {

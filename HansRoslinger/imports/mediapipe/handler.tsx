@@ -1,0 +1,99 @@
+/**
+ * Purpose
+ * -------
+ * This file defines the `GestureHandler`, which manages how recognized
+ * gestures are interpreted and dispatched to application functions. It:
+ *   • Maintains active gesture state per hand (left, right, both).
+ *   • Applies cooldowns/delays to prevent repeated rapid activations.
+ *   • Handles special cases (e.g., POINTING_UP runs instantly, ignores cooldowns).
+ *   • Calls `handleGestureToFunc` to map gestures to their configured
+ *     application actions.
+ *
+ * In short: this file provides the logic that turns detected gestures into
+ * controlled, rate-limited function calls in the app.
+ */
+import { handleGestureToFunc } from "../gesture/gesture";
+import { FunctionType, GestureType } from "../gesture/types";
+import { Gesture, Handedness } from "../mediapipe/types";
+import { useRef } from "react";
+
+let isZoomEnabled = false;
+let isDrawEnabled = false;
+// Guard against server-side evaluation where `window` is undefined
+if (typeof window !== "undefined") {
+  window.addEventListener("chart:togglezoom", () => {
+    isZoomEnabled = !isZoomEnabled;
+  });
+
+  window.addEventListener("chart:toggledraw", () => {
+    isDrawEnabled = !isDrawEnabled;
+  });
+}
+
+export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
+  const FIRST_ACTIVATION_DELAY_MS = 500; // initial activation
+  const REPEAT_ACTIVATION_DELAY_MS = 1500; // subsequent activations
+
+  type ActiveGestureState = {
+    gesture: Gesture;
+    lastFiredAt: number; // epoch ms
+    firedOnce: boolean;
+  };
+
+  const activeGestures = useRef<Record<Handedness, ActiveGestureState | null>>({
+    [Handedness.LEFT]: null,
+    [Handedness.RIGHT]: null,
+    [Handedness.BOTH]: null,
+  });
+
+  const HandleGesture = (gesture: Gesture) => {
+    const map = mapping;
+    const now: number = Date.now();
+    // Keep state consistent: clear conflicting slots when switching
+    if (gesture.handedness === Handedness.BOTH) {
+      activeGestures.current[Handedness.LEFT] = null;
+      activeGestures.current[Handedness.RIGHT] = null;
+    } else {
+      activeGestures.current[Handedness.BOTH] = null;
+    }
+    const state = activeGestures.current[gesture.handedness];
+
+    if (!state || state.gesture.gestureID !== gesture.gestureID) {
+      // New gesture started for this hand: reset state
+      activeGestures.current[gesture.handedness] = {
+        gesture,
+        lastFiredAt: Date.now(),
+        firedOnce: false,
+      };
+      // Instant hover: if this is POINTING_UP, run immediately and do not touch timers
+      if (gesture.gestureID === GestureType.POINTING_UP) {
+        handleGestureToFunc(gesture.gestureID, gesture, gesture, map);
+        return;
+      }
+    } else {
+      // Special-case: POINTING_UP (hover/select) should ignore cooldown entirely.
+      if (gesture.gestureID === GestureType.POINTING_UP) {
+        handleGestureToFunc(gesture.gestureID, state.gesture, gesture, map);
+        // Do NOT update lastFiredAt/firedOnce so this doesn't affect cooldowns
+        state.gesture = gesture; // keep latest landmarks
+        return;
+      }
+
+      const requiredDelay = state.firedOnce ? REPEAT_ACTIVATION_DELAY_MS : FIRST_ACTIVATION_DELAY_MS;
+      const elapsed = now - state.lastFiredAt;
+
+      if (elapsed >= requiredDelay || isZoomEnabled || isDrawEnabled) {
+        handleGestureToFunc(gesture.gestureID, state.gesture, gesture, map);
+        // Update state to reflect this activation
+        state.lastFiredAt = now;
+        state.firedOnce = true;
+        // Keep the most recent gesture data for any handler needing latest landmarks
+        state.gesture = gesture;
+      }
+    }
+  };
+
+  return { HandleGesture };
+};
+
+export default GestureHandler;

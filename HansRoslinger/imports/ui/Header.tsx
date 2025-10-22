@@ -1,92 +1,136 @@
 import React from "react";
+import { Button, Tooltip } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 // Define the exact types for the chart state
-type ChartTypeString = 'LINE' | 'BAR' | 'PIE';
 
 interface HeaderProps {
   backgroundRemoval: boolean;
   grayscale: boolean;
-  // 🚨 UPDATED PROP TYPE: Uses string to know the current view
-  currentChartType: ChartTypeString;
-  gestureDetectionStatus: boolean;
+  showLineChart: boolean;
   onToggleBackgroundRemoval: () => void;
   onToggleGrayscale: () => void;
   onToggleChart: () => void;
-  onToggleGestureDetectionStatus: () => void;
+  showAssets: boolean;
+  setShowAssets: (cb: (s: boolean) => boolean) => void;
 }
 
-// Helper function to determine the label of the NEXT chart
-const getNextChartLabel = (currentType: ChartTypeString): string => {
-  switch (currentType) {
-    case 'LINE':
-      return 'Bar'; // If currently LINE, the next is Bar
-    case 'BAR':
-      return 'Pie'; // If currently BAR, the next is Pie
-    case 'PIE':
-    default:
-      return 'Line'; // If currently PIE, the next is Line
-  }
-};
+export const toolbarButtonWidth = 70;
+export const toolbarButtonHeight = toolbarButtonWidth;
 
-export const Header: React.FC<HeaderProps> = ({
-  backgroundRemoval,
-  grayscale,
-  // 🚨 NEW PROP
-  currentChartType, 
-  gestureDetectionStatus,
-  onToggleBackgroundRemoval,
-  onToggleGrayscale,
-  onToggleChart,
-  onToggleGestureDetectionStatus,
-}) => {
-  
-  const buttonLabel = getNextChartLabel(currentChartType);
-  
+export const Header: React.FC<HeaderProps> = ({ backgroundRemoval, grayscale, showLineChart, onToggleBackgroundRemoval, onToggleGrayscale, onToggleChart, showAssets, setShowAssets }) => {
+  const navigate = useNavigate();
   return (
     <>
-      <button
-        onClick={onToggleGestureDetectionStatus}
-        id="toggle-gesture-detection"
-        className={`w-10 h-10 rounded-lg text-sm font-medium ${
-          gestureDetectionStatus
-            ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-            : "bg-gray-700 hover:bg-gray-600 text-white"
-        }`}
-      >
-        GD
-      </button>
-      {/* Background removal enable */}
-      <button
-        onClick={onToggleBackgroundRemoval}
-        id="background-removal-enable"
-        className={`w-10 h-10 rounded-lg text-sm font-medium ${
-          backgroundRemoval
-            ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-            : "bg-gray-700 hover:bg-gray-600 text-white"
-        }`}
-      >
-        BR
-    </button>
-      {/* Grayscale toggle */}
-      <button
-        onClick={onToggleGrayscale}
-        className={`w-10 h-10 rounded-lg text-sm font-medium ${
-          grayscale
-            ? "bg-cyan-400 hover:bg-cyan-300 text-black"
-            : "bg-gray-700 hover:bg-gray-600 text-white"
-        }`}
-      >
-        GS
-    </button>
+      {/* Back to All Presentations */}
+      <Tooltip title="Go back to all presentations" arrow>
+        <Button
+          variant="contained"
+          onClick={() => navigate("/allpresentations")}
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: "grey.700",
+            color: "white",
+            "&:hover": { backgroundColor: "grey.600" },
+          }}
+        >
+          Back
+        </Button>
+      </Tooltip>
 
-      {/* Chart toggle: Displays the label of the NEXT chart */}
-      <button
-        onClick={onToggleChart}
-        // Button style is active (cyan) when any chart is displayed
-        className={`w-10 h-10 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-sm font-medium`}
-      >
-        {buttonLabel}
-      </button>
+      {/* Background Removal */}
+      <Tooltip title="Toggle background removal" arrow>
+        <Button
+          variant="contained"
+          onClick={onToggleBackgroundRemoval}
+          id="background-removal-enable"
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: backgroundRemoval ? "cyan.400" : "grey.700",
+            color: backgroundRemoval ? "black" : "white",
+            "&:hover": {
+              backgroundColor: backgroundRemoval ? "cyan.300" : "grey.600",
+            },
+          }}
+        >
+          BR
+        </Button>
+      </Tooltip>
+
+      {/* Grayscale */}
+      <Tooltip title="Toggle grayscale mode" arrow>
+        <Button
+          variant="contained"
+          onClick={onToggleGrayscale}
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: grayscale ? "cyan.400" : "grey.700",
+            color: grayscale ? "black" : "white",
+            "&:hover": {
+              backgroundColor: grayscale ? "cyan.300" : "grey.600",
+            },
+          }}
+        >
+          GS
+        </Button>
+      </Tooltip>
+
+      {/* Show Assets (SA) */}
+      <Tooltip title="Toggle assets view" arrow>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: showAssets ? "cyan.400" : "grey.700",
+            color: showAssets ? "black" : "white",
+            "&:hover": {
+              backgroundColor: showAssets ? "cyan.300" : "grey.600",
+            },
+          }}
+          onClick={() => setShowAssets((s) => !s)}
+        >
+          SA
+        </Button>
+      </Tooltip>
+
+      {/* Chart Toggle */}
+      <Tooltip title={showLineChart ? "Switch to bar chart" : "Switch to line chart"} arrow>
+        <Button
+          variant="contained"
+          onClick={onToggleChart}
+          sx={{
+            width: toolbarButtonWidth,
+            height: toolbarButtonHeight,
+            minWidth: 0,
+            fontSize: "0.75rem",
+            fontWeight: "medium",
+            backgroundColor: "cyan.400",
+            color: "black",
+            "&:hover": {
+              backgroundColor: "cyan.300",
+            },
+          }}
+        >
+          {showLineChart ? "Bar" : "Line"}
+        </Button>
+      </Tooltip>
     </>
   );
 };

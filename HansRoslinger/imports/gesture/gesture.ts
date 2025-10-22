@@ -1,162 +1,169 @@
+/**
+ * Purpose
+ * -------
+ * This file implements a gesture detection pipeline that connects a webcam
+ * video feed (`react-webcam`) to the MediaPipe `GestureRecognizer`. It:
+ *   • Loads and initializes the gesture recognition model with retry logic.
+ *   • Runs a requestAnimationFrame loop to analyze video frames in real time.
+ *   • Maps recognized gestures (and custom heuristics like pinch/pointing)
+ *     into the app’s `Gesture` type.
+ *   • Detects both single-hand and two-hand gestures, with custom rules
+ *     (e.g., `DOUBLE_PINCH`).
+ *   • Forwards valid gestures into the central `GestureHandler`, which maps
+ *     them to configured application functions (zoom, filter, select, etc.).
+ *
+ * In short: this file is the bridge between raw video input and the higher-
+ * level gesture-driven interactions in the app.
+ */
 import { select } from "./Select";
 import { clear } from "./Clear";
 import { filter } from "./Filter";
 import { zoom, processZoom } from "./Zoom";
 import { processSwitchChartType } from "./switchChartType";
 import { processSwitchDataset } from "./switchDataset";
+import { click } from "./Click";
+import { draw, processDraw, processErase, clearDrawing, showEraserPreview } from "./Draw";
+import { FunctionType, GestureType } from "./types";
+import { Gesture } from "../mediapipe/types";
 
-enum GestureType {
-  CLOSED_FIST,
-  I_LOVE_YOU,
-  UNIDENTIFIED,
-  OPEN_PALM,
-  POINTING_UP, // This is with the thumb, and index and pinky fingers outstretched (now also identifies any pointing)
-  THUMB_DOWN,
-  THUMB_UP,
-  VICTORY, // This is the peace sign
-}
-
-enum FunctionType {
-  UNUSED,
-  SELECT,
-  FILTER,
-  CLEAR,
-  ZOOM,
-  SWITCH_CHART,
-  SWITCH_DATA,
-}
-
-export const IDtoEnum: Record<string, GestureType> = {
-  Thumb_Up: GestureType.THUMB_UP,
-  Thumb_Down: GestureType.THUMB_DOWN,
-  Pointing_Up: GestureType.POINTING_UP,
-  Closed_Fist: GestureType.CLOSED_FIST,
-  I_Love_You: GestureType.I_LOVE_YOU,
-  Unidentified: GestureType.UNIDENTIFIED,
-  Open_Palm: GestureType.OPEN_PALM,
-  Victory: GestureType.VICTORY,
-};
-
-export const EnumToFunc: Record<FunctionType, any> = {
-  [FunctionType.UNUSED]: console.log,
-  [FunctionType.SELECT]: select,
-  [FunctionType.FILTER]: filter,
-  [FunctionType.CLEAR]: clear,
-  [FunctionType.ZOOM]: zoom,
-  [FunctionType.SWITCH_CHART]: processSwitchChartType,
-  [FunctionType.SWITCH_DATA]: processSwitchDataset,
-};
-
-enum Handedness {
-  LEFT = "Left",
-  RIGHT = "Right",
-}
-
-type Gesture = {
-  gestureID: GestureType;
-  timestamp: Date;
-  handedness: Handedness;
-  confidence: number; // 0-1
-  landmarks: { x: number; y: number; z?: number }[];
+type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
+export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
+  [FunctionType.UNUSED]: (() => {}) as GestureHandlerFn,
+  [FunctionType.SELECT]: select as GestureHandlerFn,
+  [FunctionType.FILTER]: filter as GestureHandlerFn,
+  [FunctionType.CLEAR]: clear as GestureHandlerFn,
+  [FunctionType.ZOOM]: zoom as GestureHandlerFn,
+  [FunctionType.SWITCH_CHART]: processSwitchChartType as GestureHandlerFn,
+  [FunctionType.SWITCH_DATA]: processSwitchDataset as GestureHandlerFn,
+  [FunctionType.CLICK]: click as GestureHandlerFn,
+  [FunctionType.DRAW]: draw as GestureHandlerFn,
 };
 
 // Define a boolean to track the zoom state
 let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
-// Watch for the "chart:zoom" event and toggle the boolean
-window.addEventListener("chart:togglezoom", (event: Event) => {
-  const customEvent = event as CustomEvent<{ x: number; y: number }>;
-  isZoomEnabled = !isZoomEnabled;
-  if (isZoomEnabled && customEvent.detail) {
-    const { x, y } = customEvent.detail;
-    zoomStartPosition = { x: x, y: y };
-    console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-  } else {
-    zoomStartPosition = null;
-    console.log(`Zoom disabled.`);
-  }
-});
+// Define a boolean to track the draw state
+let isDrawEnabled = false;
+let drawStartPosition: { x: number; y: number } | null = null;
 
-const defaultMapping = {
-  [GestureType.THUMB_UP]: FunctionType.SWITCH_CHART,
-  [GestureType.THUMB_DOWN]: FunctionType.SWITCH_DATA,
-  [GestureType.POINTING_UP]: FunctionType.SELECT,
+if (typeof window !== "undefined") {
+  // Watch for the "chart:zoom" event and toggle the boolean
+  window.addEventListener("chart:togglezoom", (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    isZoomEnabled = !isZoomEnabled;
+    if (isZoomEnabled && customEvent.detail) {
+      const { x, y } = customEvent.detail;
+      zoomStartPosition = { x: x, y: y };
+      // console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
+      document?.body?.classList.add("zoom-active-outline");
+    } else {
+      zoomStartPosition = null;
+      document?.body?.classList.remove("zoom-active-outline");
+    }
+  });
+
+  // Watch for the "chart:draw" event and toggle the boolean
+  window.addEventListener("chart:toggledraw", (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    isDrawEnabled = !isDrawEnabled;
+    if (isDrawEnabled && customEvent.detail) {
+      const { x, y } = customEvent.detail;
+      drawStartPosition = { x: x, y: y };
+      console.log(`Draw enabled. Start position set to:`, drawStartPosition);
+      document?.body?.classList.add("draw-active-outline");
+    } else {
+      drawStartPosition = null;
+      document?.body?.classList.remove("draw-active-outline");
+    }
+  });
+}
+
+const constantMapping: Partial<Record<GestureType, FunctionType>> = {
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
+};
+
+const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
   [GestureType.UNIDENTIFIED]: FunctionType.UNUSED,
   [GestureType.OPEN_PALM]: FunctionType.CLEAR,
-  [GestureType.VICTORY]: FunctionType.ZOOM,
+  [GestureType.POINTING_UP]: FunctionType.SELECT,
+  [GestureType.THUMB_DOWN]: FunctionType.UNUSED,
+  [GestureType.THUMB_UP]: FunctionType.UNUSED,
+  [GestureType.VICTORY]: FunctionType.UNUSED,
+  [GestureType.PINCH]: FunctionType.CLICK,
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
+  [GestureType.TWO_FINGER_POINTING_LEFT]: FunctionType.SWITCH_CHART,
+  [GestureType.TWO_FINGER_POINTING_RIGHT]: FunctionType.SWITCH_DATA,
+  [GestureType.DRAW]: FunctionType.DRAW,
 };
 
-const handleGestureToFunc = (
-  INPUT: GestureType,
-  initialGesture: Gesture,
-  latestGesture: Gesture,
-): void => {
+const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture, mapping: Record<GestureType, FunctionType>): void => {
   const label = INPUT;
 
   if (isZoomEnabled) {
-    // if gesture action is CLEAR, we want to end zoom
-    if (defaultMapping[label] === FunctionType.CLEAR) {
+    console.log(mapping[label], FunctionType.FILTER);
+    // if gesture is closed fist, we want to end zoom
+    if (mapping[label] === FunctionType.FILTER) {
       zoom(initialGesture, latestGesture);
-    } else {
+    } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
-  } else {
-    const functionType = defaultMapping[label];
-    const handler = EnumToFunc[functionType];
-
-    if (handler && functionType !== FunctionType.UNUSED) {
-      // This log helps confirm the correct handler is being called
-      console.log(
-        `[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`,
-      );
-      handler(initialGesture, latestGesture);
-    } else if (functionType === FunctionType.UNUSED) {
-      // This log confirms a gesture is being correctly ignored
-      console.log(
-        `[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`,
-      );
+  } else if (isDrawEnabled) {
+    console.log(`draw mode enabled`);
+    // In draw mode, handle special gestures
+    if (latestGesture.gestureID === GestureType.POINTING_UP) {
+      // Pointing finger acts as an eraser
+      processErase(latestGesture);
+    } else if (mapping[label] === FunctionType.FILTER) {
+      // Closed fist exits draw mode
+      draw(initialGesture, latestGesture);
+    } else if (mapping[label] === FunctionType.CLEAR) {
+      // Open palm cancels draw mode
+      draw(initialGesture, latestGesture);
+    } else if (latestGesture.gestureID === GestureType.DRAW) {
+      // Continue drawing for confirmed or briefly unidentified frames
+      processDraw(drawStartPosition!, latestGesture);
     } else {
-      // This warning will now only appear for truly unhandled gestures
-      console.warn(
-        `[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`,
-      );
+      // For any other gesture, hide the eraser indicator since we're not in erase mode
+      showEraserPreview(latestGesture);
+    }
+    // All other gestures are ignored in draw mode
+  } else {
+    // Not in zoom or draw mode - normal gesture handling
+    if (mapping[label] === FunctionType.CLEAR) {
+      // Open palm: first clear drawing, then do normal clear function
+      clearDrawing();
+      // Then continue with normal clear function
+      const functionType = mapping[label];
+      const handler = EnumToFunc[functionType];
+      if (handler) {
+        console.log(`[GestureHandler] Clearing drawing then calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
+        handler(initialGesture, latestGesture);
+      }
+    } else {
+      // Normal gesture handling
+      const functionType = mapping[label];
+      const handler = EnumToFunc[functionType];
+
+      if (handler && functionType !== FunctionType.UNUSED) {
+        console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
+        handler(initialGesture, latestGesture);
+      } else if (functionType === FunctionType.UNUSED) {
+        const defaultFunction = constantMapping[label];
+        if (defaultFunction) {
+          const defaultHandler = EnumToFunc[defaultFunction];
+          if (defaultHandler) {
+            defaultHandler(initialGesture, latestGesture);
+          }
+        }
+        console.log(`[GestureHandler] Ignoring intentionally unused gesture: ${GestureType[label]}`);
+      } else {
+        console.warn(`[GestureHandler] No handler configured for gesture: ${GestureType[label]} (${INPUT})`);
+      }
     }
   }
 };
 
-export {
-  Gesture,
-  GestureType,
-  FunctionType,
-  Handedness,
-  defaultMapping,
-  handleGestureToFunc,
-  isZoomEnabled,
-};
-
-export const gestureToScreenPosition = (
-  x: number,
-  y: number,
-  z?: number,
-): { screenX: number; screenY: number } => {
-  // Get the screen dimensions
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  // Flip the x coordinate (mirrored horizontally)
-  const flippedX = 1 - x;
-
-  // Convert normalized x and y to absolute screen positions
-  const screenX = Math.round(flippedX * screenWidth);
-  const screenY = Math.round(y * screenHeight);
-
-  // Optionally, you can use z for depth-related calculations if needed
-  if (z !== undefined) {
-    console.log(`Depth (z): ${z}`);
-  }
-
-  return { screenX, screenY };
-};
+export { Gesture, GestureType, FunctionType, handleGestureToFunc, isZoomEnabled, defaultMapping, isDrawEnabled };

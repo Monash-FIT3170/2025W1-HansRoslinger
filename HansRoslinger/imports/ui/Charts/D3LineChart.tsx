@@ -1,16 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import {
-  DEFAULT_COLOUR,
-  SELECT_COLOUR,
-  MARGIN,
-  AXIS_COLOR,
-  AXIS_FONT_SIZE,
-  AXIS_TEXT_SHADOW,
-  AXIS_LINE_SHADOW,
-  LINE_STROKE_WIDTH,
-  POINT_RADIUS,
-} from "./constants";
+import { DEFAULT_COLOUR, SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, AXIS_TEXT_SHADOW, AXIS_LINE_SHADOW, LINE_STROKE_WIDTH, POINT_RADIUS } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
 interface D3LineChartProps {
@@ -21,22 +11,19 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
   const [filteredData, setFilteredData] = useState(data);
-  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(
-    new Set(),
-  );
+  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(new Set());
   const [zoomScale, setZoomScale] = useState(1);
+  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  const hoverClearTimeout = useRef<number | null>(null);
 
-  // this handles highlighting a particular point when the gesture is hovering over it
-  const handleHighlight = (event: Event) => {
+  // Transient hover highlight while finger is near a dot
+  const handleHover = (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     const { x, y } = customEvent.detail;
     if (!chartRef.current) return;
 
     const svg = d3.select(chartRef.current).select("svg");
-    const circles = svg.selectAll<
-      SVGCircleElement,
-      { label: string; value: number }
-    >("circle");
+    const circles = svg.selectAll<SVGCircleElement, { label: string; value: number }>("circle");
 
     // Get the position of all dots
     const positions = [] as {
@@ -67,15 +54,45 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       }
     }
 
-    // this selects the closest dot as long as it's closer than 40 pixels away
-    // which gives some leeway for selecting
+    // for hover, just set hoverLabel if within radius, and clear soon after if not
     if (closest && minDist <= 40) {
+      setHoverLabel(closest.d.label);
+      if (hoverClearTimeout.current) window.clearTimeout(hoverClearTimeout.current);
+      hoverClearTimeout.current = window.setTimeout(() => setHoverLabel(null), 120);
+    } else {
+      setHoverLabel(null);
+    }
+  };
+
+  // Permanent highlight after dwell: add the closest dot within 40px
+  const handleHighlight = (event: Event) => {
+    const customEvent = event as CustomEvent<{ x: number; y: number }>;
+    const { x, y } = customEvent.detail;
+    if (!chartRef.current) return;
+
+    const svg = d3.select(chartRef.current).select("svg");
+    const circles = svg.selectAll<SVGCircleElement, { label: string; value: number }>("circle");
+
+    let minDist = Infinity;
+    let target: { label: string; value: number } | null = null;
+    circles.each(function (d) {
+      const bbox = this.getBoundingClientRect();
+      const cx = bbox.left + bbox.width / 2;
+      const cy = bbox.top + bbox.height / 2;
+      const dist = Math.hypot(cx - x, cy - y);
+      if (dist < minDist) {
+        minDist = dist;
+        target = d;
+      }
+    });
+
+    if (target && minDist <= 40) {
       setHighlightedDots((prev) => {
         const next = new Set(prev);
-        if (next.has(closest!.d.label)) {
-          next.delete(closest!.d.label);
+        if (next.has(target!.label)) {
+          next.delete(target!.label);
         } else {
-          next.add(closest!.d.label);
+          next.add(target!.label);
         }
         return next;
       });
@@ -115,10 +132,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
     // the user can ad most zoom in by 0.5x to 1.5x (or size of screen)
-    const clampedScaleX = Math.max(
-      0.5,
-      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
-    );
+    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
     // the user can at most show 10% of the graph of 100% of the graph
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
@@ -140,15 +154,10 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
         const minIndex = indices[0];
         const maxIndex = indices[indices.length - 1];
-        const avgIndex = Math.round(
-          indices.reduce((a, b) => a + b, 0) / indices.length,
-        );
+        const avgIndex = Math.round(indices.reduce((a, b) => a + b, 0) / indices.length);
 
         visible = Math.max(visible, maxIndex - minIndex + 1);
-        start = Math.max(
-          0,
-          Math.min(total - visible, avgIndex - Math.floor(visible / 2)),
-        );
+        start = Math.max(0, Math.min(total - visible, avgIndex - Math.floor(visible / 2)));
 
         if (start > minIndex) start = minIndex;
         if (start + visible - 1 < maxIndex) start = maxIndex - visible + 1;
@@ -213,10 +222,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .style("font-size", axisFontSize)
       .style("text-shadow", AXIS_TEXT_SHADOW);
 
-    svg
-      .selectAll("path, line")
-      .attr("stroke", AXIS_COLOR)
-      .style("filter", AXIS_LINE_SHADOW);
+    svg.selectAll("path, line").attr("stroke", AXIS_COLOR).style("filter", AXIS_LINE_SHADOW);
 
     const line = d3
       .line<{ label: string; value: number }>()
@@ -224,13 +230,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .y((d) => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
-    svg
-      .append("path")
-      .datum(customData)
-      .attr("fill", "none")
-      .attr("stroke", DEFAULT_COLOUR)
-      .attr("stroke-width", LINE_STROKE_WIDTH)
-      .attr("d", line);
+    svg.append("path").datum(customData).attr("fill", "none").attr("stroke", DEFAULT_COLOUR).attr("stroke-width", LINE_STROKE_WIDTH).attr("d", line);
 
     // Draw dots
     svg
@@ -241,17 +241,12 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       .attr("cx", (d) => xScale(d.label)!)
       .attr("cy", (d) => yScale(d.value))
       .attr("r", POINT_RADIUS * fontScale)
-      .attr("fill", (d) =>
-        highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
-      )
+      .attr("fill", (d) => (highlightedDots.has(d.label) ? SELECT_COLOUR : hoverLabel === d.label ? SELECT_COLOUR : DEFAULT_COLOUR))
       .on("mouseover", function () {
         d3.select(this).attr("fill", SELECT_COLOUR);
       })
-      .on("mouseout", function (event, d) {
-        d3.select(this).attr(
-          "fill",
-          highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR,
-        );
+      .on("mouseout", function (_evt, d) {
+        d3.select(this).attr("fill", highlightedDots.has(d.label) ? SELECT_COLOUR : DEFAULT_COLOUR);
       });
 
     // Draw labels for selected dots
@@ -275,25 +270,21 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
   useEffect(() => {
     renderChart();
     window.addEventListener("resize", () => renderChart());
-    window.addEventListener(
-      "chart:highlight",
-      handleHighlight as EventListener,
-    );
+    window.addEventListener("chart:hover", handleHover as EventListener);
+    window.addEventListener("chart:highlight", handleHighlight as EventListener);
     window.addEventListener("chart:clear", handleClear as EventListener);
     window.addEventListener("chart:zoom", handleZoom as EventListener);
     window.addEventListener("chart:filter", handleFilter as EventListener);
 
     return () => {
       window.removeEventListener("resize", () => renderChart());
-      window.removeEventListener(
-        "chart:highlight",
-        handleHighlight as EventListener,
-      );
+      window.removeEventListener("chart:hover", handleHover as EventListener);
+      window.removeEventListener("chart:highlight", handleHighlight as EventListener);
       window.removeEventListener("chart:clear", handleClear as EventListener);
       window.removeEventListener("chart:zoom", handleZoom as EventListener);
       window.removeEventListener("chart:filter", handleFilter as EventListener);
     };
-  }, [filteredData, data, highlightedDots, zoomScale]);
+  }, [filteredData, data, highlightedDots, hoverLabel, zoomScale]);
 
   // The filters should be reset when the dataset changes
   useEffect(() => {

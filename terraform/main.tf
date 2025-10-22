@@ -4,13 +4,21 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 4.0.0"
     }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 4.0.0"
+    }
   }
 }
 
-resource "google_artifact_registry_repository" "repo" {
-  project        = var.project_id
-  location       = var.region
-  repository_id  = var.repository_name
-  format         = "DOCKER"
-  description    = "Docker repository for application images"
+module "registry_and_bucket" {
+  source = "./modules/infra"
+  providers = {
+    google = google-beta
+  }
+  project_id       = var.project_id
+  region           = var.region
+  repository_name  = var.repository_name
+  bucket_name      = var.bucket_name
+  bucket_location  = var.bucket_location != null ? var.bucket_location : var.region
 }

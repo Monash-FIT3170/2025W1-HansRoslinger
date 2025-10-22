@@ -7,7 +7,6 @@
 <br/>
 <br/>
 
----
 # Aim
 
 The aim of this document is to outline the winding down of HanRoslinger, including
@@ -15,6 +14,7 @@ The aim of this document is to outline the winding down of HanRoslinger, includi
 * Steps taken to maintain the current state of the code
 * The state of the production system
 * Associated Costs with running HansRoslinger into the future
+* Additional Comments
 
 # What is HansRoslinger?
 
@@ -144,3 +144,17 @@ Below I have outlined each service which is in use by our production deployment,
 | Service                                    | Cost per Unit                                                   | Accumulated Cost Given Current Use               |
 | ------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------ |
 | hansroslinger.website domain via NameCheap | $2.99 for the first year<br /><br />\$13.99 each following year | $2.99 for the first year ownership of the domain |
+
+# Additional Comments
+
+Throughout the development of HansRoslinger we have experienced increasing amounts of trouble using the Meteor stack. These include but are not limited to:
+- Errors loading packages
+- Errors downloading packages
+- Loading times between 1 minute and over an hour
+- Meteor not being recongised entirely
+- Meteor not able to be updated using `meteor update`
+- Difficulty deploying using conventional Dockerisation
+
+For this reason, if this software is to be maintained into the future, it is highly recommended that whoever owns this project makes it their highest priority to migrate the application to an alternative framework such as `Vite`. The main reason we initially utilised Meteor was due to it being recommended to us, however the only unique feature we have used is the built in local MongoDB Database, which can be easily replicated in Vite and without all the difficulties outlined above.
+
+This will allow for a much more straight forward developer experience, and potential issues with scalability into the future

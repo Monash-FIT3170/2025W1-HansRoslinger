@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
+// IMPORT THE NEW PIE CHART COMPONENT
+import { D3PieChart } from "./Charts/D3PieChart"; 
 import { WebcamComponent } from "./Video/webcam";
 import { Header } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
@@ -10,8 +12,14 @@ import { Title } from "./Charts/Title";
 import { useAuthGuard } from "../handlers/auth/authHook";
 import { ChartType, defaultDataset } from "../api/database/dataset/dataset";
 
+// Define chart views (add PIE)
+enum CurrentChartView {
+  LINE = 'LINE',
+  BAR = 'BAR',
+  PIE = 'PIE',
+}
+
 export const Present: React.FC = () => {
-  // Make sure the user is authenticated, otherwise return to login
   useAuthGuard();
 
   // State of tooling features
@@ -20,8 +28,8 @@ export const Present: React.FC = () => {
   const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
 
-  // State for chart features
-  const [showLineChart, setShowLineChart] = useState(false);
+  // State for chart features - Replaced 'showLineChart' boolean with 'currentChartView' enum
+  const [currentChartView, setCurrentChartView] = useState<CurrentChartView>(CurrentChartView.BAR); 
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomStartPosition, setZoomStartPosition] = useState<{
     x: number;
@@ -40,8 +48,21 @@ export const Present: React.FC = () => {
   }, [grayscale]);
 
   const determineGrayscale = () => grayscaleRef.current;
+  
+  // Helper to determine the next chart view (cycle: LINE -> BAR -> PIE -> LINE)
+  const getNextChartView = useCallback((current: CurrentChartView) => {
+    switch (current) {
+      case CurrentChartView.LINE:
+        return CurrentChartView.BAR;
+      case CurrentChartView.BAR:
+        return CurrentChartView.PIE;
+      case CurrentChartView.PIE:
+      default:
+        return CurrentChartView.LINE;
+    }
+  }, []);
 
-  // code which handles playing a dot at the start position of the zoom
+  // code which handles playing a dot at the start position of the zoom (No changes)
   useEffect(() => {
     const handleToggleZoom = (event: Event) => {
       const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -64,20 +85,30 @@ export const Present: React.FC = () => {
       window.removeEventListener("chart:togglezoom", handleToggleZoom);
   }, []);
 
-  // code which switches the chart type when thumbs up is done
+  // code which switches the chart type when thumbs up is done (Modified)
   useEffect(() => {
     const handleSwitchChart = () => {
-      setShowLineChart((prev) => !prev);
+      // Cycle to the next chart view
+      setCurrentChartView(prev => getNextChartView(prev));
     };
 
     window.addEventListener("chart:switch", handleSwitchChart);
     return () => window.removeEventListener("chart:switch", handleSwitchChart);
-  }, []);
+  }, [getNextChartView]); // Dependency on useCallback
 
+  // Set initial chart type based on dataset preference (Modified)
   useEffect(() => {
-    setShowLineChart(
-      (currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE,
-    );
+    const preferredType = (currentDataset ?? defaultDataset).preferredChartType;
+    let initialView = CurrentChartView.BAR; // Default to BAR or LINE
+
+    if (preferredType === ChartType.LINE) {
+      initialView = CurrentChartView.LINE;
+    } else if (preferredType === ChartType.BAR) {
+      initialView = CurrentChartView.BAR;
+    }
+    // Note: If your ChartType enum includes PIE, you'd add an 'else if' here.
+    
+    setCurrentChartView(initialView);
   }, [currentDataset]);
 
   const toggleGrayscale = () => {
@@ -98,9 +129,28 @@ export const Present: React.FC = () => {
         "z-50",
       ].join(" ");
 
+  // --- RENDER FUNCTION ---
+  
+  // Function to render the correct chart component
+  const renderChart = () => {
+    const dataset = currentDataset ?? defaultDataset;
+
+    switch (currentChartView) {
+      case CurrentChartView.LINE:
+        return <D3LineChart dataset={dataset} />;
+      case CurrentChartView.BAR:
+        return <D3BarChart dataset={dataset} />;
+      case CurrentChartView.PIE:
+        // Render the new D3PieChart component here
+        return <D3PieChart dataset={dataset} />; 
+      default:
+        return <D3BarChart dataset={dataset} />; // Fallback
+    }
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Fullscreen video */}
+      {/* Fullscreen video and segmentation logic (no change) */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center ${backgroundRemoval ? "invisible pointer-events-none" : ""}`}
       >
@@ -126,18 +176,15 @@ export const Present: React.FC = () => {
         />
       )}
 
-      {/* charts */}
+      {/* charts - RENDER THE SWITCHED CHART */}
       <div
         className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
         style={{ bottom: "10%", width: "95%", height: "50%" }}
       >
-        {showLineChart ? (
-          <D3LineChart dataset={currentDataset ?? defaultDataset} />
-        ) : (
-          <D3BarChart dataset={currentDataset ?? defaultDataset} />
-        )}
+        {renderChart()}
       </div>
-      {/* creates a div directly below the div above that takes up the remaining bottom of the screen and shows the title */}
+      
+      {/* Title (no change) */}
       <div
         className="absolute left-1/2 transform -translate-x-1/2 bg-transparent flex justify-center"
         style={{ bottom: 0, width: "95%", height: "10%" }}
@@ -145,14 +192,16 @@ export const Present: React.FC = () => {
         <Title dataset={currentDataset ?? defaultDataset} />
       </div>
 
-      {/* Dynamic toolbar: collapsed when hidden, expanded when showing */}
+      {/* Dynamic toolbar */}
       <div className={toolbarClasses}>
         {showHeader && (
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
             onToggleGrayscale={toggleGrayscale}
-            showLineChart={showLineChart}
-            onToggleChart={() => setShowLineChart((c) => !c)}
+            // Pass the current chart view status
+            showLineChart={currentChartView === CurrentChartView.LINE} 
+            // The toggle function now cycles through all three charts
+            onToggleChart={() => setCurrentChartView(getNextChartView)} 
             gestureDetectionStatus={gestureDetectionStatus}
             onToggleGestureDetectionStatus={() =>
               setGestureDetectionStatus((c) => !c)

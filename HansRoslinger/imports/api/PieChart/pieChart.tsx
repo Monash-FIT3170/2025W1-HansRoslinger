@@ -1,4 +1,5 @@
-type Slice = { label: string; value: number };
+// api/PieChart/pieChart.ts
+export type Slice = { label: string; value: number };
 
 const makeColors = (n: number) =>
   Array.from({ length: n }, (_, i) => {
@@ -6,24 +7,23 @@ const makeColors = (n: number) =>
     return `hsl(${hue} 80% 55% / 0.85)`;
   });
 
-export const generatePieChartData = (slices: Slice[]) => {
-  // sanitize + filter
-  const clean = slices
-    .map(s => ({ label: `${s.label}`.trim(), value: Number(s.value) }))
+export const generatePieChartData = (slices?: Slice[]) => {
+  const demo =
+    slices && slices.length
+      ? slices
+      : [
+          { label: "Apples", value: 40 },
+          { label: "Bananas", value: 25 },
+          { label: "Cherries", value: 20 },
+          { label: "Dates", value: 15 },
+        ];
+
+  const clean = demo
+    .map(s => ({ label: String(s.label || "").trim(), value: Number(s.value) }))
     .filter(s => s.label && Number.isFinite(s.value) && s.value > 0);
 
-  // fallback demo data if nothing valid
-  const data = clean.length
-    ? clean
-    : [
-        { label: "Apples", value: 40 },
-        { label: "Bananas", value: 25 },
-        { label: "Cherries", value: 20 },
-        { label: "Dates", value: 15 },
-      ];
-
-  const labels = data.map(d => d.label);
-  const values = data.map(d => d.value);
+  const labels = clean.map(d => d.label);
+  const values = clean.map(d => d.value);
   const backgroundColor = makeColors(values.length);
 
   return {
@@ -42,9 +42,7 @@ export const generatePieChartData = (slices: Slice[]) => {
 export const pieOptions = {
   responsive: true,
   plugins: {
-    legend: {
-      position: "top" as const,
-    },
+    legend: { position: "top" as const },
     title: {
       display: true,
       text: "User Pie Chart",
@@ -53,9 +51,9 @@ export const pieOptions = {
       callbacks: {
         label: (ctx: any) => {
           const value = Number(ctx.parsed);
-          const dataset = ctx.dataset?.data as number[] | undefined;
+          const ds = ctx.dataset?.data as number[] | undefined;
           const total =
-            dataset?.reduce((s: number, v: number) => s + (Number(v) || 0), 0) || 0;
+            ds?.reduce((s: number, v: number) => s + (Number(v) || 0), 0) || 0;
           const pct = total > 0 ? ((value / total) * 100).toFixed(2) : "0.00";
           return `${ctx.label}: ${value} (${pct}%)`;
         },

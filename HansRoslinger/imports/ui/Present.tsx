@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
 // IMPORT THE NEW PIE CHART COMPONENT
-import { D3PieChart } from "./Charts/D3PieChart"; 
+import { D3PieChart } from "./Charts/D3PieChart";
 import { WebcamComponent } from "./Video/webcam";
 import { Header, toolbarButtonHeight, toolbarButtonWidth } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
@@ -26,9 +26,9 @@ import { FunctionToIconSources, GestureToIconSources, FunctionToLabel, GestureTo
 
 // Define chart views (add PIE)
 enum CurrentChartView {
-  LINE = 'LINE',
-  BAR = 'BAR',
-  PIE = 'PIE',
+  LINE = "LINE",
+  BAR = "BAR",
+  PIE = "PIE",
 }
 
 export const Present: React.FC = () => {
@@ -118,10 +118,10 @@ export const Present: React.FC = () => {
   }, [activeGesture, gestureDetectionStatus]);
 
   const determineGrayscale = () => grayscaleRef.current;
-  
+
   // State for current chart view
   const [currentChartView, setCurrentChartView] = useState<CurrentChartView>(CurrentChartView.LINE);
-  
+
   // Helper to determine the next chart view (cycle: LINE -> BAR -> PIE -> LINE)
   const getNextChartView = (current: CurrentChartView): CurrentChartView => {
     switch (current) {
@@ -316,7 +316,7 @@ export const Present: React.FC = () => {
   };
 
   // --- RENDER FUNCTION ---
-  
+
   // Function to render the correct chart component
   const renderChart = () => {
     const dataset = currentDataset ?? defaultDataset;
@@ -327,7 +327,7 @@ export const Present: React.FC = () => {
       case CurrentChartView.BAR:
         return <D3BarChart dataset={dataset} />;
       case CurrentChartView.PIE:
-        return <D3PieChart dataset={dataset} />; 
+        return <D3PieChart dataset={dataset} />;
       default:
         return <D3BarChart dataset={dataset} />; // Fallback
     }

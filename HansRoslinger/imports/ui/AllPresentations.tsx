@@ -376,11 +376,7 @@ export default function AllPresentations() {
                             {dataset.title}
                           </Typography>
                           <Typography variant="subtitle2">
-                            {dataset.preferredChartType === ChartType.BAR 
-                              ? "Bar chart" 
-                              : dataset.preferredChartType === ChartType.LINE 
-                              ? "Line chart" 
-                              : "Pie chart"}
+                            {dataset.preferredChartType === ChartType.BAR ? "Bar chart" : dataset.preferredChartType === ChartType.LINE ? "Line chart" : "Pie chart"}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {dataset.data ? dataset.data.length : 0} data point
@@ -413,11 +409,7 @@ export default function AllPresentations() {
                 {summaryDataset.title}
               </Typography>
               <Typography variant="subtitle2">
-                {summaryDataset.preferredChartType === ChartType.BAR 
-                  ? "Bar chart" 
-                  : summaryDataset.preferredChartType === ChartType.LINE 
-                  ? "Line chart" 
-                  : "Pie chart"}
+                {summaryDataset.preferredChartType === ChartType.BAR ? "Bar chart" : summaryDataset.preferredChartType === ChartType.LINE ? "Line chart" : "Pie chart"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {summaryDataset.data ? summaryDataset.data.length : 0} data point

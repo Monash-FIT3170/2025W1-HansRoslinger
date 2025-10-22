@@ -1,8 +1,7 @@
 // api/PieChart/pieChart.ts
 
 // The original 20 values generated for the line chart
-const generateRandomValues = (count: number) =>
-  Array.from({ length: count }, () => Math.floor(Math.random() * 100) + 10);
+const generateRandomValues = (count: number) => Array.from({ length: count }, () => Math.floor(Math.random() * 100) + 10);
 
 /**
  * Generates aggregated data suitable for a Pie chart.
@@ -46,36 +45,36 @@ export const options = {
   plugins: {
     legend: {
       // Placing the legend to the right is common for pie charts
-      position: "right" as const, 
+      position: "right" as const,
       labels: {
         // Use the colors from the dataset as the legend boxes
-        usePointStyle: true, 
-      }
+        usePointStyle: true,
+      },
     },
     title: {
       display: true,
       text: "Quarterly Data Distribution", // Updated title
       font: {
-        size: 16
-      }
+        size: 16,
+      },
     },
     // Optional: Add tooltips to show the percentage for each slice
     tooltip: {
-        callbacks: {
-            label: function(context: any) {
-                let label = context.label || '';
-                if (label) {
-                    label += ': ';
-                }
-                if (context.parsed !== null) {
-                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-                    const currentValue = context.parsed;
-                    const percentage = ((currentValue/total) * 100).toFixed(1) + '%';
-                    label += `${currentValue.toFixed(0)} (${percentage})`;
-                }
-                return label;
-            }
-        }
-    }
+      callbacks: {
+        label: function (context: any) {
+          let label = context.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed !== null) {
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const currentValue = context.parsed;
+            const percentage = ((currentValue / total) * 100).toFixed(1) + "%";
+            label += `${currentValue.toFixed(0)} (${percentage})`;
+          }
+          return label;
+        },
+      },
+    },
   },
 };

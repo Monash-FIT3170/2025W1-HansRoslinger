@@ -15,7 +15,7 @@ export enum ChartType {
 
 // Dataset interface
 export interface Dataset {
-// ... rest of the interface is unchanged ...
+  // ... rest of the interface is unchanged ...
   _id?: string;
   title: string;
   data: DataPoint[];

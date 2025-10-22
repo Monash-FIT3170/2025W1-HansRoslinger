@@ -2,7 +2,7 @@
 
 import React from "react";
 // Change the imported component from Line to Pie
-import { Pie } from "react-chartjs-2"; 
+import { Pie } from "react-chartjs-2";
 // Import pie chart data and options
 import { generatePieChartData, options } from "../../api/PieChart/pieChart";
 import {
@@ -34,11 +34,8 @@ const PieChart: React.FC<PieChartProps> = ({
 
   return (
     // Use an equal width/height for the container to ensure the pie is a circle
-    <div style={{ width, height, margin: "0 auto" }}> 
-      <Pie 
-        data={data} 
-        options={{ ...options, maintainAspectRatio: false }} 
-      />
+    <div style={{ width, height, margin: "0 auto" }}>
+      <Pie data={data} options={{ ...options, maintainAspectRatio: false }} />
     </div>
   );
 };

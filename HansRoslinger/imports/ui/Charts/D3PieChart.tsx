@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import {
-  SELECT_COLOUR,
-  MARGIN,
-  AXIS_COLOR,
-  AXIS_FONT_SIZE,
-  BAR_OPACITY,
-} from "./constants";
+import { SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, BAR_OPACITY } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
 interface PieSliceData {
@@ -137,12 +131,10 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     // Calculate chart dimensions
     const outerRadius = Math.min(width, height) / 2 - MARGIN.top;
     const innerRadius = 0;
-    
+
     // Center the chart group
-    const g = svg
-      .append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
-    
+    const g = svg.append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
+
     // 🚨 REMOVE THIS BLOCK to remove the top title
     // 8. Add Title (This was the block creating the top title)
     // const titleText = (dataset.title || "Data Distribution (Pie Chart)");
@@ -155,31 +147,23 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     //     .style("font-weight", "bold")
     //     .text(titleText);
 
-
     // --- Logic for EMPTY DATA ---
-    if (filteredData.length === 0 || d3.sum(filteredData, d => d.value) === 0) {
-        // Draw a placeholder grey circle (analogous to empty axes)
-        g.append("circle")
-            .attr("cx", 0)
-            .attr("cy", 0)
-            .attr("r", outerRadius * 0.95) // Use a slightly smaller radius than max
-            .attr("fill", "#333333") // Dark grey color
-            .attr("stroke", AXIS_COLOR)
-            .style("stroke-width", "1px");
-            
-        // Add text indicator inside the circle
-        g.append("text")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("text-anchor", "middle")
-            .attr("fill", AXIS_COLOR)
-            .style("font-size", AXIS_FONT_SIZE)
-            .text("No Data Available");
+    if (filteredData.length === 0 || d3.sum(filteredData, (d) => d.value) === 0) {
+      // Draw a placeholder grey circle (analogous to empty axes)
+      g.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", outerRadius * 0.95) // Use a slightly smaller radius than max
+        .attr("fill", "#333333") // Dark grey color
+        .attr("stroke", AXIS_COLOR)
+        .style("stroke-width", "1px");
 
-        return; 
+      // Add text indicator inside the circle
+      g.append("text").attr("x", 0).attr("y", 0).attr("text-anchor", "middle").attr("fill", AXIS_COLOR).style("font-size", AXIS_FONT_SIZE).text("No Data Available");
+
+      return;
     }
     // --- END EMPTY DATA LOGIC ---
-
 
     // 2. Color Scale
     const color = d3
@@ -199,12 +183,12 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     const arc = d3
       .arc<d3.PieArcDatum<PieSliceData>>()
       .innerRadius(innerRadius)
-      .outerRadius(outerRadius * 0.95); 
+      .outerRadius(outerRadius * 0.95);
 
     const labelArc = d3
-        .arc<d3.PieArcDatum<PieSliceData>>()
-        .innerRadius(outerRadius * 0.7) 
-        .outerRadius(outerRadius * 0.7);
+      .arc<d3.PieArcDatum<PieSliceData>>()
+      .innerRadius(outerRadius * 0.7)
+      .outerRadius(outerRadius * 0.7);
 
     // 5. Draw the Slices (Paths)
     g.selectAll(".arc")
@@ -229,7 +213,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .attr("transform", (d) => `translate(${labelArc.centroid(d)})`)
       .attr("dy", "0.35em")
       .attr("text-anchor", "middle")
-      .attr("fill", "white") 
+      .attr("fill", "white")
       .style("font-size", AXIS_FONT_SIZE)
       .style("font-weight", "bold")
       .style("text-shadow", "0 0 3px black")
@@ -242,7 +226,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
         }
         return "";
       });
-    
+
     // Apply zoom scale
     svg.attr("transform", `scale(${zoomScale})`);
   };

@@ -1,15 +1,7 @@
 // D3PieChart.tsx
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import {
-  DEFAULT_COLOUR,
-  SELECT_COLOUR,
-  MARGIN,
-  AXIS_COLOR,
-  AXIS_FONT_SIZE,
-  AXIS_TEXT_SHADOW,
-  AXIS_LINE_SHADOW,
-} from "./constants";
+import { DEFAULT_COLOUR, SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, AXIS_TEXT_SHADOW, AXIS_LINE_SHADOW } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
 interface D3PieChartProps {
@@ -18,11 +10,7 @@ interface D3PieChartProps {
   donutRatio?: number; // 0..0.9 fraction of outer radius
 }
 
-export const D3PieChart: React.FC<D3PieChartProps> = ({
-  dataset,
-  asDonut = true,
-  donutRatio = 0.6,
-}) => {
+export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset, asDonut = true, donutRatio = 0.6 }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -101,10 +89,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({
     const windowWidth = window.innerWidth;
     const maxAllowedScale = (0.95 * windowWidth) / chartWidth;
 
-    const clampedScaleX = Math.max(
-      0.5,
-      Math.min(1.5, Math.min(scaleX, maxAllowedScale)),
-    );
+    const clampedScaleX = Math.max(0.5, Math.min(1.5, Math.min(scaleX, maxAllowedScale)));
     const clampedScaleY = Math.max(0.1, Math.min(1, scaleY));
 
     setZoomScale(clampedScaleX);
@@ -173,10 +158,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({
 
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.max(
-      10,
-      Math.min((width - MARGIN.left - MARGIN.right), (height - MARGIN.top - MARGIN.bottom)) / 2,
-    );
+    const radius = Math.max(10, Math.min(width - MARGIN.left - MARGIN.right, height - MARGIN.top - MARGIN.bottom) / 2);
 
     const innerR = asDonut ? Math.max(0, Math.min(radius * donutRatio, radius * 0.9)) : 0;
 
@@ -190,18 +172,13 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({
 
     const arcs = pieGen(customData);
 
-    const arcGen = d3
-      .arc<d3.PieArcDatum<{ label: string; value: number }>>()
-      .innerRadius(innerR)
-      .outerRadius(radius);
+    const arcGen = d3.arc<d3.PieArcDatum<{ label: string; value: number }>>().innerRadius(innerR).outerRadius(radius);
 
     // Colour mapping (derive palette; highlighted uses SELECT_COLOUR)
     const color = (i: number) => d3.interpolateRainbow((i / Math.max(customData.length, 1)) % 1);
 
     // Group for chart, apply zoom scale like the line chart
-    const g = svg
-      .append("g")
-      .attr("transform", `translate(${cx}, ${cy}) scale(${zoomScale})`);
+    const g = svg.append("g").attr("transform", `translate(${cx}, ${cy}) scale(${zoomScale})`);
 
     // Axis-line shadow parity: apply to slices via filter style
     g.style("filter", AXIS_LINE_SHADOW);
@@ -220,10 +197,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({
       })
       .on("mouseout", function (event, d: any) {
         const i = (arcs as any as any[]).indexOf(d);
-        d3.select(this).attr(
-          "fill",
-          highlighted.has(d.data.label) ? SELECT_COLOUR : color(i),
-        );
+        d3.select(this).attr("fill", highlighted.has(d.data.label) ? SELECT_COLOUR : color(i));
       });
 
     // Labels (only for highlighted slices to reduce clutter)

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import { SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, BAR_OPACITY } from "./constants";
+import { SELECT_COLOUR, DARK_SELECT_COLOUR, MARGIN, AXIS_COLOR, AXIS_FONT_SIZE, BAR_OPACITY } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
 interface PieSliceData {
@@ -31,10 +31,41 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     const svg = d3.select(chartRef.current).select("svg");
     const slices = svg.selectAll<SVGPathElement, d3.PieArcDatum<PieSliceData>>("path.arc");
 
+    // Get the SVG's bounding rectangle to calculate center
+    const svgNode = svg.node();
+    if (!svgNode) return;
+    const svgRect = (svgNode as SVGSVGElement).getBoundingClientRect();
+
+    const centerX = svgRect.left + svgRect.width / 2;
+    const centerY = svgRect.top + svgRect.height / 2;
+
+    // Calculate radius from chart dimensions
+    const { width, height } = chartRef.current.getBoundingClientRect();
+    const outerRadius = Math.min(width, height) / 2 - MARGIN.top;
+    const innerRadius = 0;
+
     let hovered: string | null = null;
+    let minDistance = Infinity;
+
+    // Check each slice - find which slice center is closest to the finger
     slices.each(function (d) {
-      const bbox = this.getBoundingClientRect();
-      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+      // Calculate the center point of this slice
+      const angle = (d.startAngle + d.endAngle) / 2;
+      const radius = (innerRadius + outerRadius) / 2;
+      
+      // Convert polar to cartesian coordinates
+      const sliceCenterX = centerX + radius * Math.cos(angle - Math.PI / 2);
+      const sliceCenterY = centerY + radius * Math.sin(angle - Math.PI / 2);
+
+      // Calculate distance from finger to slice center
+      const distance = Math.sqrt(
+        Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2)
+      );
+
+      // Use a threshold - if finger is within radius distance of slice center
+      const threshold = radius * 0.7; // 70% of slice radius
+      if (distance < threshold && distance < minDistance) {
+        minDistance = distance;
         hovered = d.data.label;
       }
     });
@@ -54,10 +85,41 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     const svg = d3.select(chartRef.current).select("svg");
     const slices = svg.selectAll<SVGPathElement, d3.PieArcDatum<PieSliceData>>("path.arc");
 
+    // Get the SVG's bounding rectangle to calculate center
+    const svgNode = svg.node();
+    if (!svgNode) return;
+    const svgRect = (svgNode as SVGSVGElement).getBoundingClientRect();
+
+    const centerX = svgRect.left + svgRect.width / 2;
+    const centerY = svgRect.top + svgRect.height / 2;
+
+    // Calculate radius from chart dimensions
+    const { width, height } = chartRef.current.getBoundingClientRect();
+    const outerRadius = Math.min(width, height) / 2 - MARGIN.top;
+    const innerRadius = 0;
+
     let targetLabel: string | null = null;
+    let minDistance = Infinity;
+
+    // Check each slice - find which slice center is closest to the finger
     slices.each(function (d) {
-      const bbox = this.getBoundingClientRect();
-      if (x >= bbox.left && x <= bbox.right && y >= bbox.top && y <= bbox.bottom) {
+      // Calculate the center point of this slice
+      const angle = (d.startAngle + d.endAngle) / 2;
+      const radius = (innerRadius + outerRadius) / 2;
+      
+      // Convert polar to cartesian coordinates
+      const sliceCenterX = centerX + radius * Math.cos(angle - Math.PI / 2);
+      const sliceCenterY = centerY + radius * Math.sin(angle - Math.PI / 2);
+
+      // Calculate distance from finger to slice center
+      const distance = Math.sqrt(
+        Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2)
+      );
+
+      // Use a threshold - if finger is within radius distance of slice center
+      const threshold = radius * 0.7; // 70% of slice radius
+      if (distance < threshold && distance < minDistance) {
+        minDistance = distance;
         targetLabel = d.data.label;
       }
     });
@@ -91,6 +153,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
   const handleFilter = () => {
     if (highlightedSlices.size > 0) {
       setFilteredData(data.filter((d) => highlightedSlices.has(d.label)));
+      setHighlightedSlices(new Set()); // Clear selection after filtering
     }
   };
 
@@ -199,7 +262,15 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .attr("fill", (d) => {
         const isHighlighted = highlightedSlices.has(d.data.label);
         const isHovered = d.data.label === hoverLabel;
-        return isHighlighted || isHovered ? SELECT_COLOUR : color(d.data.label);
+        
+        // Selected (permanent) gets darker color, hover (temporary) gets lighter color
+        if (isHighlighted) {
+          return DARK_SELECT_COLOUR; // Darker for selected
+        } else if (isHovered) {
+          return SELECT_COLOUR; // Lighter for hover
+        } else {
+          return color(d.data.label); // Original color
+        }
       })
       .attr("opacity", BAR_OPACITY) // Make it semi-transparent like bar chart
       .attr("stroke", "white")

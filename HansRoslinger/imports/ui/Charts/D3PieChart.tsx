@@ -52,15 +52,13 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       // Calculate the center point of this slice
       const angle = (d.startAngle + d.endAngle) / 2;
       const radius = (innerRadius + outerRadius) / 2;
-      
+
       // Convert polar to cartesian coordinates
       const sliceCenterX = centerX + radius * Math.cos(angle - Math.PI / 2);
       const sliceCenterY = centerY + radius * Math.sin(angle - Math.PI / 2);
 
       // Calculate distance from finger to slice center
-      const distance = Math.sqrt(
-        Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2)
-      );
+      const distance = Math.sqrt(Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2));
 
       // Use a threshold - if finger is within radius distance of slice center
       const threshold = radius * 0.7; // 70% of slice radius
@@ -106,15 +104,13 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       // Calculate the center point of this slice
       const angle = (d.startAngle + d.endAngle) / 2;
       const radius = (innerRadius + outerRadius) / 2;
-      
+
       // Convert polar to cartesian coordinates
       const sliceCenterX = centerX + radius * Math.cos(angle - Math.PI / 2);
       const sliceCenterY = centerY + radius * Math.sin(angle - Math.PI / 2);
 
       // Calculate distance from finger to slice center
-      const distance = Math.sqrt(
-        Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2)
-      );
+      const distance = Math.sqrt(Math.pow(x - sliceCenterX, 2) + Math.pow(y - sliceCenterY, 2));
 
       // Use a threshold - if finger is within radius distance of slice center
       const threshold = radius * 0.7; // 70% of slice radius
@@ -262,7 +258,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .attr("fill", (d) => {
         const isHighlighted = highlightedSlices.has(d.data.label);
         const isHovered = d.data.label === hoverLabel;
-        
+
         // Selected (permanent) gets darker color, hover (temporary) gets lighter color
         if (isHighlighted) {
           return DARK_SELECT_COLOUR; // Darker for selected

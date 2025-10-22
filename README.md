@@ -125,6 +125,17 @@ Please refer to the following documents if you would like to view it
 
 Please note that the markdown document may not render the Images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with Images.
 
+## Maintenance Document
+
+The Milestone 4 submission specifies that the Maintenance Document should be at the `root of the repository`, however because of the structure of our existing repository we have chosen to place it in our `Documentation` folder in order to align with our existing convention.
+
+Please refer to the following documents if you would like to view it
+
+- [Markdown Document](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.md)
+- [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.pdf)
+
+Please note that the markdown document may not render the Images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Maintenance Document with Images.
+
 ## License
 
 This repository is licensed under the MIT License. See `LICENSE`.

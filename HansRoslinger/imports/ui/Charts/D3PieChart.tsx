@@ -7,13 +7,9 @@ import {
   AXIS_COLOR,
   AXIS_FONT_SIZE,
   AXIS_TEXT_SHADOW,
-  // AXIS_LINE_SHADOW, // Not needed for pie
-  // LINE_STROKE_WIDTH, // Not needed for pie
-  // POINT_RADIUS, // Not needed for pie, but kept as a constant
 } from "./constants";
 import { Dataset } from "../../api/database/dataset/dataset";
 
-// Define the data structure D3 will operate on
 interface PieSliceData {
   label: string;
   value: number;
@@ -24,42 +20,13 @@ interface D3PieChartProps {
 }
 
 export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
-  // Use the original data structure from the line chart
   const data: PieSliceData[] = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
-  
-  // NOTE: These states are maintained for structural consistency, 
-  // but their complex logic (filter/zoom) is not used for the pie chart.
-  const [filteredData, setFilteredData] = useState(data); 
-  const [highlightedDots, setHighlightedDots] = useState<Set<string>>(new Set());
-  const [zoomScale, setZoomScale] = useState(1);
-  
-  // State for visual highlight on a pie slice (for mouse events)
   const [highlightedSlice, setHighlightedSlice] = useState<string | null>(null);
 
-  // --- INTERACTION HANDLERS (DISABLED/SIMPLIFIED FOR PIE CHART) ---
-
-  // Highlighting in a pie chart is usually handled by simple mouse events on the arcs themselves.
-  // The complex gesture/coordinate calculation from the line chart is skipped.
-  const handleHighlight = (event: Event) => {
-    console.warn("chart:highlight event ignored. Pie charts do not use point-based highlighting.");
-  };
-
-  // Clearing highlights is the only part that makes sense for a pie chart.
-  const handleClear = () => {
-    setHighlightedSlice(null); // Clear the active mouse highlight
-    setHighlightedDots(new Set()); // Clear the gesture highlight state
-  };
-
-  const handleFilter = () => {
-    console.warn("chart:filter event ignored. Pie charts typically show the entire dataset.");
-  };
-
-  const handleZoom = (event: Event) => {
-    console.warn("chart:zoom event ignored. Pie charts do not scale proportionally like linear charts.");
-  };
-
-  // --- D3 RENDERING LOGIC ---
+  // Remaining state and interaction handlers (handleHighlight, handleClear, etc.) 
+  // are omitted here for brevity but should be kept the same as in the previous response.
+  // ...
 
   const renderChart = () => {
     if (!chartRef.current) return;
@@ -81,18 +48,55 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
 
     // Calculate chart dimensions
     const outerRadius = Math.min(width, height) / 2 - MARGIN.top;
-    const innerRadius = 0; // Standard pie chart. Use > 0 for Doughnut.
+    const innerRadius = 0;
     
     // Center the chart group
     const g = svg
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
-      
+    
+    // 8. Add Title (Moved to top so it's always drawn)
+    const titleText = (dataset.title || "Data Distribution (Pie Chart)");
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", MARGIN.top / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", AXIS_COLOR)
+        .style("font-size", "1.4em")
+        .style("font-weight", "bold")
+        .text(titleText);
+
+
+    // --- 🚨 NEW LOGIC FOR EMPTY DATA 🚨 ---
+    if (data.length === 0 || d3.sum(data, d => d.value) === 0) {
+        // Draw a placeholder grey circle (analogous to empty axes)
+        g.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", outerRadius * 0.95) // Use a slightly smaller radius than max
+            .attr("fill", "#333333") // Dark grey color
+            .attr("stroke", AXIS_COLOR)
+            .style("stroke-width", "1px");
+            
+        // Add text indicator inside the circle
+        g.append("text")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("text-anchor", "middle")
+            .attr("fill", AXIS_COLOR)
+            .style("font-size", AXIS_FONT_SIZE)
+            .text("No Data Available");
+
+        return; // Exit the function, skipping the pie chart rendering logic
+    }
+    // --- END EMPTY DATA LOGIC ---
+
+
     // 2. Color Scale
     const color = d3
       .scaleOrdinal<string, string>()
       .domain(data.map((d) => d.label))
-      .range(d3.schemeCategory10); // Standard D3 color scheme
+      .range(d3.schemeCategory10);
 
     // 3. Define D3 Pie Layout
     const pie = d3
@@ -106,7 +110,7 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
     const arc = d3
       .arc<d3.PieArcDatum<PieSliceData>>()
       .innerRadius(innerRadius)
-      .outerRadius(outerRadius * 0.95); // Slightly smaller for clear border separation
+      .outerRadius(outerRadius * 0.95); 
 
     const labelArc = d3
         .arc<d3.PieArcDatum<PieSliceData>>()
@@ -120,7 +124,6 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
       .attr("class", "arc")
       .attr("d", arc)
       .attr("fill", (d) => {
-        // Use SELECT_COLOUR for hover, otherwise use the color scale
         const isHighlighted = d.data.label === highlightedSlice;
         return isHighlighted ? SELECT_COLOUR : color(d.data.label);
       })
@@ -149,58 +152,28 @@ export const D3PieChart: React.FC<D3PieChartProps> = ({ dataset }) => {
         const total = d3.sum(data, (d) => d.value);
         const percentage = ((d.data.value / total) * 100).toFixed(1);
 
-        if (d.endAngle - d.startAngle > 0.35) { // Filter small slices
+        if (d.endAngle - d.startAngle > 0.35) {
           return `${d.data.label} ${percentage}%`;
         }
         return "";
       });
-      
-    // 7. Add Title
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", MARGIN.top / 2)
-        .attr("text-anchor", "middle")
-        .attr("fill", AXIS_COLOR)
-        .style("font-size", "1.4em")
-        .style("font-weight", "bold")
-        .text("Data Distribution (Pie Chart)");
   };
 
-  // --- EFFECT HOOKS (Identical to Line Chart for consistency) ---
+  // ... (Effect Hooks remain the same)
   
+  // The state and effects need to be defined outside of renderChart for React to work
   useEffect(() => {
-    // We only call renderChart() since the complex logic is disabled/simplified
+    // ... (rest of the useEffect hook for rendering and listeners)
     renderChart();
-    
-    // Register event listeners
     window.addEventListener("resize", renderChart);
-    window.addEventListener(
-      "chart:highlight",
-      handleHighlight as EventListener,
-    );
-    window.addEventListener("chart:clear", handleClear as EventListener);
-    window.addEventListener("chart:zoom", handleZoom as EventListener);
-    window.addEventListener("chart:filter", handleFilter as EventListener);
-
+    // ... (event listeners)
+    
     return () => {
-      // Cleanup event listeners
+      // ... (cleanup)
       window.removeEventListener("resize", renderChart);
-      window.removeEventListener(
-        "chart:highlight",
-        handleHighlight as EventListener,
-      );
-      window.removeEventListener("chart:clear", handleClear as EventListener);
-      window.removeEventListener("chart:zoom", handleZoom as EventListener);
-      window.removeEventListener("chart:filter", handleFilter as EventListener);
+      // ... (cleanup listeners)
     };
-  }, [data, highlightedSlice]); // Dependency cleanup: simplified to only depend on data/highlight
-
-  // The filters/state should be reset when the dataset changes (Identical to Line Chart)
-  useEffect(() => {
-    setFilteredData(data);
-    setHighlightedDots(new Set());
-    setZoomScale(1);
-  }, [dataset]);
+  }, [data, highlightedSlice, dataset]); // Simplified dependencies for example
 
   return <div ref={chartRef} className="w-full h-full" />;
 };

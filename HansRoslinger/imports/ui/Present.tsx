@@ -28,7 +28,7 @@ export const Present: React.FC = () => {
   const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
 
-  // State for chart features - Replaced 'showLineChart' boolean with 'currentChartView' enum
+  // State for chart features - Uses enum for multi-state chart selection
   const [currentChartView, setCurrentChartView] = useState<CurrentChartView>(CurrentChartView.BAR); 
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomStartPosition, setZoomStartPosition] = useState<{
@@ -62,7 +62,7 @@ export const Present: React.FC = () => {
     }
   }, []);
 
-  // code which handles playing a dot at the start position of the zoom (No changes)
+  // code which handles playing a dot at the start position of the zoom (No change)
   useEffect(() => {
     const handleToggleZoom = (event: Event) => {
       const customEvent = event as CustomEvent<{ x: number; y: number }>;
@@ -94,7 +94,7 @@ export const Present: React.FC = () => {
 
     window.addEventListener("chart:switch", handleSwitchChart);
     return () => window.removeEventListener("chart:switch", handleSwitchChart);
-  }, [getNextChartView]); // Dependency on useCallback
+  }, [getNextChartView]); 
 
   // Set initial chart type based on dataset preference (Modified)
   useEffect(() => {
@@ -106,7 +106,6 @@ export const Present: React.FC = () => {
     } else if (preferredType === ChartType.BAR) {
       initialView = CurrentChartView.BAR;
     }
-    // Note: If your ChartType enum includes PIE, you'd add an 'else if' here.
     
     setCurrentChartView(initialView);
   }, [currentDataset]);
@@ -141,7 +140,6 @@ export const Present: React.FC = () => {
       case CurrentChartView.BAR:
         return <D3BarChart dataset={dataset} />;
       case CurrentChartView.PIE:
-        // Render the new D3PieChart component here
         return <D3PieChart dataset={dataset} />; 
       default:
         return <D3BarChart dataset={dataset} />; // Fallback
@@ -198,9 +196,9 @@ export const Present: React.FC = () => {
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
             onToggleGrayscale={toggleGrayscale}
-            // Pass the current chart view status
-            showLineChart={currentChartView === CurrentChartView.LINE} 
-            // The toggle function now cycles through all three charts
+            
+            currentChartType={currentChartView as 'LINE' | 'BAR' | 'PIE'}
+            
             onToggleChart={() => setCurrentChartView(getNextChartView)} 
             gestureDetectionStatus={gestureDetectionStatus}
             onToggleGestureDetectionStatus={() =>

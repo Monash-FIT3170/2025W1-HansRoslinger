@@ -375,7 +375,9 @@ export default function AllPresentations() {
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             {dataset.title}
                           </Typography>
-                          <Typography variant="subtitle2">{dataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
+                          <Typography variant="subtitle2">
+                            {dataset.preferredChartType === ChartType.BAR ? "Bar chart" : dataset.preferredChartType === ChartType.LINE ? "Line chart" : "Pie chart"}
+                          </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {dataset.data ? dataset.data.length : 0} data point
                             {dataset.data && dataset.data.length !== 1 ? "s" : ""}
@@ -406,7 +408,9 @@ export default function AllPresentations() {
               <Typography variant="h6" color="text.secondary">
                 {summaryDataset.title}
               </Typography>
-              <Typography variant="subtitle2">{summaryDataset.preferredChartType === ChartType.BAR ? "Bar chart" : "Line chart"}</Typography>
+              <Typography variant="subtitle2">
+                {summaryDataset.preferredChartType === ChartType.BAR ? "Bar chart" : summaryDataset.preferredChartType === ChartType.LINE ? "Line chart" : "Pie chart"}
+              </Typography>
               <Typography variant="body2" color="text.secondary">
                 {summaryDataset.data ? summaryDataset.data.length : 0} data point
                 {summaryDataset.data && summaryDataset.data.length !== 1 ? "s" : ""}
@@ -454,6 +458,7 @@ export default function AllPresentations() {
           <Select value={datasetChartType} onChange={(e) => setDatasetChartType(e.target.value as ChartType)}>
             <MenuItem value={ChartType.BAR}>Bar</MenuItem>
             <MenuItem value={ChartType.LINE}>Line</MenuItem>
+            <MenuItem value={ChartType.PIE}>Pie</MenuItem>
           </Select>
 
           {/* Drag & Drop Zone */}

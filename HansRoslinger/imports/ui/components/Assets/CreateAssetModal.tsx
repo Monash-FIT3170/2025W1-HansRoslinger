@@ -26,11 +26,16 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
   const [files, setFiles] = useState<File[]>([]);
 
   const onDrop = (acceptedFiles: File[]) => {
+    console.log("Files dropped/selected:", acceptedFiles);
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".gif", ".bmp", ".webp"],
+      "application/pdf": [".pdf"],
+    },
     multiple: true,
   });
 
@@ -42,6 +47,10 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
       setIcon(ICONS[0]);
       onClose();
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
@@ -57,6 +66,7 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
           </MenuItem>
         ))}
       </TextField>
+
       <Box
         {...getRootProps()}
         sx={{
@@ -65,18 +75,52 @@ export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAs
           textAlign: "center",
           my: 2,
           cursor: "pointer",
+          backgroundColor: isDragActive ? "#f0f0f0" : "transparent",
         }}
       >
         <input {...getInputProps()} />
         {isDragActive ? (
-          <Typography>Drop the images here ...</Typography>
+          <Typography>Drop the files here ...</Typography>
         ) : (
-          <Typography>{files.length === 0 ? "Drag & drop images here, or click to select" : `${files.length} image(s) selected`}</Typography>
+          <Typography>{files.length === 0 ? "Drag & drop images or PDFs here, or click to select" : `${files.length} file(s) selected`}</Typography>
         )}
       </Box>
+
+      {files.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            Selected Files:
+          </Typography>
+          {files.map((file, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                p: 1,
+                border: "1px solid #eee",
+                borderRadius: 1,
+                mb: 1,
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              <Typography variant="body2">{file.name}</Typography>
+              <IconButton size="small" onClick={() => removeFile(index)} sx={{ ml: 1 }}>
+                <MuiIcons.Delete />
+              </IconButton>
+            </Box>
+          ))}
+        </Box>
+      )}
+
       <Button variant="contained" color="primary" onClick={handleCreate} disabled={!name || files.length === 0} fullWidth>
         Create
       </Button>
+
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+        Supported files: Images (JPEG, PNG, GIF, BMP, WebP) and PDF documents
+      </Typography>
     </Modal>
   );
 }

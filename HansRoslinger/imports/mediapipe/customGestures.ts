@@ -1,11 +1,19 @@
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { Gesture, GestureType } from "../gesture/gesture";
+import { isDrawModeEnabled } from "../gesture/Draw";
 import { Handedness } from "./types";
 
 export function recogniseCustomGesture(landmarks: NormalizedLandmark[], handedness: Handedness = Handedness.RIGHT): { gestureID: GestureType; confidence: number } | null {
   if (!landmarks || landmarks.length < 21) return null;
 
-  if (isPinchSign(landmarks)) {
+  const drawEnabled = isDrawModeEnabled();
+
+  if (isDrawGesture(landmarks, drawEnabled)) {
+    return {
+      gestureID: GestureType.DRAW,
+      confidence: 1.0,
+    };
+  } else if (isPinchSign(landmarks)) {
     return {
       gestureID: GestureType.PINCH,
       confidence: 1.0,
@@ -70,6 +78,7 @@ export function isPointing(landmarks: NormalizedLandmark[]): boolean {
   const wrist = landmarks[0];
   const indexTip = landmarks[8];
   const indexPip = landmarks[6];
+  const indexDip = landmarks[7];
   const middleTip = landmarks[12];
   const middlePip = landmarks[10];
   const ringTip = landmarks[16];
@@ -80,7 +89,11 @@ export function isPointing(landmarks: NormalizedLandmark[]): boolean {
   const thumbPip = landmarks[6];
 
   const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
-  const isIndexExtended = dist(wrist, indexTip) > dist(wrist, indexPip);
+  const wristToTip = dist(wrist, indexTip);
+  const wristToPip = dist(wrist, indexPip);
+  const pipToTip = dist(indexPip, indexTip);
+  const pipToDip = dist(indexPip, indexDip);
+  const isIndexExtended = wristToTip > wristToPip + 0.035 && pipToTip > pipToDip + 0.01;
   const areOthersCurled =
     dist(wrist, middleTip) < dist(wrist, middlePip) && dist(wrist, ringTip) < dist(wrist, ringPip) && dist(wrist, pinkyTip) < dist(wrist, pinkyPip) && dist(wrist, thumbTip) < dist(wrist, thumbPip);
   const isPointing = isIndexExtended && areOthersCurled;
@@ -118,18 +131,63 @@ export function isDoublePinchSign(leftGesture: Gesture, rightGesture: Gesture) {
   return isLeftPinch && isRightPinch;
 }
 
+export function isDrawGesture(landmarks: NormalizedLandmark[], isDrawModeActive: boolean = false): boolean {
+  if (!landmarks || landmarks.length < 21) return false;
+
+  const thumbTip = landmarks[4];
+  const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const ringTip = landmarks[16];
+  const wrist = landmarks[0];
+
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+  const thumbIndexDistance = dist(thumbTip, indexTip);
+  const thumbMiddleDistance = dist(thumbTip, middleTip);
+  const indexMiddleDistance = dist(indexTip, middleTip);
+  const indexRingDistance = dist(indexTip, ringTip);
+
+  const ringPip = landmarks[14];
+  const pinkyTip = landmarks[20];
+  const pinkyPip = landmarks[18];
+  const areOthersCurled = dist(wrist, ringTip) < dist(wrist, ringPip) && dist(wrist, pinkyTip) < dist(wrist, pinkyPip);
+
+  const distanceMultiplier = isDrawModeActive ? 1.2 : 1;
+  const loosenedRingGap = isDrawModeActive ? 0.05 : 0.06;
+
+  const fingersClose =
+    thumbIndexDistance < 0.03 * distanceMultiplier && thumbMiddleDistance < 0.035 * distanceMultiplier && indexMiddleDistance < 0.025 * distanceMultiplier && indexRingDistance > loosenedRingGap;
+
+  console.log(`thumb-index distance: ${thumbIndexDistance.toFixed(4)}`);
+  console.log(`thumb-middle distance: ${thumbMiddleDistance.toFixed(4)}`);
+  console.log(`index-middle distance: ${indexMiddleDistance.toFixed(4)}`);
+  console.log(`index-ring distance: ${indexRingDistance.toFixed(4)}`);
+  console.log(`Draw gesture check: fingersClose=${fingersClose}, areOthersCurled=${areOthersCurled}, drawMode=${isDrawModeActive}`);
+
+  return fingersClose && areOthersCurled;
+}
+
 export function isPinchSign(landmarks: NormalizedLandmark[]) {
   if (!landmarks || landmarks.length < 21) return false;
 
   const thumbTip = landmarks[4];
   const indexTip = landmarks[8];
+  const middleTip = landmarks[12];
+  const middlePip = landmarks[10];
+  const wrist = landmarks[0];
 
-  // For implementation of pinching
-  // Distance between thumb and index tip
-  const thumbIndexDistance = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+  const dist = (p1: NormalizedLandmark, p2: NormalizedLandmark) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
-  // Consider it "PINCH" if thumb + index are touching, and other fingers are up
-  const isThumbIndexClose = thumbIndexDistance < 0.05; // Tune this if needed
+  const thumbIndexDistance = dist(thumbTip, indexTip);
+  const thumbMiddleDistance = dist(thumbTip, middleTip);
+  const isMiddleRelaxed = dist(wrist, middleTip) < dist(wrist, middlePip);
 
-  return isThumbIndexClose;
+  const isPinch = thumbIndexDistance < 0.03 && thumbMiddleDistance > 0.045 && isMiddleRelaxed;
+
+  console.log(`thumb-index distance: ${thumbIndexDistance.toFixed(4)}`);
+  console.log(`thumb-middle distance: ${thumbMiddleDistance.toFixed(4)}`);
+  console.log(`isMiddleRelaxed: ${isMiddleRelaxed}`);
+  console.log(`Pinch gesture check: isPinch=${isPinch}`);
+
+  return isPinch;
 }

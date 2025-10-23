@@ -90,7 +90,18 @@ export const Home: React.FC = () => {
     setUploadProgress(0);
 
     try {
-      await createAssetWithImages(data);
+      // Pass progress callback to createAssetWithImages
+      await createAssetWithImages(data, (progress) => {
+        setUploadProgress(progress);
+      });
+
+      // Quickly animate from 90% to 100% when complete
+      setUploadProgress(90);
+      await new Promise((res) => setTimeout(res, 100));
+      setUploadProgress(95);
+      await new Promise((res) => setTimeout(res, 100));
+      setUploadProgress(100);
+      await new Promise((res) => setTimeout(res, 300)); // Brief pause at 100%
     } finally {
       setUploading(false);
       setUploadProgress(0);

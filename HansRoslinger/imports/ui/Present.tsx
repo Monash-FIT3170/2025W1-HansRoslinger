@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { Meteor } from "meteor/meteor";
 import { useSearchParams } from "react-router-dom";
 import { D3LineChart } from "./Charts/D3LineChart";
 import { D3BarChart } from "./Charts/D3BarChart";
+// IMPORT THE NEW PIE CHART COMPONENT
+import { D3PieChart } from "./Charts/D3PieChart";
 import { WebcamComponent } from "./Video/webcam";
 import { Header, toolbarButtonHeight, toolbarButtonWidth } from "./Header";
 import { ImageSegmentation } from "./Video/ImageSegmentation";
@@ -20,6 +22,14 @@ import { useImagePreload } from "./handlers/image/useImagePreload";
 import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
+import { FunctionToIconSources, GestureToIconSources, FunctionToLabel, GestureToLabel } from "./Settings";
+
+// Define chart views (add PIE)
+enum CurrentChartView {
+  LINE = "LINE",
+  BAR = "BAR",
+  PIE = "PIE",
+}
 
 /**
  * Page for the presentation page of HansRoslinger
@@ -35,9 +45,10 @@ export const Present: React.FC = () => {
   const [gestureDetectionStatus, setGestureDetectionStatus] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [showAssets, setShowAssets] = useState(false);
+  const [activeGesture, setActiveGesture] = useState<GestureType | null>(null);
+  const [showHints, setShowHints] = useState(false);
 
   // State for chart features
-  const [showLineChart, setShowLineChart] = useState(false);
   const { imageScale, isZoomEnabled, zoomStartPosition } = useImageAssetZoom();
 
   const [searchParams] = useSearchParams();
@@ -86,7 +97,48 @@ export const Present: React.FC = () => {
     grayscaleRef.current = grayscale;
   }, [grayscale]);
 
+  useEffect(() => {
+    let hintTimeout: NodeJS.Timeout | null = null;
+
+    if (!gestureDetectionStatus) {
+      setShowHints(false);
+      return;
+    }
+
+    if (activeGesture) {
+      setShowHints(true);
+      return;
+    }
+
+    setShowHints(false);
+    hintTimeout = setTimeout(() => {
+      setShowHints(true);
+    }, 1500);
+
+    return () => {
+      if (hintTimeout) {
+        clearTimeout(hintTimeout);
+      }
+    };
+  }, [activeGesture, gestureDetectionStatus]);
+
   const determineGrayscale = () => grayscaleRef.current;
+
+  // State for current chart view
+  const [currentChartView, setCurrentChartView] = useState<CurrentChartView>(CurrentChartView.LINE);
+
+  // Helper to determine the next chart view (cycle: LINE -> BAR -> PIE -> LINE)
+  const getNextChartView = (current: CurrentChartView): CurrentChartView => {
+    switch (current) {
+      case CurrentChartView.LINE:
+        return CurrentChartView.BAR;
+      case CurrentChartView.BAR:
+        return CurrentChartView.PIE;
+      case CurrentChartView.PIE:
+      default:
+        return CurrentChartView.LINE;
+    }
+  };
 
   // Zoom toggle handled in useImageAssetZoom
 
@@ -103,16 +155,27 @@ export const Present: React.FC = () => {
         }
         return;
       }
-      setShowLineChart((prev) => !prev);
+      // Cycle through chart views: LINE -> BAR -> PIE -> LINE
+      setCurrentChartView((prev) => getNextChartView(prev));
     };
 
     window.addEventListener("chart:switch", handleSwitchChartOrImage);
     return () => window.removeEventListener("chart:switch", handleSwitchChartOrImage);
   }, [showAssets, assetImages.length, assets.length]);
 
-  // Initialize chart type
+  // Initialize chart type based on dataset preference
   useEffect(() => {
-    setShowLineChart((currentDataset ?? defaultDataset).preferredChartType === ChartType.LINE);
+    const preferredType = (currentDataset ?? defaultDataset).preferredChartType;
+    if (preferredType === ChartType.LINE) {
+      setCurrentChartView(CurrentChartView.LINE);
+    } else if (preferredType === ChartType.BAR) {
+      setCurrentChartView(CurrentChartView.BAR);
+    } else if (preferredType === ChartType.PIE) {
+      setCurrentChartView(CurrentChartView.PIE);
+    } else {
+      // Default to LINE if no preference
+      setCurrentChartView(CurrentChartView.LINE);
+    }
   }, [currentDataset]);
 
   // Load the selected presentation to pick initial asset
@@ -222,8 +285,150 @@ export const Present: React.FC = () => {
     loadSettings().then(setGestureSettings);
   }, []);
 
+  const hintFunctions = useMemo(() => {
+    const uniqueFunctions = new Set<FunctionType>();
+    Object.values(gestureSettings).forEach((functionType) => {
+      if (functionType !== FunctionType.UNUSED) {
+        uniqueFunctions.add(functionType);
+      }
+    });
+    return Array.from(uniqueFunctions);
+  }, [gestureSettings]);
+
+  const getGestureAssignedToFunction = (functionType: FunctionType): GestureType | null => {
+    // First try to find in user's gesture settings
+    for (const [gestureKey, assignedFunction] of Object.entries(gestureSettings)) {
+      if (assignedFunction === functionType) {
+        return Number(gestureKey) as GestureType;
+      }
+    }
+    // If not found, fall back to default mapping
+    for (const [gestureKey, assignedFunction] of Object.entries(defaultMapping)) {
+      if (assignedFunction === functionType) {
+        return Number(gestureKey) as GestureType;
+      }
+    }
+    return null;
+  };
+
+  const formatTooltip = (functionType: FunctionType, gesture: GestureType | null): string => {
+    const functionLabel = FunctionToLabel[functionType] ?? "Configured";
+    if (gesture === null) {
+      return `${functionLabel}: Unassigned`;
+    }
+    const gestureLabel = GestureToLabel[gesture] ?? "Custom";
+    return `${functionLabel}: ${gestureLabel}`;
+  };
+
+  // --- RENDER FUNCTION ---
+
+  // Function to render the correct chart component
+  const renderChart = () => {
+    const dataset = currentDataset ?? defaultDataset;
+
+    switch (currentChartView) {
+      case CurrentChartView.LINE:
+        return <D3LineChart dataset={dataset} />;
+      case CurrentChartView.BAR:
+        return <D3BarChart dataset={dataset} />;
+      case CurrentChartView.PIE:
+        return <D3PieChart dataset={dataset} />;
+      default:
+        return <D3BarChart dataset={dataset} />; // Fallback
+    }
+  };
+
   return (
     <Box position="relative" width="100vw" height="100vh" overflow="hidden">
+      <Box
+        sx={{
+          position: "absolute",
+          top: 20,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "15px",
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          padding: "10px",
+          borderRadius: "10px",
+          zIndex: 1000,
+          opacity: gestureDetectionStatus ? 1 : 0,
+          transition: "opacity 0.3s ease-in-out",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: "15px",
+            opacity: gestureDetectionStatus && (showHints || activeGesture !== null) ? 1 : 0,
+            transition: "opacity 0.5s",
+          }}
+        >
+          {hintFunctions.map((functionType) => {
+            const functionIconSource = FunctionToIconSources[functionType];
+            if (!functionIconSource) return null;
+            const gesture = getGestureAssignedToFunction(functionType);
+            if (!gesture) return null;
+            const gestureIconSource = GestureToIconSources[gesture];
+            const tooltip = formatTooltip(functionType, gesture);
+            const isActive = activeGesture !== null && gesture === activeGesture;
+            return (
+              <Box
+                key={functionType}
+                component="div"
+                sx={{
+                  position: "relative",
+                  borderRadius: "50%",
+                  padding: "6px",
+                  backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                  border: isActive ? "2px solid #3b82f6" : "2px solid transparent",
+                  boxShadow: isActive ? "0 0 12px rgba(59, 130, 246, 0.6)" : "none",
+                  transition: "all 0.25s ease-in-out",
+                  "&:hover .tooltip": { visibility: "visible", opacity: 1 },
+                }}
+              >
+                <img
+                  src={functionIconSource}
+                  alt={tooltip}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    cursor: "pointer",
+                    filter: isActive ? "saturate(1.5)" : undefined,
+                  }}
+                />
+                <Box
+                  className="tooltip"
+                  sx={{
+                    visibility: "hidden",
+                    opacity: 0,
+                    transition: "opacity 0.3s",
+                    width: 160,
+                    backgroundColor: "#555",
+                    color: "#fff",
+                    textAlign: "center",
+                    borderRadius: "6px",
+                    padding: "5px 0",
+                    position: "absolute",
+                    zIndex: 1,
+                    top: "125%",
+                    left: "50%",
+                    marginLeft: "-80px",
+                  }}
+                >
+                  {tooltip}
+                  <img
+                    src={gestureIconSource} // <-- the image you want to show on hover
+                    alt="gesture icon"
+                    style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#cececeff" }}
+                  />
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+
       {/* Fullscreen video */}
       <Box
         position="absolute"
@@ -240,7 +445,7 @@ export const Present: React.FC = () => {
           pointerEvents: backgroundRemoval ? "none" : "auto",
         }}
       >
-        <WebcamComponent gestureDetectionStatus={gestureDetectionStatus} grayscale={grayscale} settings={gestureSettings} />
+        <WebcamComponent gestureDetectionStatus={gestureDetectionStatus} grayscale={grayscale} settings={gestureSettings} onGestureChange={setActiveGesture} />
       </Box>
 
       <Box
@@ -282,7 +487,7 @@ export const Present: React.FC = () => {
       {/* Charts (hidden when showing assets) */}
       {!showAssets && (
         <Box position="absolute" left="50%" sx={{ transform: "translateX(-50%)" }} bgcolor="transparent" display="flex" justifyContent="center" style={{ bottom: "10%", width: "95%", height: "50%" }}>
-          {showLineChart ? <D3LineChart dataset={currentDataset ?? defaultDataset} /> : <D3BarChart dataset={currentDataset ?? defaultDataset} />}
+          {renderChart()}
         </Box>
       )}
 
@@ -360,8 +565,8 @@ export const Present: React.FC = () => {
           <Header
             onToggleBackgroundRemoval={() => setBackgroundRemoval((b) => !b)}
             onToggleGrayscale={toggleGrayscale}
-            showLineChart={showLineChart}
-            onToggleChart={() => setShowLineChart((c) => !c)}
+            showLineChart={currentChartView === CurrentChartView.LINE}
+            onToggleChart={() => setCurrentChartView((prev) => getNextChartView(prev))}
             backgroundRemoval={backgroundRemoval}
             grayscale={grayscale}
             showAssets={showAssets}

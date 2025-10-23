@@ -11,6 +11,7 @@ export enum GestureType {
   DOUBLE_PINCH,
   TWO_FINGER_POINTING_LEFT,
   TWO_FINGER_POINTING_RIGHT,
+  DRAW, // Thumb, pointer and middle finger together
 }
 
 export enum FunctionType {
@@ -22,4 +23,5 @@ export enum FunctionType {
   SWITCH_CHART,
   SWITCH_DATA,
   CLICK,
+  DRAW,
 }

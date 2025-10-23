@@ -1,17 +1,23 @@
-
-
-<h1 align="center">Handover Document</h1>
-
-
 <p align="center">
-  <img src="images/HandoverDocument/Sean Roslinger.png" alt="alt text" width="300"/>
+  <img src="Images/MaintenancePlan/logo.png" alt="HansRoslinger Logo" width="400"/>
 </p>
 
+<h1 align="center">HansRoslinger Handover Document</h1>
+
+<h2 align="center">Milestone 4</h2>
+
+<h3 align="center">
+  Jiale Hu, Max Craig, Mayank Bajpai, Ranusha Liyanage, Shehara Hewawasam, Nathan Michailidis, Harkirat Singh, Tejeshvi Sagwal, Connor Macdougall, Liam Chui, Bhanu Wijekoon, Agamjot Singh
+</h3>
+
+<div style="page-break-before: always;"></div>
 
 # Table of Contents
 
 - [Purpose of this Document](#purpose-of-this-document)
 - [What is HansRoslinger?](#what-is-hansroslinger)
+- [Repository Structure](#repository-structure)
+  - [HansRoslinger/ Structure](#hansroslinger-structure)
 - [Installation Guides](#installation-guides)
 - [Suggested Tutorials/Documentation](#suggested-tutorialsdocumentation)
 - [Technology Stack](#technology-stack)
@@ -24,12 +30,16 @@
   - [Github/CICD](#githubcicd)
 - [How to Deployment to Production](#how-to-deployment-to-production)
   - [Routing to Unique Domain Name](#routing-to-unique-domain-name)
+- [Versioning Strategy](#versioning-strategy)
+- [Pull Request Strategy](#pull-request-strategy)
 - [Troubleshooting](#troubleshooting)
   - [Incorrect Node Version](#incorrect-node-version)
   - [Module not found error](#module-not-found-error)
   - [Meteor stuck on `Extracting meteor-tool@1.4.0-1`](#meteor-stuck-on-extracting-meteor-tool140-1)
 
 ---
+
+<div style="page-break-before: always;"></div>
 
 # Purpose of this Document
 
@@ -41,15 +51,15 @@ This document also contains further information on the installations required to
 
 # What is HansRoslinger?
 
-HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
+HansRoslinger is a gestured-based presentation tool that allows individuals to create, upload and present datasets and Images, with the unique ability of being able to present with their webcam positioned behind the data being presented, and being able to manipulate the data using built-in custom gestures.
 
 The purpose of HansRoslinger is to make the process of presenting information as engaging as possible to the audience, and as intuitive as possible to the presenter. Bygone are the days of mindlessly clicking through a powerpoint presentation, with only your voice or a small video of you in the corner. HansRoslinger quite literally puts the presentation right in your fingertips.
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038436775.png" alt="alt text" width="500"/>
 </p>
 
-HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the Cloud Run URL 
+HansRoslinger is accessible via a public URL `hansroslinger.website`, or via the Cloud Run URL
 
 `https://hans-roslinger-961228355326.us-central1.run.app`
 
@@ -57,14 +67,16 @@ Please note that the production version is currently deployed in the us-central1
 
 ---
 
+<div style="page-break-before: always;"></div>
+
 # Repository Structure
 
-- **Documentation/** — Project docs (CI/CD, tutorials, troubleshooting) and supporting images.
+- **Documentation/** — Project docs (CI/CD, tutorials, troubleshooting) and supporting Images.
 - **HansRoslinger/** — Meteor + React application source (client, server, shared imports, public assets, GCP helpers, tests).
 - **terraform/** — Infrastructure as code for GCP (root configs, reusable module, per-env tfvars, state files).
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038225446.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038225446.png" alt="alt text" width="400"/>
 </p>
 
 ## HansRoslinger/ Structure
@@ -72,15 +84,17 @@ Please note that the production version is currently deployed in the us-central1
 - **client/** — React/Meteor client entry and global HTML/CSS; bootstraps the UI.
 - **server/** — Meteor server startup, methods, publications, and integrations.
 - **imports/** — Shared app code: UI components/pages, handlers, gestures, and data layer.
-- **public/** — Static assets served as-is (e.g., images/HandoverDocumenticons).
+- **public/** — Static assets served as-is (e.g., Images/HandoverDocumenticons).
 - **GCP/** — Google Cloud helpers/config (e.g., bucket utilities).
 - **tests/** — App tests and helpers.
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038239010.png" alt="alt text" width="500"/>
+  <img src="Images/HandoverDocument/1757038239010.png" alt="alt text" width="400"/>
 </p>
 
 ---
+
+<div style="page-break-before: always;"></div>
 
 # Installation Guides
 
@@ -91,7 +105,6 @@ Follow these steps in order to set up the required software for HansRoslinger
 3. [Install MongoSH](https://www.mongodb.com/docs/mongodb-shell/install/) in order to perform local development with MongoDB
 4. [Install Gcloud CLI](https://cloud.google.com/sdk/docs/install) in order to perform testing with GCP
 5. [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) in order to provision cloud infrastructure
-
 
 Once all of these steps have been followed to completion, you should be able to run the following commands to run HansRoslinger
 
@@ -113,31 +126,37 @@ https://console.cloud.google.com/welcome?invt=Ab6sAg&project=hansroslinger-46801
 
 ---
 
+<div style="page-break-before: always;"></div>
+
 # Suggested Tutorials/Documentation
 
 If you are not familiar with the services above, feel free to take a look at the following documentation/tutorials to gain some familiarity with these services.
 
 **Meteor**
+
 - [Technical Tutorial Plan](/Documentation/Technology%20Tutorial%20Plan.md)
 - [Introduction to Meteor](https://guide.meteor.com/)
 
 **MongoSH**
+
 - [Introduction to MongoDB](https://www.mongodb.com/docs/manual/introduction/)
 - [Introduction to MongoDB Atlas](https://www.mongodb.com/docs/atlas/)
 
 **Google Cloud Services**
+
 - [Google Cloud Overview](https://cloud.google.com/docs/overview)
 - [Cloud Run Overview](https://cloud.google.com/run/docs)
 - [Artifact Registry Overview](https://cloud.google.com/artifact-registry/docs)
 - [Storage Bucket Overview](https://cloud.google.com/storage/docs)
 
 **Terraform**
+
 - [What is Terraform](https://developer.hashicorp.com/terraform/intro)
 - [Getting started with Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started)
 
-
-
 ---
+
+<div style="page-break-before: always;"></div>
 
 # Technology Stack
 
@@ -184,11 +203,11 @@ You can look into how this MongoDB Atlas database is connected to meteor through
 
 ### Google Cloud Bucket
 
-All images uploaded by the user to HansRoslinger is stored in a google cloud bucket. Buckets allows for cheap and robust uploading of images, witih links to the files being stored as documents in the MongoDB Database.
+All Images uploaded by the user to HansRoslinger is stored in a google cloud bucket. Buckets allows for cheap and robust uploading of Images, witih links to the files being stored as documents in the MongoDB Database.
 
 The buckets are available [here](https://console.cloud.google.com/storage/browser?referrer=search&invt=Ab6sAg&project=hansroslinger-468011&prefix=&forceOnBucketsSortingFiltering=true&bucketType=live)
 
-![1757038278174](images/HandoverDocument/1757038278174.png)
+![1757038278174](Images/HandoverDocument/1757038278174.png)
 
 ## Github/CICD
 
@@ -205,10 +224,12 @@ CICD Workflows are found under [.github](https://github.com/Monash-FIT3170/2025W
 We also have configured a [pull request template](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md) in order to standardise the process of creating a pull request
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038949103.png" alt="alt text" width="400"/>
+  <img src="Images/HandoverDocument/1757038949103.png" alt="alt text" width="400"/>
 </p>
 
 ---
+
+<div style="page-break-before: always;"></div>
 
 # How to Deployment to Production
 
@@ -243,12 +264,13 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 4. You will then need to set up A, AAAA and TXT DNS Records to point to your Cloud Run Service. While a Cloud Run is deployed to a region, this can have multiple zones, so you may need to configure multiple A DNS Records (4 in this case)
 
 **Purpose of DNS Records**
+
 > **A record:** Maps our domain name to the Google Server Zone IPv4 addresses.
 > **AAAA record:** Maps our domain name to the Google Server IPv6 address.
 > **TXT record:** Stores google site verification
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038674391.png" alt="alt text" width="700"/>
+  <img src="Images/HandoverDocument/1757038674391.png" alt="alt text" width="700"/>
 </p>
 
 <p align="center"><i>A and AAAA Records</i></p>
@@ -257,14 +279,41 @@ Because we are primarily hosting our services in Google Cloud, and this provider
 <br>
 
 <p align="center">
-  <img src="images/HandoverDocument/1757038704021.png" alt="alt text" width="700"/>
+  <img src="Images/HandoverDocument/1757038704021.png" alt="alt text" width="700"/>
 </p>
 <p align="center"><i>TXT Records Records</i></p>
-
 
 Once this has been configured, google will automatically generate a SSL/TLS certificate to encrypt your domain, and shortly after you should be able to access your Cloud Run from your website.
 
 ---
+
+<div style="page-break-before: always;"></div>
+
+# Versioning Strategy
+
+Through the development of HansRoslinger we have not considered a versioning strategy, with our repository only consisting of tags to signify the completion of some milestones. However, in order to maintain the integrity of the code, we suggest you do the following. Information regarding semantic versioning was taken from this source https://semver.org/.
+
+1. Follow `MAJOR.MINOR.PATCH`, versioning. In order to maintain consistency, each pull request should have a label that is added by the user in order to signify whether the added feature is a PATCH, MINOR, or MAJOR change.
+2. Once the pull request has been merged, the appropriate tag should be generated (this can be done manually or automatically via a workflow) to increment the appropriate place in the version in line with the pull request label.
+3. It is up to your discretion as to whether you would like each version to be deployed to production, or if you would like only major/semi regular deployments to be completed.
+
+---
+
+
+# Pull Request Strategy
+
+We have followed the provided pull request strategy throughout our development of HansRoslinger, and we suggest you do the same, making modifications if neccessary.
+
+1. A pull request is required to fill out the template with all required information. https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md
+2. Branch name must abide by the quality assurance plan, and the title must be a description of the additional features added.
+3. Each pull request should mark an indvidiual feature or set of related features.
+4. The pull request must pass all CI/CD workflows.
+5. The pull request must have at least 1 approval in order to be merged.
+
+
+---
+
+<div style="page-break-before: always;"></div>
 
 # Troubleshooting
 

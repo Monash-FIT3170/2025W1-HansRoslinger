@@ -2,6 +2,7 @@
 
 export const DEFAULT_COLOUR = "#36A2EB";
 export const SELECT_COLOUR = "#FF6384";
+export const DARK_SELECT_COLOUR = "#f6406eff"; // Darker version for permanent selection
 
 // tighten insets so the plot fills more of that box
 export const MARGIN = { top: 20, right: 20, bottom: 30, left: 32 };

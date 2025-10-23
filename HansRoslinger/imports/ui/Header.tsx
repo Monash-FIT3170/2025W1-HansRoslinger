@@ -2,6 +2,8 @@ import React from "react";
 import { Button, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
+// Define the exact types for the chart state
+
 interface HeaderProps {
   backgroundRemoval: boolean;
   grayscale: boolean;

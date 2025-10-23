@@ -10,10 +10,12 @@ export interface DataPoint {
 export enum ChartType {
   BAR = "BAR",
   LINE = "LINE",
+  PIE = "PIE", // 🚨 ADDED PIE CHART TYPE
 }
 
 // Dataset interface
 export interface Dataset {
+  // ... rest of the interface is unchanged ...
   _id?: string;
   title: string;
   data: DataPoint[];

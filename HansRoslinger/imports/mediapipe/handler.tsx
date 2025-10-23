@@ -18,10 +18,15 @@ import { Gesture, Handedness } from "../mediapipe/types";
 import { useRef } from "react";
 
 let isZoomEnabled = false;
+let isDrawEnabled = false;
 // Guard against server-side evaluation where `window` is undefined
 if (typeof window !== "undefined") {
   window.addEventListener("chart:togglezoom", () => {
     isZoomEnabled = !isZoomEnabled;
+  });
+
+  window.addEventListener("chart:toggledraw", () => {
+    isDrawEnabled = !isDrawEnabled;
   });
 }
 
@@ -77,7 +82,7 @@ export const GestureHandler = (mapping: Record<GestureType, FunctionType>) => {
       const requiredDelay = state.firedOnce ? REPEAT_ACTIVATION_DELAY_MS : FIRST_ACTIVATION_DELAY_MS;
       const elapsed = now - state.lastFiredAt;
 
-      if (elapsed >= requiredDelay || isZoomEnabled) {
+      if (elapsed >= requiredDelay || isZoomEnabled || isDrawEnabled) {
         handleGestureToFunc(gesture.gestureID, state.gesture, gesture, map);
         // Update state to reflect this activation
         state.lastFiredAt = now;

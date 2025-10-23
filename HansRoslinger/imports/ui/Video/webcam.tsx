@@ -3,11 +3,13 @@ import Webcam from "react-webcam";
 import { useGestureDetector, setupGestureRecognizer } from "/imports/mediapipe/gestures";
 import { GestureRecognizer } from "@mediapipe/tasks-vision";
 import { GestureType, FunctionType } from "/imports/gesture/gesture";
+import { Handedness } from "/imports/mediapipe/types";
 
 interface WebcamComponentProps {
   grayscale: boolean;
   gestureDetectionStatus: boolean;
   settings: Record<GestureType, FunctionType>;
+  onGestureChange?: (gesture: GestureType | null) => void;
 }
 
 /**
@@ -18,7 +20,7 @@ interface WebcamComponentProps {
  * @param settings
  * @returns 
  */
-export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, gestureDetectionStatus, settings }) => {
+export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, gestureDetectionStatus, settings, onGestureChange }) => {
   const webcamRef = useRef<Webcam | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   // Store recognizer in state so component re-renders when it's ready
@@ -59,7 +61,39 @@ export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, ges
   }
 
   // Call the gesture detector hook unconditionally to preserve hook order
-  useGestureDetector(recognizer, videoElRef, imageRef, gestureDetectionStatus, settings, "VIDEO");
+  const { currentGestures } = useGestureDetector(recognizer, videoElRef, imageRef, gestureDetectionStatus, settings, "VIDEO");
+
+  useEffect(() => {
+    if (!onGestureChange) {
+      return;
+    }
+
+    if (!gestureDetectionStatus) {
+      onGestureChange(null);
+      return;
+    }
+
+    if (!currentGestures.length) {
+      onGestureChange(null);
+      return;
+    }
+
+    // Check for double-handed pinch first (highest priority)
+    const leftGesture = currentGestures.find((g) => g?.handedness === Handedness.LEFT);
+    const rightGesture = currentGestures.find((g) => g?.handedness === Handedness.RIGHT);
+
+    if (leftGesture && rightGesture && leftGesture.gestureID === GestureType.PINCH && rightGesture.gestureID === GestureType.PINCH) {
+      onGestureChange(GestureType.DOUBLE_PINCH);
+      return;
+    }
+
+    // Otherwise, prioritize by confidence
+    const prioritized = currentGestures.filter((gesture) => gesture.gestureID !== GestureType.UNIDENTIFIED).sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
+
+    const nextGesture = (prioritized[0] ?? currentGestures[0])?.gestureID ?? null;
+
+    onGestureChange(nextGesture);
+  }, [currentGestures, gestureDetectionStatus, onGestureChange]);
 
   return (
     <div className={`absolute top-0 left-0 w-full h-full flex justify-center items-center fixed inset-0 z-[-1] ${grayscale ? "grayscale" : ""}`}>

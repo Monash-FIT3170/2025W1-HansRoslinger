@@ -88,12 +88,12 @@ export const processZoom = (_zoomStartPosition: { x: number; y: number }, latest
 
   const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedX = Math.min(Math.abs(xDiff) / maxDistanceX, 1);
-  const deltaX = xDiff >= 0 ? normalizedX * 0.5 : -normalizedX * 0.5;
+  const deltaX = xDiff >= 0 ? normalizedX * 1.5 : -normalizedX * 1.5;
 
   const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedY = Math.min(Math.abs(yDiff) / maxDistanceY, 1);
 
-  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 1.5);
+  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 3.0);
   const scaleY = Math.min(1 - normalizedY * 0.9 + 0.1, 1);
 
   // console.log(`Zoom ratios: X: ${scaleX}, Y: ${scaleY}`);

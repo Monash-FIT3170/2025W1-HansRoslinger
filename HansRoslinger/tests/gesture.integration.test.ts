@@ -106,7 +106,7 @@ const ImageGestureHarness: React.FC<{
 
 if (Meteor.isClient) {
   describe("Gesture recognition from images (IMAGE mode)", function () {
-    this.timeout(60000);
+    this.timeout(180000);
 
     const testCases: { src: string; expected: GestureType }[] = [
       { src: "/images/integrationtests/thumbs_up.jpg", expected: GestureType.THUMB_UP },

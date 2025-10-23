@@ -16,6 +16,18 @@ interface HeaderProps {
 export const toolbarButtonWidth = 70;
 export const toolbarButtonHeight = toolbarButtonWidth;
 
+/**
+ * Header of the application
+ * 
+ * @param backgroundRemoval
+ * @param grayscale
+ * @param showLineChart
+ * @param onToggleBackgroundRemoval
+ * @param onToggleGrayscale
+ * @param onToggleChart
+ * @param showAssets 
+ * @returns HTML
+ */
 export const Header: React.FC<HeaderProps> = ({ backgroundRemoval, grayscale, showLineChart, onToggleBackgroundRemoval, onToggleGrayscale, onToggleChart, showAssets, setShowAssets }) => {
   const navigate = useNavigate();
   return (

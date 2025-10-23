@@ -11,6 +11,7 @@ Meteor.subscribe("users");
 Meteor.subscribe("presentations");
 Meteor.subscribe("datasets");
 
+// App router
 export const App: React.FC = () => (
   <Router>
     <Routes>

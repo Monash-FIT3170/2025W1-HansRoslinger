@@ -15,8 +15,8 @@ function preload(url: string) {
 
 /**
  * Allows image preloading to enable a faster load
- * 
- * @param urls 
+ *
+ * @param urls
  */
 export function useImagePreload(urls: string[]) {
   const prev = useRef<string[]>([]);

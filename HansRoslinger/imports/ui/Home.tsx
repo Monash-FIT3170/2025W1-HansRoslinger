@@ -17,7 +17,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 /**
  * Home renderer for HansRoslinger landing page
- * 
+ *
  * @returns HTML
  */
 export const Home: React.FC = () => {

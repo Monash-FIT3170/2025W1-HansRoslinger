@@ -16,7 +16,7 @@ export interface AssetListItem {
 
 /**
  * Component to render a list of assets.
- * 
+ *
  * @param assets
  * @returns HTML
  */

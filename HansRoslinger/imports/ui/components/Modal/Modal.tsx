@@ -3,7 +3,7 @@ import { Box, IconButton } from "@mui/material";
 
 /**
  * Default modal component
- * 
+ *
  * @param isOpen
  * @param onClose
  * @param children

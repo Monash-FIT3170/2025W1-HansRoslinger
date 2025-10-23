@@ -14,11 +14,11 @@ export interface CreateAssetModalProps {
 
 /**
  * Modal component for creating assets
- * 
- * @param isOpen 
+ *
+ * @param isOpen
  * @param onClose
  * @param onCreate
- * @returns 
+ * @returns
  */
 export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAssetModalProps) {
   const [name, setName] = useState("");

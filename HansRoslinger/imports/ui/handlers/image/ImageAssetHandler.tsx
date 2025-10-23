@@ -15,7 +15,7 @@ export interface UseImageAssetZoomReturn {
 
 /**
  * ALlows image assets to zoom.
- * 
+ *
  * @returns hooks for enabling image asset zooming logic
  */
 export function useImageAssetZoom(): UseImageAssetZoomReturn {

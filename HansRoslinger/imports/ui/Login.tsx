@@ -6,7 +6,7 @@ import { Box, Button, TextField, Typography, Alert, Stack, Dialog, DialogTitle, 
 
 /**
  * Login page for users
- * 
+ *
  * @returns HTML
  */
 export const Login: React.FC = () => {

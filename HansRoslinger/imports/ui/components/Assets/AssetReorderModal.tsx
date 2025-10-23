@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * Modal component for reordering assets.
- * 
+ *
  * @param isOpen
  * @param onClose
  * @param assetId

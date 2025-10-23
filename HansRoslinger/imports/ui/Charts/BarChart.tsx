@@ -10,9 +10,8 @@ interface BarChartProps {
   height?: number | string;
 }
 
-
 /**
- * 
+ *
  * @param width (number) - Width of bar chart
  * @param height (number) - Height of bar chart.
  *

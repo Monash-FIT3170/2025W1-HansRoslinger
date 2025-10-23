@@ -13,7 +13,7 @@ interface LineChartProps {
 
 /**
  * Function to generate line graph
- * 
+ *
  * @param width
  * @param height
  * @returns HTML

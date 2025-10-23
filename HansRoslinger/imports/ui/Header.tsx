@@ -20,14 +20,14 @@ export const toolbarButtonHeight = toolbarButtonWidth;
 
 /**
  * Header of the application
- * 
+ *
  * @param backgroundRemoval
  * @param grayscale
  * @param showLineChart
  * @param onToggleBackgroundRemoval
  * @param onToggleGrayscale
  * @param onToggleChart
- * @param showAssets 
+ * @param showAssets
  * @returns HTML
  */
 export const Header: React.FC<HeaderProps> = ({ backgroundRemoval, grayscale, showLineChart, onToggleBackgroundRemoval, onToggleGrayscale, onToggleChart, showAssets, setShowAssets }) => {

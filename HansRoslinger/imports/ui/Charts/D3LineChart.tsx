@@ -8,7 +8,7 @@ interface D3LineChartProps {
 }
 
 /**
- * 
+ *
  * @param dataset - The dataset to display in the chart.
  *
  * @returns HTML element that displays a line chart.
@@ -180,7 +180,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
 
   /**
    * Helper to render the line chart
-   * @param customData 
+   * @param customData
    * @returns (void)
    */
   const renderChart = (customData = filteredData) => {

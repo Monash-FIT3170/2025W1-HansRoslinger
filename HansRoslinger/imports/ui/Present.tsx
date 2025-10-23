@@ -33,7 +33,7 @@ enum CurrentChartView {
 
 /**
  * Page for the presentation page of HansRoslinger
- * 
+ *
  * @returns HTML
  */
 export const Present: React.FC = () => {

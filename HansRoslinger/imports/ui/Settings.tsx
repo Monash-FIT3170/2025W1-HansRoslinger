@@ -101,7 +101,7 @@ const Functions = [
 
 /**
  * Settings page for HansRoslinger
- * 
+ *
  * @returns HTML
  */
 const Settings: React.FC = () => {

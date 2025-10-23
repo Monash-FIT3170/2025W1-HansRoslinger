@@ -8,7 +8,7 @@ interface TitleProps {
 
 /**
  * Function for generating Chart UI titles
- * 
+ *
  * @param dataaset
  * @returns (void)
  */

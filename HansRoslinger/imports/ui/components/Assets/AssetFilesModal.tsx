@@ -14,7 +14,7 @@ export interface AssetFilesModalProps {
 
 /**
  * Modal for displaying file assets that can be uploaded
- * 
+ *
  * @param isOpen
  * @param onClose
  * @param assetId

@@ -8,7 +8,7 @@ interface D3BarChartProps {
 }
 
 /**
- * 
+ *
  * @param dataset - The dataset to display in the chart.
  *
  * @returns HTML element that displays a bar chart.

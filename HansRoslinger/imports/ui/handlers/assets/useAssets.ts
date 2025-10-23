@@ -10,7 +10,7 @@ export interface AssetWithCount extends Asset {
 
 /**
  * Track list of user's assets with counts of images per asset.
- * 
+ *
  * @returns list of assets with image counts
  */
 export function useAssetsWithImageCount(): AssetWithCount[] {

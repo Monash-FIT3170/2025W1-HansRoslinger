@@ -58,6 +58,11 @@ const Gestures = [
 
 const Functions = [FunctionType.UNUSED, FunctionType.SELECT, FunctionType.FILTER, FunctionType.CLEAR, FunctionType.ZOOM, FunctionType.CLICK, FunctionType.SWITCH_CHART, FunctionType.SWITCH_DATA];
 
+/**
+ * Settings page for HansRoslinger
+ * 
+ * @returns HTML
+ */
 const Settings: React.FC = () => {
   const [state, setState] = useState<Record<GestureType, FunctionType>>(defaultMapping);
   const [error] = useState<string | null>(null);

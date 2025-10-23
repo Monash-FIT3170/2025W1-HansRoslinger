@@ -21,6 +21,11 @@ import { Box, Button } from "@mui/material";
 import { getUserById, getUserSettings } from "../api/database/users/users";
 import { defaultMapping, FunctionType, GestureType } from "../gesture/gesture";
 
+/**
+ * Page for the presentation page of HansRoslinger
+ * 
+ * @returns HTML
+ */
 export const Present: React.FC = () => {
   useAuthGuard();
 

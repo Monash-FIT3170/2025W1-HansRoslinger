@@ -120,8 +120,8 @@ The Milestone 3 submission specifies that the Handover Document should be at the
 
 Please refer to the following documents if you would like to view it
 
-- [Markdown Document](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.md)
-- [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.pdf)
+- [HandoverDocument.md](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.md)
+- [HandoverDocument.pdf](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Handover%20Document.pdf)
 
 Please note that the markdown document may not render the Images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Handover Document with Images.
 
@@ -131,8 +131,8 @@ The Milestone 4 submission specifies that the Maintenance Document should be at 
 
 Please refer to the following documents if you would like to view it
 
-- [Markdown Document](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.md)
-- [PDF](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.pdf)
+- [MaintenancePlan.md](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.md)
+- [MaintenancePlan.pdf](https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/Documentation/Maintenance%20Plan.pdf)
 
 Please note that the markdown document may not render the Images in the github `Preview` mode, however it does work on an IDE editing. Please refer to the PDF for a Maintenance Document with Images.
 

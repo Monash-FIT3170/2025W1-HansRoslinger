@@ -12,6 +12,15 @@ interface Props {
   assetName: string;
 }
 
+/**
+ * Modal component for reordering assets.
+ * 
+ * @param isOpen
+ * @param onClose
+ * @param assetId
+ * @param assetName
+ * @returns HTML
+ */
 export default function AssetReorderModal({ isOpen, onClose, assetId, assetName }: Props) {
   const images = useTracker(() => ImageCollection.find({ assetId }, { sort: { order: 1, fileName: 1 } }).fetch(), [assetId]) as ImageDoc[];
   const [localOrder, setLocalOrder] = useState<string[]>([]);

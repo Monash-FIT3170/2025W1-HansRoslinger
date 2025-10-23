@@ -12,6 +12,15 @@ export interface AssetFilesModalProps {
   assetName: string;
 }
 
+/**
+ * Modal for displaying file assets that can be uploaded
+ * 
+ * @param isOpen
+ * @param onClose
+ * @param assetId
+ * @param assetName
+ * @returns HTML
+ */
 export default function AssetFilesModal({ isOpen, onClose, assetId, assetName }: AssetFilesModalProps) {
   if (!isOpen) return null;
 

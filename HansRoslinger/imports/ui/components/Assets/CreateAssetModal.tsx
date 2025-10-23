@@ -12,6 +12,14 @@ export interface CreateAssetModalProps {
   onCreate: (data: { name: string; icon: string; files: File[] }) => void;
 }
 
+/**
+ * Modal component for creating assets
+ * 
+ * @param isOpen 
+ * @param onClose
+ * @param onCreate
+ * @returns 
+ */
 export default function CreateAssetModal({ isOpen, onClose, onCreate }: CreateAssetModalProps) {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState(ICONS[0]);

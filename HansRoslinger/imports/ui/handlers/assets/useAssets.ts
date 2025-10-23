@@ -131,7 +131,10 @@ async function processFile(file: File): Promise<File[]> {
 }
 
 // Create asset and upload images
-export async function createAssetWithImages({ name, icon, files }: { name: string; icon: string; files: File[] }) {
+export async function createAssetWithImages(
+  { name, icon, files }: { name: string; icon: string; files: File[] },
+  onProgress?: (progress: number) => void
+) {
   const userId = getUserIDCookie();
   if (!userId) {
     throw new Error("User ID is required to create an asset.");
@@ -143,13 +146,19 @@ export async function createAssetWithImages({ name, icon, files }: { name: strin
   // Wait briefly to ensure asset is available in DB (Meteor eventual consistency)
   await new Promise((res) => setTimeout(res, 300));
 
+  onProgress?.(5); // Initial progress
+
   // Process all files (convert PDFs to images)
   const allImageFiles: File[] = [];
 
-  for (const file of files) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     try {
       const processedFiles = await processFile(file);
       allImageFiles.push(...processedFiles);
+      // Progress from 5% to 40% during file processing
+      const processProgress = 5 + ((i + 1) / files.length) * 35;
+      onProgress?.(Math.round(processProgress));
     } catch (error) {
       console.error(`Failed to process file ${file.name}:`, error);
       throw error;
@@ -158,8 +167,11 @@ export async function createAssetWithImages({ name, icon, files }: { name: strin
 
   console.log(`Converted ${files.length} files to ${allImageFiles.length} images`);
 
+  onProgress?.(40); // Processing complete, starting uploads
+
   // Upload images and insert docs
-  for (const file of allImageFiles) {
+  for (let i = 0; i < allImageFiles.length; i++) {
+    const file = allImageFiles[i];
     const arrayBuffer = await file.arrayBuffer();
     const base64 = arrayBufferToBase64(arrayBuffer);
 
@@ -178,5 +190,11 @@ export async function createAssetWithImages({ name, icon, files }: { name: strin
         },
       );
     });
+
+    // Progress from 40% to 90% during uploads
+    const uploadProgress = 40 + ((i + 1) / allImageFiles.length) * 50;
+    onProgress?.(Math.round(uploadProgress));
   }
+
+  onProgress?.(90); // Uploads complete
 }

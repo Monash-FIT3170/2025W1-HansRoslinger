@@ -10,6 +10,14 @@ interface BarChartProps {
   height?: number | string;
 }
 
+
+/**
+ * 
+ * @param width (number) - Width of bar chart
+ * @param height (number) - Height of bar chart.
+ *
+ * @returns HTML element that shows a bar chart.
+ */
 const BarChart: React.FC<BarChartProps> = ({ width = "100%", height = 120 }) => {
   const data = generateBarChartData();
 

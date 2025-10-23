@@ -14,6 +14,12 @@ export interface AssetListItem {
   imageCount: number;
 }
 
+/**
+ * Component to render a list of assets.
+ * 
+ * @param assets
+ * @returns HTML
+ */
 export default function AssetList({ assets }: { assets: AssetListItem[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -23,12 +29,14 @@ export default function AssetList({ assets }: { assets: AssetListItem[] }) {
   const [reorderAssetId, setReorderAssetId] = useState<string>("");
   const [reorderAssetName, setReorderAssetName] = useState<string>("");
 
+  // Handle asset deletioon
   const handleDelete = async (assetId: string) => {
     if (window.confirm("Delete this asset and all its files?")) {
       await deleteAssetAndFiles(assetId);
     }
   };
 
+  // Modal handler
   const handleOpenModal = (asset: AssetListItem) => {
     setModalAssetId(asset._id);
     setModalAssetName(asset.name);

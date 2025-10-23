@@ -6,6 +6,12 @@ interface TitleProps {
   dataset: Dataset;
 }
 
+/**
+ * Function for generating Chart UI titles
+ * 
+ * @param dataaset
+ * @returns (void)
+ */
 export const Title: React.FC<TitleProps> = ({ dataset }) => (
   <div
     style={{

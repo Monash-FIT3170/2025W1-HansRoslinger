@@ -7,6 +7,12 @@ interface D3LineChartProps {
   dataset: Dataset;
 }
 
+/**
+ * 
+ * @param dataset - The dataset to display in the chart.
+ *
+ * @returns HTML element that displays a line chart.
+ */
 export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
@@ -171,6 +177,12 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({ dataset }) => {
       setFilteredData(data);
     }
   };
+
+  /**
+   * Helper to render the line chart
+   * @param customData 
+   * @returns (void)
+   */
   const renderChart = (customData = filteredData) => {
     if (!chartRef.current) return;
 

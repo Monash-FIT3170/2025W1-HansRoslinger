@@ -11,6 +11,13 @@ interface LineChartProps {
   height?: number | string;
 }
 
+/**
+ * Function to generate line graph
+ * 
+ * @param width
+ * @param height
+ * @returns HTML
+ */
 const LineChart: React.FC<LineChartProps> = ({ width = "600px", height = "90px" }) => {
   const data = generateLineChartData();
 

@@ -7,6 +7,12 @@ interface D3BarChartProps {
   dataset: Dataset;
 }
 
+/**
+ * 
+ * @param dataset - The dataset to display in the chart.
+ *
+ * @returns HTML element that displays a bar chart.
+ */
 export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
   const data = dataset.data;
   const chartRef = useRef<HTMLDivElement>(null);
@@ -146,6 +152,11 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({ dataset }) => {
     }
   };
 
+  /**
+   * Helper function to render the chart
+   *
+   * @returns {void}
+   */
   const renderChart = () => {
     if (!chartRef.current) return;
 

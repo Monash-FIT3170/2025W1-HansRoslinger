@@ -12,6 +12,14 @@ interface WebcamComponentProps {
   onGestureChange?: (gesture: GestureType | null) => void;
 }
 
+/**
+ * Handler for web cam component for video (and image segementation for background removal)
+ * 
+ * @param grayscale
+ * @param gestureDetectionStatus
+ * @param settings
+ * @returns 
+ */
 export const WebcamComponent: React.FC<WebcamComponentProps> = ({ grayscale, gestureDetectionStatus, settings, onGestureChange }) => {
   const webcamRef = useRef<Webcam | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);

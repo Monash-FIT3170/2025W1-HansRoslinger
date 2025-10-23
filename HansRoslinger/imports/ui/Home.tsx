@@ -15,6 +15,11 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
+/**
+ * Home renderer for HansRoslinger landing page
+ * 
+ * @returns HTML
+ */
 export const Home: React.FC = () => {
   useAuthGuard();
   const userId = getUserIDCookie();

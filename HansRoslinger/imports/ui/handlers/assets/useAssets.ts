@@ -131,10 +131,7 @@ async function processFile(file: File): Promise<File[]> {
 }
 
 // Create asset and upload images
-export async function createAssetWithImages(
-  { name, icon, files }: { name: string; icon: string; files: File[] },
-  onProgress?: (progress: number) => void
-) {
+export async function createAssetWithImages({ name, icon, files }: { name: string; icon: string; files: File[] }, onProgress?: (progress: number) => void) {
   const userId = getUserIDCookie();
   if (!userId) {
     throw new Error("User ID is required to create an asset.");

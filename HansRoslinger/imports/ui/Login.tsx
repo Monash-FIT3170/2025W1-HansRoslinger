@@ -4,6 +4,11 @@ import { loginUser, registerUser } from "../handlers/auth/authHandlers";
 import { setAuthCookie } from "../cookies/cookies";
 import { Box, Button, TextField, Typography, Alert, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
+/**
+ * Login page for users
+ * 
+ * @returns HTML
+ */
 export const Login: React.FC = () => {
   type FloatingQuote = {
     idx: number;

@@ -13,6 +13,11 @@ export interface UseImageAssetZoomReturn {
   handleClearGesture: () => void;
 }
 
+/**
+ * ALlows image assets to zoom.
+ * 
+ * @returns hooks for enabling image asset zooming logic
+ */
 export function useImageAssetZoom(): UseImageAssetZoomReturn {
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomStartPosition, setZoomStartPosition] = useState({ x: 0, y: 0 });

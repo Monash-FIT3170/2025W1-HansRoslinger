@@ -8,6 +8,11 @@ export interface AssetWithCount extends Asset {
   imageCount: number;
 }
 
+/**
+ * Track list of user's assets with counts of images per asset.
+ * 
+ * @returns list of assets with image counts
+ */
 export function useAssetsWithImageCount(): AssetWithCount[] {
   return useTracker<AssetWithCount[]>(() => {
     Meteor.subscribe("assets");

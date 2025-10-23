@@ -13,6 +13,11 @@ function preload(url: string) {
   imgCache.set(url, img);
 }
 
+/**
+ * Allows image preloading to enable a faster load
+ * 
+ * @param urls 
+ */
 export function useImagePreload(urls: string[]) {
   const prev = useRef<string[]>([]);
   useEffect(() => {

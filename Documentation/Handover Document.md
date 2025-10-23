@@ -293,7 +293,7 @@ Once this has been configured, google will automatically generate a SSL/TLS cert
 
 Through the development of HansRoslinger we have not considered a versioning strategy, with our repository only consisting of tags to signify the completion of some milestones. However, in order to maintain the integrity of the code, we suggest you do the following. Information regarding semantic versioning was taken from this source https://semver.org/.
 
-1. Following `MAJOR.MINOR.PATCH`, versioning. In order to maintain consistency, each pull request should have a label that is added by the user in order to signify whether the added feature is a PATCH, MINOR, or MAJOR change.
+1. Follow `MAJOR.MINOR.PATCH`, versioning. In order to maintain consistency, each pull request should have a label that is added by the user in order to signify whether the added feature is a PATCH, MINOR, or MAJOR change.
 2. Once the pull request has been merged, the appropriate tag should be generated (this can be done manually or automatically via a workflow) to increment the appropriate place in the version in line with the pull request label.
 3. It is up to your discretion as to whether you would like each version to be deployed to production, or if you would like only major/semi regular deployments to be completed.
 
@@ -305,9 +305,9 @@ Through the development of HansRoslinger we have not considered a versioning str
 We have followed the provided pull request strategy throughout our development of HansRoslinger, and we suggest you do the same, making modifications if neccessary.
 
 1. A pull request is required to fill out the template with all required information. https://github.com/Monash-FIT3170/2025W1-HansRoslinger/blob/main/.github/pull_request_template.md
-2. Branch name must abide by the quality assurance plan, and the title must be description of the additional
-3. Each pull request should mark indvidiual features
-4. The pull request must pass all CI/CD workflows
+2. Branch name must abide by the quality assurance plan, and the title must be a description of the additional features added.
+3. Each pull request should mark an indvidiual feature or set of related features.
+4. The pull request must pass all CI/CD workflows.
 5. The pull request must have at least 1 approval in order to be merged.
 
 

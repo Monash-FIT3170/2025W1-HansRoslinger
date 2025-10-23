@@ -8,6 +8,13 @@ interface ToolbarProps {
   className?: string;
 }
 
+/**
+ * Toolbar at the top of the page
+ * @param title
+ * @param actions
+ * @param className
+ * @return HTML
+ */
 const Toolbar: React.FC<ToolbarProps> = ({ title, actions, className }) => (
   <Box
     className={className}

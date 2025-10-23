@@ -1,6 +1,16 @@
 import React from "react";
 import { Box, IconButton } from "@mui/material";
 
+/**
+ * Default modal component
+ * 
+ * @param isOpen
+ * @param onClose
+ * @param children
+ * @param maxwidth
+ *
+ * @returns HTML
+ */
 export default function Modal({ isOpen, onClose, children, maxwidth }: { isOpen: boolean; onClose: () => void; children: React.ReactNode; maxwidth: string }) {
   if (!isOpen) return null;
 

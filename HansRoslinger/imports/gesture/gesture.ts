@@ -1,19 +1,15 @@
 /**
  * Purpose
  * -------
- * This file implements a gesture detection pipeline that connects a webcam
- * video feed (`react-webcam`) to the MediaPipe `GestureRecognizer`. It:
- *   • Loads and initializes the gesture recognition model with retry logic.
- *   • Runs a requestAnimationFrame loop to analyze video frames in real time.
- *   • Maps recognized gestures (and custom heuristics like pinch/pointing)
- *     into the app’s `Gesture` type.
- *   • Detects both single-hand and two-hand gestures, with custom rules
- *     (e.g., `DOUBLE_PINCH`).
- *   • Forwards valid gestures into the central `GestureHandler`, which maps
- *     them to configured application functions (zoom, filter, select, etc.).
- *
- * In short: this file is the bridge between raw video input and the higher-
- * level gesture-driven interactions in the app.
+ * This file connects webcam video frames (via react-webcam) to the MediaPipe GestureRecognizer.
+ * It handles:
+ *   • Loading and initializing gesture recognition.
+ *   • Real-time frame analysis using requestAnimationFrame.
+ *   • Mapping raw gestures into the app’s Gesture type.
+ *   • Single-hand and two-hand gestures, including custom gestures (e.g., DOUBLE_PINCH).
+ *   • Forwarding gestures to the GestureHandler which triggers app functions like zoom, filter, select, draw, etc.
+ * 
+ * Essentially, this is the bridge from raw video input to high-level gesture-driven interactions.
  */
 import { select } from "./Select";
 import { clear } from "./Clear";
@@ -26,6 +22,7 @@ import { draw, processDraw, processErase, clearDrawing, showEraserPreview } from
 import { FunctionType, GestureType } from "./types";
 import { Gesture } from "../mediapipe/types";
 
+// Mapping from FunctionType to actual handler functions
 type GestureHandlerFn = (initial: Gesture, latest: Gesture) => void;
 export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.UNUSED]: (() => {}) as GestureHandlerFn,
@@ -39,39 +36,41 @@ export const EnumToFunc: Record<FunctionType, GestureHandlerFn> = {
   [FunctionType.DRAW]: draw as GestureHandlerFn,
 };
 
-// Define a boolean to track the zoom state
+// Track zoom state
 let isZoomEnabled = false;
 let zoomStartPosition: { x: number; y: number } | null = null;
 
-// Define a boolean to track the draw state
+// Track draw state
 let isDrawEnabled = false;
 let drawStartPosition: { x: number; y: number } | null = null;
 
 if (typeof window !== "undefined") {
-  // Watch for the "chart:zoom" event and toggle the boolean
+  // Event listener to toggle zoom mode
   window.addEventListener("chart:togglezoom", (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     isZoomEnabled = !isZoomEnabled;
+
     if (isZoomEnabled && customEvent.detail) {
+      // Store start position for zoom (used for pinch/drag calculations)
       const { x, y } = customEvent.detail;
-      zoomStartPosition = { x: x, y: y };
-      // console.log(`Zoom enabled. Start position set to:`, zoomStartPosition);
-      document?.body?.classList.add("zoom-active-outline");
+      zoomStartPosition = { x, y };
+      document?.body?.classList.add("zoom-active-outline"); // Visual cue
     } else {
       zoomStartPosition = null;
       document?.body?.classList.remove("zoom-active-outline");
     }
   });
 
-  // Watch for the "chart:draw" event and toggle the boolean
+  // Event listener to toggle draw mode
   window.addEventListener("chart:toggledraw", (event: Event) => {
     const customEvent = event as CustomEvent<{ x: number; y: number }>;
     isDrawEnabled = !isDrawEnabled;
+
     if (isDrawEnabled && customEvent.detail) {
       const { x, y } = customEvent.detail;
-      drawStartPosition = { x: x, y: y };
+      drawStartPosition = { x, y };
       console.log(`Draw enabled. Start position set to:`, drawStartPosition);
-      document?.body?.classList.add("draw-active-outline");
+      document?.body?.classList.add("draw-active-outline"); // Visual cue
     } else {
       drawStartPosition = null;
       document?.body?.classList.remove("draw-active-outline");
@@ -79,10 +78,12 @@ if (typeof window !== "undefined") {
   });
 }
 
+// Custom constant mapping for special gestures
 const constantMapping: Partial<Record<GestureType, FunctionType>> = {
-  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM,
+  [GestureType.DOUBLE_PINCH]: FunctionType.ZOOM, // Always zoom when double pinch
 };
 
+// Default mapping from gestures to app functions
 const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.CLOSED_FIST]: FunctionType.FILTER,
   [GestureType.I_LOVE_YOU]: FunctionType.UNUSED,
@@ -99,43 +100,50 @@ const defaultMapping: Record<GestureType, FunctionType> = {
   [GestureType.DRAW]: FunctionType.DRAW,
 };
 
-const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture, mapping: Record<GestureType, FunctionType>): void => {
+/**
+ * Main handler connecting gesture types to application functions
+ * 
+ * @param INPUT GestureType detected
+ * @param initialGesture First frame of this gesture
+ * @param latestGesture Most recent frame of this gesture
+ * @param mapping Mapping from gestures to function types
+ */
+const handleGestureToFunc = (
+  INPUT: GestureType,
+  initialGesture: Gesture,
+  latestGesture: Gesture,
+  mapping: Record<GestureType, FunctionType>
+): void => {
   const label = INPUT;
 
+  // Zoom mode handling
   if (isZoomEnabled) {
-    console.log(mapping[label], FunctionType.FILTER);
-    // if gesture is closed fist, we want to end zoom
+    // Closed fist ends zoom
     if (mapping[label] === FunctionType.FILTER) {
       zoom(initialGesture, latestGesture);
-    } else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
+    } 
+    // Double pinch continues zoom movement
+    else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
-  } else if (isDrawEnabled) {
-    console.log(`draw mode enabled`);
-    // In draw mode, handle special gestures
+  } 
+  // Draw mode handling
+  else if (isDrawEnabled) {
     if (latestGesture.gestureID === GestureType.POINTING_UP) {
-      // Pointing finger acts as an eraser
-      processErase(latestGesture);
-    } else if (mapping[label] === FunctionType.FILTER) {
-      // Closed fist exits draw mode
-      draw(initialGesture, latestGesture);
-    } else if (mapping[label] === FunctionType.CLEAR) {
-      // Open palm cancels draw mode
-      draw(initialGesture, latestGesture);
+      processErase(latestGesture); // Eraser gesture
+    } else if (mapping[label] === FunctionType.FILTER || mapping[label] === FunctionType.CLEAR) {
+      draw(initialGesture, latestGesture); // Closed fist or open palm cancels draw mode
     } else if (latestGesture.gestureID === GestureType.DRAW) {
-      // Continue drawing for confirmed or briefly unidentified frames
-      processDraw(drawStartPosition!, latestGesture);
+      processDraw(drawStartPosition!, latestGesture); // Continue drawing
     } else {
-      // For any other gesture, hide the eraser indicator since we're not in erase mode
-      showEraserPreview(latestGesture);
+      showEraserPreview(latestGesture); // Show eraser indicator without erasing
     }
-    // All other gestures are ignored in draw mode
-  } else {
-    // Not in zoom or draw mode - normal gesture handling
+  } 
+  // Default (not zoom or draw)
+  else {
     if (mapping[label] === FunctionType.CLEAR) {
-      // Open palm: first clear drawing, then do normal clear function
+      // Clear drawing first before triggering clear function
       clearDrawing();
-      // Then continue with normal clear function
       const functionType = mapping[label];
       const handler = EnumToFunc[functionType];
       if (handler) {
@@ -151,6 +159,7 @@ const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latest
         console.log(`[GestureHandler] Calling function '${FunctionType[functionType]}' for gesture '${GestureType[label]}'`);
         handler(initialGesture, latestGesture);
       } else if (functionType === FunctionType.UNUSED) {
+        // Check constantMapping for fallback
         const defaultFunction = constantMapping[label];
         if (defaultFunction) {
           const defaultHandler = EnumToFunc[defaultFunction];

@@ -32,12 +32,7 @@ export const click = (_: Gesture, latestGesture: Gesture): void => {
     const rect = clickableElement?.getBoundingClientRect();
 
     // If the gesture midpoint is within the element's bounding box, dispatch a click
-    if (clickableElement && rect &&
-        screenPosition.screenX >= rect.left &&
-        screenPosition.screenX <= rect.right &&
-        screenPosition.screenY >= rect.top &&
-        screenPosition.screenY <= rect.bottom) {
-
+    if (clickableElement && rect && screenPosition.screenX >= rect.left && screenPosition.screenX <= rect.right && screenPosition.screenY >= rect.top && screenPosition.screenY <= rect.bottom) {
       const clickEvent = new MouseEvent("click", {
         bubbles: true,
         cancelable: true,

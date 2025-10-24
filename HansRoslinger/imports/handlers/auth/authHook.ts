@@ -22,9 +22,7 @@ export function useAuthGuard() {
     const { token, userId } = getAuthCookie();
 
     // Validate token presence and integrity
-    const valid = token !== undefined && userId !== undefined 
-      ? verifyJWT(token, userId) 
-      : false;
+    const valid = token !== undefined && userId !== undefined ? verifyJWT(token, userId) : false;
 
     // If token is invalid or missing, redirect to home/login page
     if (!valid) {

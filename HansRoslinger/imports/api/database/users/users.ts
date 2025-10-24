@@ -130,10 +130,7 @@ export async function correctLogin(email: string, password: string): Promise<boo
 // Retrieve the ID of the user's most recently used presentation
 export async function getRecentPresentationId(userId: string): Promise<string | undefined> {
   // Query for the recent presentation field only
-  const user = await UserCollection.findOneAsync(
-    { _id: userId },
-    { projection: { _recent_presentation_id: 1, _id: 0 } }
-  );
+  const user = await UserCollection.findOneAsync({ _id: userId }, { projection: { _recent_presentation_id: 1, _id: 0 } });
 
   // Return the recent presentation ID if it exists
   return user?._recent_presentation_id;

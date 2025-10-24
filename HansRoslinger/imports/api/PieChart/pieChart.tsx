@@ -1,8 +1,7 @@
 // api/PieChart/pieChart.ts
 
 // Helper to generate 'count' random values between 10–109
-const generateRandomValues = (count: number) => 
-  Array.from({ length: count }, () => Math.floor(Math.random() * 100) + 10);
+const generateRandomValues = (count: number) => Array.from({ length: count }, () => Math.floor(Math.random() * 100) + 10);
 
 /**
  * Generates data for a Pie chart by aggregating 20 random values
@@ -21,12 +20,7 @@ export const generatePieChartData = () => {
   }
 
   // Assign distinct colors for each pie slice
-  const backgroundColors = [
-    "rgba(255, 99, 132, 0.8)", 
-    "rgba(54, 162, 235, 0.8)", 
-    "rgba(255, 206, 86, 0.8)", 
-    "rgba(75, 192, 192, 0.8)",
-  ];
+  const backgroundColors = ["rgba(255, 99, 132, 0.8)", "rgba(54, 162, 235, 0.8)", "rgba(255, 206, 86, 0.8)", "rgba(75, 192, 192, 0.8)"];
 
   return {
     labels: categoryLabels,

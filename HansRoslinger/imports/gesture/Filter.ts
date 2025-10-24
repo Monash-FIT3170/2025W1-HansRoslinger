@@ -1,6 +1,6 @@
 /**
  * Dispatches a custom event to trigger filtering in the chart.
- * 
+ *
  * Logic:
  * - Creates a CustomEvent named "chart:filter"
  * - Dispatches it on the window object so any listener in the app can respond

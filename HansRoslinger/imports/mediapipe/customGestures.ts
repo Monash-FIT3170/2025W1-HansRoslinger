@@ -4,10 +4,7 @@ import { isDrawModeEnabled } from "../gesture/Draw"; // Function to check if dra
 import { Handedness } from "./types"; // Enum for LEFT, RIGHT hand
 
 // Function to recognize custom gestures from hand landmarks
-export function recogniseCustomGesture(
-  landmarks: NormalizedLandmark[],
-  handedness: Handedness = Handedness.RIGHT
-): { gestureID: GestureType; confidence: number } | null {
+export function recogniseCustomGesture(landmarks: NormalizedLandmark[], handedness: Handedness = Handedness.RIGHT): { gestureID: GestureType; confidence: number } | null {
   // Return null if landmarks are missing or incomplete
   if (!landmarks || landmarks.length < 21) return null;
 
@@ -28,9 +25,7 @@ export function recogniseCustomGesture(
   } else if (isTwoFingerPointing(landmarks)) {
     // Differentiate left/right hand for two-finger pointing
     return {
-      gestureID: handedness === Handedness.LEFT
-        ? GestureType.TWO_FINGER_POINTING_LEFT
-        : GestureType.TWO_FINGER_POINTING_RIGHT,
+      gestureID: handedness === Handedness.LEFT ? GestureType.TWO_FINGER_POINTING_LEFT : GestureType.TWO_FINGER_POINTING_RIGHT,
       confidence: 1.0,
     };
   } else if (isPointing(landmarks)) {
@@ -112,10 +107,7 @@ export function isPointing(landmarks: NormalizedLandmark[]): boolean {
 
   // Check if other fingers are curled
   const areOthersCurled =
-    dist(wrist, middleTip) < dist(wrist, middlePip) &&
-    dist(wrist, ringTip) < dist(wrist, ringPip) &&
-    dist(wrist, pinkyTip) < dist(wrist, pinkyPip) &&
-    dist(wrist, thumbTip) < dist(wrist, thumbPip);
+    dist(wrist, middleTip) < dist(wrist, middlePip) && dist(wrist, ringTip) < dist(wrist, ringPip) && dist(wrist, pinkyTip) < dist(wrist, pinkyPip) && dist(wrist, thumbTip) < dist(wrist, thumbPip);
 
   const isPointing = isIndexExtended && areOthersCurled;
   return isPointing;
@@ -180,10 +172,7 @@ export function isDrawGesture(landmarks: NormalizedLandmark[], isDrawModeActive:
 
   // Check if fingers are close enough to be considered a draw gesture
   const fingersClose =
-    thumbIndexDistance < 0.03 * distanceMultiplier &&
-    thumbMiddleDistance < 0.035 * distanceMultiplier &&
-    indexMiddleDistance < 0.025 * distanceMultiplier &&
-    indexRingDistance > loosenedRingGap;
+    thumbIndexDistance < 0.03 * distanceMultiplier && thumbMiddleDistance < 0.035 * distanceMultiplier && indexMiddleDistance < 0.025 * distanceMultiplier && indexRingDistance > loosenedRingGap;
 
   console.log(`Draw gesture check: fingersClose=${fingersClose}, areOthersCurled=${areOthersCurled}, drawMode=${isDrawModeActive}`);
 

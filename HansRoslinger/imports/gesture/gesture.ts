@@ -8,7 +8,7 @@
  *   • Mapping raw gestures into the app’s Gesture type.
  *   • Single-hand and two-hand gestures, including custom gestures (e.g., DOUBLE_PINCH).
  *   • Forwarding gestures to the GestureHandler which triggers app functions like zoom, filter, select, draw, etc.
- * 
+ *
  * Essentially, this is the bridge from raw video input to high-level gesture-driven interactions.
  */
 import { select } from "./Select";
@@ -102,18 +102,13 @@ const defaultMapping: Record<GestureType, FunctionType> = {
 
 /**
  * Main handler connecting gesture types to application functions
- * 
+ *
  * @param INPUT GestureType detected
  * @param initialGesture First frame of this gesture
  * @param latestGesture Most recent frame of this gesture
  * @param mapping Mapping from gestures to function types
  */
-const handleGestureToFunc = (
-  INPUT: GestureType,
-  initialGesture: Gesture,
-  latestGesture: Gesture,
-  mapping: Record<GestureType, FunctionType>
-): void => {
+const handleGestureToFunc = (INPUT: GestureType, initialGesture: Gesture, latestGesture: Gesture, mapping: Record<GestureType, FunctionType>): void => {
   const label = INPUT;
 
   // Zoom mode handling
@@ -121,12 +116,12 @@ const handleGestureToFunc = (
     // Closed fist ends zoom
     if (mapping[label] === FunctionType.FILTER) {
       zoom(initialGesture, latestGesture);
-    } 
+    }
     // Double pinch continues zoom movement
     else if (latestGesture.gestureID === GestureType.DOUBLE_PINCH) {
       processZoom(zoomStartPosition!, latestGesture);
     }
-  } 
+  }
   // Draw mode handling
   else if (isDrawEnabled) {
     if (latestGesture.gestureID === GestureType.POINTING_UP) {
@@ -138,7 +133,7 @@ const handleGestureToFunc = (
     } else {
       showEraserPreview(latestGesture); // Show eraser indicator without erasing
     }
-  } 
+  }
   // Default (not zoom or draw)
   else {
     if (mapping[label] === FunctionType.CLEAR) {

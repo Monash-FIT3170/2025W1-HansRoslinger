@@ -27,7 +27,7 @@ function isStable(a: { x: number; y: number }, b: { x: number; y: number }) {
 
 /**
  * Handles the "POINTING_UP" gesture for selection
- * 
+ *
  * This implements a dwell-based selection system:
  *  1. Continuously emits transient "hover" events for UI feedback (like piano key highlight)
  *  2. Tracks whether the finger is stable enough
@@ -36,10 +36,7 @@ function isStable(a: { x: number; y: number }, b: { x: number; y: number }) {
 export const select = (_: Gesture, latestGesture: Gesture): void => {
   // Ensure enough landmarks are available (at least 9 required for index finger tip)
   if (!latestGesture.singleGestureLandmarks || latestGesture.singleGestureLandmarks.length < 9) {
-    console.warn(
-      "[select] Not enough landmarks to select (need at least 9)",
-      latestGesture.singleGestureLandmarks
-    );
+    console.warn("[select] Not enough landmarks to select (need at least 9)", latestGesture.singleGestureLandmarks);
     return;
   }
 

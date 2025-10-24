@@ -8,7 +8,7 @@ const AUTHTOKEN = "auth_token";
 // Set authentication cookies for 1 day
 export function setAuthCookie(token: string, userId: string) {
   Cookies.set(AUTHTOKEN, token, { expires: 1 }); // Auth token
-  Cookies.set(USERID, userId, { expires: 1 });   // User ID
+  Cookies.set(USERID, userId, { expires: 1 }); // User ID
 }
 
 // Retrieve authentication cookies

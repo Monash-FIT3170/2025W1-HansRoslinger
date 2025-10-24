@@ -1,14 +1,13 @@
 import { Gesture, GestureType } from "./gesture";
 import { gestureToScreenPosition } from "./util";
 
-// We store the starting separations so we can compute ratios per frame
+// Store the initial separation between hands to compute zoom ratios
 let initialDx = 0;
 let initialDy = 0;
 
 /**
- * Helper: get normalized hand coordinates for the two hands.
- * Uses landmark 8 (index finger tip) per hand for stability.
- * Falls back to landmark 9 if needed.
+ * Helper: extract screen coordinates for both hands from MediaPipe landmarks.
+ * Uses index finger tip (landmark 8) for stability. Falls back if missing.
  */
 function getHandsXY(latestGesture: Gesture): {
   left: { x: number; y: number } | null;
@@ -18,9 +17,10 @@ function getHandsXY(latestGesture: Gesture): {
     const leftHand = latestGesture.doubleGestureLandmarks[0];
     const rightHand = latestGesture.doubleGestureLandmarks[1];
 
-    const l = leftHand[8];
-    const r = rightHand[8];
+    const l = leftHand[8]; // index finger tip
+    const r = rightHand[8]; // index finger tip
 
+    // Convert normalized landmarks to screen coordinates
     const leftHandToScreen = gestureToScreenPosition(l.x, l.y);
     const rightHandToScreen = gestureToScreenPosition(r.x, r.y);
 
@@ -35,12 +35,14 @@ function getHandsXY(latestGesture: Gesture): {
 }
 
 /**
- * Called when a zoom gesture is (re)started.
- * - Saves the initial horizontal/vertical separations (dx, dy)
- * - Emits chart:togglezoom centered at the midpoint between hands
+ * Called when a zoom gesture is first detected.
+ * - Saves initial horizontal/vertical separation between hands.
+ * - Computes midpoint for zoom focus.
+ * - Emits "chart:togglezoom" event centered at midpoint.
  */
 export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   if (latestGesture.gestureID === GestureType.CLOSED_FIST) {
+    // Ending zoom mode on closed fist
     console.log("ending zoom");
     window.dispatchEvent(
       new CustomEvent("chart:togglezoom", {
@@ -50,20 +52,17 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   }
 
   const hands = getHandsXY(latestGesture);
+  if (!hands.left || !hands.right) return;
 
-  if (!hands.left || !hands.right) {
-    return;
-  }
-
-  // Save starting separations (normalized coordinates)
+  // Save starting separation between hands
   initialDx = Math.abs(hands.right.x - hands.left.x);
   initialDy = Math.abs(hands.right.y - hands.left.y);
 
-  // Avoid zero-division later: set minimal epsilon
+  // Avoid divide-by-zero
   if (initialDx < 1e-4) initialDx = 1e-4;
   if (initialDy < 1e-4) initialDy = 1e-4;
 
-  // Midpoint in screen pixels to focus the zoom around it
+  // Compute midpoint to center zoom around
   const leftScreen = gestureToScreenPosition(hands.left.x, hands.left.y);
   const rightScreen = gestureToScreenPosition(hands.right.x, hands.right.y);
   const midX = (leftScreen.screenX + rightScreen.screenX) / 2;
@@ -76,6 +75,13 @@ export const zoom = (_initial: Gesture, latestGesture: Gesture): void => {
   );
 };
 
+/**
+ * Process zoom during an ongoing gesture.
+ * - Computes the change in separation between hands from initial.
+ * - Normalizes differences relative to screen size.
+ * - Computes a scaling factor (scaleX, scaleY) within limits.
+ * - Emits "chart:zoom" event with computed scale.
+ */
 export const processZoom = (_zoomStartPosition: { x: number; y: number }, latestGesture: Gesture): void => {
   const hands = getHandsXY(latestGesture);
   if (!hands.left || !hands.right) return;
@@ -83,9 +89,11 @@ export const processZoom = (_zoomStartPosition: { x: number; y: number }, latest
   const currentDx = Math.abs(hands.right.x - hands.left.x);
   const currentDy = Math.abs(hands.right.y - hands.left.y);
 
+  // Compute difference from initial separation
   const xDiff = currentDx - initialDx;
   const yDiff = currentDy - initialDy;
 
+  // Normalize by a fraction of the screen size to get proportional zoom
   const maxDistanceX = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedX = Math.min(Math.abs(xDiff) / maxDistanceX, 1);
   const deltaX = xDiff >= 0 ? normalizedX * 1.5 : -normalizedX * 1.5;
@@ -93,10 +101,11 @@ export const processZoom = (_zoomStartPosition: { x: number; y: number }, latest
   const maxDistanceY = Math.min(window.innerWidth, window.innerHeight) * 0.3;
   const normalizedY = Math.min(Math.abs(yDiff) / maxDistanceY, 1);
 
-  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 3.0);
-  const scaleY = Math.min(1 - normalizedY * 0.9 + 0.1, 1);
+  // Clamp scale factors to reasonable range
+  const scaleX = Math.min(Math.max(1 + deltaX, 0.5), 3.0); // horizontal zoom
+  const scaleY = Math.min(1 - normalizedY * 0.9 + 0.1, 1); // vertical zoom (restrict shrink)
 
-  // console.log(`Zoom ratios: X: ${scaleX}, Y: ${scaleY}`);
+  // Emit zoom event
   window.dispatchEvent(
     new CustomEvent<{ scaleX: number; scaleY: number }>("chart:zoom", {
       detail: { scaleX, scaleY },
